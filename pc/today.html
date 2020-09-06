@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="euc-kr">
+  <title>한눈에 보는 오늘 - 네이트 뉴스</title>
+  <meta property="og:url" content="">
+  <meta property="og:title" content="한눈에 보는 오늘">
+	<meta property="og:image" content="./src/images/og_nate_today.png">
+  <meta property="og:description" content="">
+  
+  <link rel="shortcut icon" href="//news.nate.com/icon/favicon.ico">
+  
+  <link rel="stylesheet" type="text/css" href="../../pc/release/css/pcsnb.css">
+  <link rel="stylesheet" type="text/css" href="../../pc/release/css/sisa/snb.css">
+  <link rel="stylesheet" type="text/css" href="../../pc/release/css/sisa/news_common.css">
+  <link rel="stylesheet" type="text/css" href="../../pc/release/css/sisa/section_news.css">
+  <link rel="stylesheet" type="text/css" href="../../pc/release/css/sisa/section_news.css">
+
+  <link rel="stylesheet" type="text/css" href="./src/css/today.css">
+  
+  <script type="text/javascript" src="//common.nate.com/textGNB/commonTextGNBV1"></script>
+  
+  <script src="./src/js/jquery-1.9.1.min.js"></script>
+  <script src="./src/js/plast-low-min.js"></script>
+  <script src="./src/js/gsap.min.js"></script>
+  <script src="./src/js/CustomEase.min.js"></script>
+  <script src="./src/js/Draggable.min.js"></script>
+  <script src="./src/js/DrawSVGPlugin.min.js"></script>
+  <script src="./src/js/MotionPathPlugin.min.js"></script>
+  <script src="./src/js/ScrollToPlugin.min.js"></script>
+  <script src="./src/js/d3.v5.min.js"></script>
+  <script src="./src/js/moment-with-locale.min.js"></script>
+  <script src="./src/js/moment-timezone-with-data.min.js"></script>
+
+  <!-- CSM 통계 -->
+  <script type="text/javascript" src="//news.nate.com/js/common.js?202007291407"></script>
+  <script type="text/javascript" src="//news.nate.com/js/stat.js?202007291407" charset="euc-kr"></script>
+</head>
+
+<body id="mediaHome">
+  <div id="mediaWraper" class="section_news">
+    <!-- Header -->
+    <div id="header" role="banner">
+      <!-- svc -->
+      <div class="svcWrap">
+        <div class="gnbWrap">
+          <h1><a href="../" class="natebi">NATE</a><a href="../" class="svcname">뉴스</a></h1>
+          <ul class="relsvc">
+            <li class="svc1"><a href="../sports/">스포츠</a></li>
+            <li class="svc2"><a href="../ent/">연예</a></li>
+            <li class="svc3"><a href="../">판</a></li>
+            <li class="svc4"><a href="../weather/">날씨</a></li>
+          </ul>
+          <div class="s_weather">
+            <h2 class="hide">전국 날씨</h2>
+            <a href="//news.nate.com/weather?areaCode=11C10301">청주<em>16.7</em>°C <img width="27" height="27" alt="약한비계속" src="../../images/weather/ico/27x27_am_04.png"></a>
+          </div>
+
+          <!-- textGNB -->
+          <script type="text/javascript">
+            var NateGNB = new classNateGNB("container");
+          </script>
+          <noscript>
+            <div id="noscript_gnb">
+              <div>
+                <a href="http://www.nate.com/" title="네이트 메인으로">네이트 메인으로</a> <span>|</span>
+                <a href="http://www.nate.com/sitemap/" title="사이트맵">사이트맵</a>
+              </div>
+            </div>
+          </noscript>
+
+          <!-- search -->
+          <div id="searchWrap" data-set="search">
+            <form id="search" class="srchform" name="search" action="" method="post">
+              <input type="hidden" id="searchType" name="searchType" value="A" />
+              <fieldset>
+                <legend>검색영역</legend>
+                <input type="text" id="input_search_all" name="q" class="searchBox" title="검색어 입력" value="" />
+                <button type="submit" class="searchBtn"><span class="hide">검색</span></button>
+              </fieldset>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- navigation -->
+      <div class="navWrap">
+        <div class="snbArea" role="navigation">
+          <h2 class="hide">뉴스 메뉴</h2>
+          <ul>
+            <!-- 현제 페이지에 해당하는 경우 current="page" 추가 -->
+            <li class="on"><a href="00_home.html" aria-current="page">홈</a></li>
+            <li><a href="01_list01.html?1">최신뉴스</a></li>
+            <li><a href="01_section.html?2">정치</a></li>
+            <li><a href="01_section.html?3">경제</a></li>
+            <li><a href="01_section.html?4">사회</a></li>
+            <li><a href="01_section.html?5">세계</a></li>
+            <li><a href="01_section.html?6">IT/과학</a></li>
+            <li><a href="01_column.html?7">칼럼</a></li>
+            <li><a href="01_photo_home.html?8">포토</a></li>
+            <li><a href="01_TV_home.html?9">TV</a></li>
+            <li><a href="01_radio_home.html?10">라디오</a></li>
+            <li><a href="01_ranking.html?11">랭킹뉴스</a></li>
+            <li><a href="01_today_reply.html?12">투데이댓글</a></li>
+          </ul>
+
+          <!-- 배너 미사용
+            <div class="svcLink">
+            <a class="hotBanner" href="#"><img alt="핫이슈 배너" src="http://placehold.it/185x55"></a>
+          </div>
+         -->
+        </div>
+      </div>
+    </div>
+    <!-- Header : E -->
+  </div>
+
+  <div id="contents">
+    <!-- 뉴스엣지 컨테이너 -->
+    <div class="newsEdge">
+      <div class="inner">
+        <!-- 이전/다음/오늘 이동 및 날짜 표시 -->
+        <div class="timeTravel">
+          <p class="timeline">
+            <button type="button" class="btnTravel prev" data-travel="prev" onclick="ndrclick('TOB01')">이전</button>
+            <span class="year"></span>
+            <span class="month"></span>
+            <span class="date"></span>
+            <button type="button" class="btnTravel next" data-travel="next" onclick="ndrclick('TOB02')">다음</button>
+          </p>
+          <button type="button" class="btnTravel today" data-travel="today" onclick="ndrclick('TOB00')">오늘</button>
+        </div>
+        <!-- // 이전/다음/오늘 이동 및 날짜 표시 -->
+        <!-- 공유하기 -->
+        <div class="socialShare">
+          <button type="button" class="btnShare">공유하기</button>
+        </div>
+        <!-- // 공유하기 -->
+        <!-- 버블 -->
+        <div class="bubblesWrap">
+          <svg id="newsEdgeBubbles"></svg>
+        </div>
+        <!-- // 버블 -->
+        <!-- 버블 컨트롤러 -->
+        <div class="progressWrap active">
+          <button type="button" class="btnProgress">타임라인</button>
+          <svg id="newsEdgeProgress" class="newsEdgeProgress"></svg>
+        </div>
+        <!-- // 버블 컨트롤러 -->
+      </div>
+      
+      <!-- 뉴스 리스트 -->
+      <div class="todayListWrap">
+        <div class="todayListTop">
+          <h3 class="title">오늘</h3>
+          <p class="subTitle">오늘 키워드를 선택하면, 시간대별 주요 뉴스를 확인할 수 있어요.</p>
+          <!-- 로그 -->
+          <div class="timeLog"></div>
+          <!-- //로그 -->
+        </div>
+        <!-- // 뉴스 리스트 -->
+        <!-- 사용 미정 UI
+          <div class="todayListEmpty">
+            <p class="emptyMsg">오늘의 키워드를 선택해주세요.</p>
+          </div> 
+        -->
+      </div>
+    </div>
+    <!-- //뉴스엣지 컨테이너 -->
+    
+    <!-- 공유하기 레이어 팝업-->
+    <div class="layerPopup share">
+      <div class="inner">
+        <button type="button" class="btnClosePopup">닫기</button>
+        <div class="content">
+          <strong class="title">공유하기</strong>
+          <ul class="shareList">
+            <li>
+              <a href="javascript:;" class="shareNateon" onclick="ndrclick('TOS01')">네이트온</a>
+            </li>
+            <li>
+              <a href="javascript:;" class="shareFacebook" onclick="ndrclick('TOS02')">페이스북</a>
+            </li>
+            <li>
+              <a href="javascript:;" class="shareTwetter" onclick="ndrclick('TOS03')">트위터</a>
+            </li>
+          </ul>
+          <div class="shareInput">
+            <input type="text" value="" class="shareLinkUrl" readonly />
+          </div>
+        </div>
+        <button type="button" class="btnCopyURL" onclick="utils.CopyUrlToClipboard('.shareLinkUrl')">URL 복사</button>
+      </div>
+      <div class="dimm"></div>
+    </div>
+    <!-- // 공유하기 레이어 팝업-->
+  </div>
+
+  <!-- 기본 FOOTER 시작 -->
+  <div id="footer">
+    <h2>푸터 영역</h2>
+    <dl>
+      <dt>네이트 공용 푸터</dt>
+      <dd>
+        <span class="chief">기사배열 책임자 : 김종훈</span>
+        <span class="bar">|</span>
+        <span class="chief">청소년보호 책임자 : 김종훈</span>
+        <span class="bar">|</span>
+        <span class="policy"><a href="//news.nate.com/enews/editguide" target="_blank">기사배열 기본방침</a></span>
+        <span class="bar">|</span>
+        <span class="policy"><a href="//news.nate.com/enews/cooperguide" target="_blank">제휴가이드</a></span>
+      </dd>
+      <dd>
+        <a href="#">서비스 이용약관</a> <span class="bar">|</span>
+        <a href="#"><strong>개인정보처리방침</strong></a> <span class="bar">|</span>
+        <a href="#">청소년보호정책</a> <span class="bar">|</span>
+        <a href="#">광고문의</a> <span class="bar">|</span>
+        <a href="#">고객센터</a>
+      </dd>
+    </dl>
+    <span class="copyright">&copy; <a href="#" target="_blank"><strong><span class="sk">SK</span> Communications</strong></a> All rights reserved.</span>
+  </div>
+  <!-- 기본 FOOTER 끝 -->
+  <script>
+    var KEYWORD_URL = '//testdb-m.news.nate.com/today/keywordList';
+    var ARTICLE_URL = '//testdb-m.news.nate.com/today/articleList';
+
+    //<![CDATA[
+      // ndr code
+      var sNdrPath = 'news.ndr.nate.com/today', _ndr_br = '', sRef1 = '', sRef2 = '';
+
+      draw_ndr(sNdrPath, _ndr_br, sRef1, sRef2);
+    //]]>
+  </script>
+  <script src="./src/js/userAgent.js"></script>
+  <script src="./src/js/utils.js"></script>
+  <script src="./src/js/today.js"></script>
+</body>
+</html>
