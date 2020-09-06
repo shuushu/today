@@ -10,7 +10,7 @@ export default class Bubble extends Controller {
   _update() {
     console.log('키워드 업데이트')
     // 렌더 > 날짜 업데이트
-    //this._render();
+    this._render();
   }
 
   _render(f) {

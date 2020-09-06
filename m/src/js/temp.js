@@ -35,7 +35,7 @@ cc.render(function() {
   // 버블 인스턴스
   bb.render();
   // 프로그래스 인스턴스
-  pp.render();
+  pp.render(); 
 });
 
 
@@ -83,18 +83,32 @@ pp.render(function() {
   // 드래그이벤트 정의
   onThrowUpdate = onDrag = () => {
     let c = Math.abs(this.drag[0].x / this.width); // c === this.timestamp.percent;
-    // data > 프로그래스 업데이트
-    this.data.time.progress_dtm = moment(this.covert).format('YYYY-MM-DD HH:mm:ss');
-    this.current = c;
+    this.current = c > 1 ? 1 : c;
     this.timeline.progress(c);
     // 툴팁타임 업데이트
     this._updateTooltipTime();
+    // AM PM check
+    if(moment(this.covert).format('HH:mm') !== '00:00') {
+      this.AMPM = moment(this.covert).format('A')
+    }
   };
   onDragEnd = () => {
     // 버블 업데이트...
-    let tmp = percent * 86400000 + this.timestamp.start;
-    //console.log(tmp)
-    //this.update();
+    let { service_dtm, server_dtm } = this.data.time,
+        t, d = moment(service_dtm).format('YYYY-MM-DD');
+    /**
+     * data > 프로그래스 업데이트
+     * 프로그래스 범위가  00:00 ~ 다음날 00:00 까지 지정할 수 있으므로 
+     * 다음날  00:00 드래그 후 달력 > 다음 날짜 로 업데이트시 하루 더 지난 상태로 업데이트 된다
+     * 따라서 업데이트 날짜가 서버시간을 초과를 막는다.
+     */  
+    t = moment(this.covert).format('YYYY-MM-DD HH:mm:ss').split(' ').pop();
+    if(t === '00:00:00' && this.AMPM === 'PM') {
+      d = moment(server_dtm).format('YYYY-MM-DD')
+    }
+    this.data.time.progress_dtm = `${d} ${t}`;
+    // 키워드 업데이트
+    bb.update(this.data.time.progress_dtm);
   }
 
   this.drag = Draggable.create('.timeGroup', {

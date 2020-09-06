@@ -5,21 +5,28 @@
   "main": "gulpfile.js",
   "directories": {
     "test": "test"
-  },  
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "m": "webpack m/src/js/temp.js -o m/test.js",
-    "p": "webpack pc/src/js/temp.js -o pc/test.js"
+    "p": "webpack pc/src/js/temp.js -o pc/test.js",
+    "dev": "webpack-dev-server"
+  },
+  "resolutions": {
+    "chokidar": "^3.4.0"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.11.5",
     "@babel/plugin-transform-runtime": "^7.11.5",
-    "@babel/preset-env": "^7.11.0",
     "@babel/polyfill": "^7.11.5",
+    "@babel/preset-env": "^7.11.0",
     "babel-loader": "^8.1.0",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "webpack-dev-server": "^3.11.0"
   }
 }
