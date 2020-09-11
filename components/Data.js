@@ -24,6 +24,7 @@ export default class Data {
       throw 'response parameter error'
     }
     let { server_dtm, service_dtm, update_dtm, data } = v;
+    console.log(this.time.progress_dtm )
     this.keywordList = data;
     this.time.progress_dtm = this.time.progress_dtm || server_dtm;
     this.time.server_dtm = server_dtm;

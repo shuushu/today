@@ -501,8 +501,8 @@ var newsEdge = (function() {
             index: d.index
           }, false);
           // 카드 노출시 url표시
-          let { origin, pathname } = window.location;
-          window.location.replace(`${origin}${pathname}#keyword_dtm=${d.keyword_dtm}#keyword_sq=${d.keyword_sq}#index=${d.index}`);
+          // let { origin, pathname } = window.location;
+          // window.location.replace(`${origin}${pathname}#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}`);
         })
         .on('mouseover', function() {
           var selection = d3.select(this).select('.bubble');
@@ -578,7 +578,7 @@ var newsEdge = (function() {
         var lineBreak = text
           .selectAll('.lineBreak')
           .data(function(d) {
-            return d.keyword_service.split('<br />').map(self => self.trim()).slice(0, 3)
+            return d.keyword_service.split('<br />').map(self => self).slice(0, 3)
           });
 
         lineBreak
@@ -601,7 +601,7 @@ var newsEdge = (function() {
             .attr('dy', function (d, i) {
               return i === 0 ? 0 : (i * 1.45) + 'em';
             })
-            .html(function (title) {
+            .text(function (title) {
               return title;
             });
       }
@@ -887,8 +887,8 @@ var newsEdge = (function() {
       var timestamp = {};
       
       timestamp.min = moment(caller.minDTM).valueOf();
-      timestamp.server = moment(caller.serverDTM).minutes(0).seconds(0).valueOf(); // minutes() / seconds() 추가
-      timestamp.now = moment(caller.progressDTM).minutes(0).seconds(0).valueOf(); // minutes() / seconds() 추가
+      timestamp.server = moment(caller.serverDTM).valueOf(); // minutes() / seconds() 추가
+      timestamp.now = moment(caller.progressDTM).valueOf(); // minutes() / seconds() 추가
       timestamp.start = moment(caller.progressDTM).startOf('day').valueOf();
       timestamp.end = moment(caller.progressDTM).endOf('day').valueOf();
       timestamp.percent = (timestamp.now - timestamp.start) / oneDateMilli;
@@ -1204,7 +1204,12 @@ var newsEdge = (function() {
 
         var lineBreak = tooltipText
           .selectAll('tspan')
-            .data(function(d) { return d.HM.split(' ') });
+            .data(function(d) {
+              // 서버시간 > 2020-08-20 09:23:00 이면 현재 10분단위 정책이므로 09:20으로 변환
+              let t = d.HM.split(' '), c = parseInt( t.pop() / 10) * 10;
+              t.push(c === 0 ? '00':c)
+              return t
+            });
 
         lineBreak
           .enter()
@@ -1302,7 +1307,12 @@ var newsEdge = (function() {
 
         var lineBreak = tooltipText
           .selectAll('tspan')
-            .data(function(d) { return d.HM.split(' ') });
+            .data(function(d) {
+              // 서버시간 > 2020-08-20 09:23:00 이면 현재 10분단위 정책이므로 09:20으로 변환
+              let t = d.HM.split(' '), c = parseInt( t.pop() / 10) * 10;
+              t.push(c === 0 ? '00':c)
+              return t
+            });
 
         lineBreak
           .text(function(time) { 
@@ -1592,12 +1602,20 @@ var newsEdge = (function() {
    */
   function controlSeQs() {
     // 메인/속보/공유하기 관련 쿼리 존재 유/무 체크
-    const qs = ((searches, reservedQuery) => {
+    /*const qs = ((searches, reservedQuery) => {
       var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
 
       if (!isReserved) return null;
-      else return searches.substr(1).split('#').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
-    })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index']);
+      else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+    })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index']);*/
+
+    let qs = ((searches, reservedQuery) => {
+      var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
+
+      if (!isReserved) return null;
+      else return searches.substr(1).split('&').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+    })(window.location.search, ['keyword_dtm', 'keyword_sq', 'index']);
+
 
     const session = ((session) => session !== null ? JSON.parse(sessionStorage.getItem('Article')) : null)(sessionStorage.getItem('Article'));
     const Datum = session || qs;
@@ -1608,7 +1626,7 @@ var newsEdge = (function() {
       keyword_dtm: Datum !== null ? Datum.keyword_dtm : caller.keyword[0].keyword_dtm,
       keyword_sq: Datum !== null ? Datum.keyword_sq : caller.keyword[0].keyword_sq,
       index: Datum !== null ? parseInt(Datum.index, 10) : 0
-    }, qs ? false : true);
+    },  true);
   }
 
 
@@ -1825,25 +1843,25 @@ document.addEventListener('DOMContentLoaded', function() {
           type = 'articleList';
         } else {
           type = path.split('=')[1] || '2020-08-21 12:00:00';
-        }
+        }*/
 
         $.ajax({
           type: 'GET',
-          url: './src/data/fake.json',
+          url: path,
           dataType: 'json',
           processData: false
         })
-        .then(function(data) {
-          return data[type];
-        })
+        // .then(function(data) {
+        //   return data[type];
+        // })
         .done(function(data) {
           callback(data);
         })
         .fail(function() {
           console.log('fail');
-        });*/
+        });
 
-        plast.$dataloader.AJAX(plast.$dataloader.ARG.url(path).onComplete((res) => {
+        /*plast.$dataloader.AJAX(plast.$dataloader.ARG.url(path).onComplete((res) => {
           if (res.status === 200) {
             try {
               callback(plast.$dataloader.parseJson(res.responseText));
@@ -1853,7 +1871,7 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             console.log('data error');
           }
-        }));
+        }));*/
       }
     }
 
@@ -1875,20 +1893,22 @@ document.addEventListener('DOMContentLoaded', function() {
      * @TYPE_BACK_FORWARD = 2
      * @TYPE_RESERVED = 255
      */
-    if (window.performance.navigation.type === 0) sessionStorage.clear();
 
-    const Datum = (sessionStorage.getItem('Article') !== null ? JSON.parse(sessionStorage.getItem('Article')) : null);
-    const qs = ((searches, reservedQuery) => {
+    let qs = ((searches, reservedQuery) => {
       var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
-      if (!isReserved) return null;
-      else return searches.substr(1).split('#').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
-    })(window.location.hash, ['keyword_dtm']);
-    let temp = KEYWORD_URL;
 
-    if(qs && qs.hasOwnProperty('keyword_dtm')) {
-      temp = `${KEYWORD_URL}?service_dtm=${qs.keyword_dtm.split(' ').join('%20')}`
+      if (!isReserved) return null;
+      else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+    })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index']);
+
+    let initPath = KEYWORD_URL;
+    if (history.state !== null && history.state.name === 'Article') {
+      initPath = KEYWORD_URL + '?service_dtm='+ history.state.keyword_dtm;
+    } else if(qs && qs.hasOwnProperty('keyword_dtm')) {
+      initPath = KEYWORD_URL + '?service_dtm='+ qs.keyword_dtm;
     }
-    caller.dataLoadEvent(((qs !== null) ? temp : KEYWORD_URL), (res) => {
+
+    caller.dataLoadEvent((initPath), (res) => {
       caller.minDTM = utils.dateFormat('2020-08-20 09:00:00');
       caller.serverDTM = utils.dateFormat(res.server_dtm);
       caller.updateDTM = utils.dateFormat(res.update_dtm);
@@ -1896,7 +1916,9 @@ document.addEventListener('DOMContentLoaded', function() {
       caller.progressDTM = utils.dateFormat(qs !== null ? qs.keyword_dtm : res.server_dtm);
 
       for (let key in res.data) caller.keyword = res.data[key];
-
+      if(qs){
+        xhrData.progressDTM = utils.dateFormat(res.service_dtm);
+      }
       newsEdge.init(caller);
     });
   })(xhrData);

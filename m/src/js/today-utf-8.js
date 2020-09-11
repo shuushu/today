@@ -1,4 +1,4 @@
-/** 
+/**
  * * BFCache(webkit - Page Cache) Issue (page reload)
  */
 window.addEventListener('pageshow', function(e) {
@@ -6,7 +6,7 @@ window.addEventListener('pageshow', function(e) {
 });
 
 
-/** 
+/**
  * * Moment 글로벌 설정
  */
 moment.locale('ko');
@@ -30,7 +30,7 @@ var newsEdge = (function() {
   var bubblesController;
   var progressBarController;
   var articlesController;
-  var timeTravelController; 
+  var timeTravelController;
 
   // 최초 화면 방향 체크 (가로모드/세로모드)
   var orientation = window.matchMedia('(orientation: portrait)').matches;
@@ -38,7 +38,7 @@ var newsEdge = (function() {
   // xhrData Reference 할당
   var caller;
 
-  /** 
+  /**
    * * 상태 제어
    */
   const State = (function controlState() {
@@ -71,7 +71,7 @@ var newsEdge = (function() {
     var todayListDrag;
     var btnTodayClose;
 
-    // 클릭된 버블 
+    // 클릭된 버블
     var bubbleGroup;
     // 클릭된 버블 이외 버블
     var bubbleGroupSiblings;
@@ -80,7 +80,7 @@ var newsEdge = (function() {
     //클릭된 버블 내부 circle
     var bubbleGroupText;
 
-    /** 
+    /**
      * * 실행중인 인터렉션 삭제
      */
     function killTweens() {
@@ -93,21 +93,21 @@ var newsEdge = (function() {
       gsap.killTweensOf(todayListItem);
     }
 
-    /** 
+    /**
      * * 메인 버블 => 기사 목록 애니메이션
      */
     function popUp(immediate) {
       if (!!immediate) killTweens();
       var duration = !!immediate ? 0 : .3;
 
-      gsap.to(window, duration, { 
-        scrollTo : 0, 
+      gsap.to(window, duration, {
+        scrollTo : 0,
         ease : 'none',
         onComplete: function () {
           gsap.set('body', { overflow: 'hidden', position: 'fixed', left: 0, top: 0, right: 0, bottom: 0, background: utils.RGBAToRGB(_data.fill) });
           gsap.set(bubblesSVG, { zIndex: 100 });
 
-          todayListWrap.addClass((_data.index < 5) ? 'highScore' : 'lowScore');       
+          todayListWrap.addClass((_data.index < 5) ? 'highScore' : 'lowScore');
         }
       });
 
@@ -141,7 +141,7 @@ var newsEdge = (function() {
       });
     }
 
-    /** 
+    /**
      * * 기사 목록 => 메인 버블 애니메이션
      */
     function popOut(immediate) {
@@ -155,7 +155,7 @@ var newsEdge = (function() {
         onComplete: function() {
           gsap.set(todayListWrap, { display: 'none' });
           gsap.set([todayListItem, todayListItemWrap, todayListItemWrap.children()], { clearProps: 'all' });
-          
+
           gsap.to(bubbleGroupCircle, duration * 2, {
             scale: 1,
             ease: 'power3.inOut',
@@ -172,27 +172,27 @@ var newsEdge = (function() {
               history.pushState(null, null, window.location.pathname);
             }
           });
-          
+
           gsap.to(header, duration * 2, { autoAlpha: 1, ease: 'power3.inOut' });
         }
       });
     }
 
-    /** 
+    /**
      * * 리스트 생성
      */
     function listRender(callBack) {
       btnTodayClose = $('<button type="button" class="btnTodayClose">close</button>');
 
-      todayList = $('<div class="todayList" />');          
+      todayList = $('<div class="todayList" />');
       todayListTitle = $('<h3 class="todayListTitle" />');
       todayListItem = $('<div class="todayListItem" />');
       todayListItemCounts = $('<div class="todayListItemCounts">');
       todayListItemWrap = $('<ul class="listItemWrap" />');
-      
+
       todayList.append(btnTodayClose);
       todayList.append(todayListTitle.html(_data.keyword_service.split('<br />').map((self, i) => i !== 0 && i % 2 === 1 ? self + '<br />' : self + ' ' )));
-      
+
       todayListItemCounts.append(_data.article.map((self, i, data) => {
         if (i < data.length - 1) return `<span class="count-${i}"></span>`;
         else return `<span class="count-${i}"></span><span class="count-more"></span>`;
@@ -200,7 +200,7 @@ var newsEdge = (function() {
 
       todayListItemWrap.append(_data.article.map((self, i) => {
         var item = '';
-        
+
         var insertDTM = utils.isToday(_data.serverDTM, utils.dateFormat(self.insert_dtm)) ? moment(utils.dateFormat(self.insert_dtm)).startOf('min').fromNow() : self.insert_dtm;
         var emptyImgURL =  (!!self.img_url)  ? '' : ' empty';
 
@@ -229,15 +229,15 @@ var newsEdge = (function() {
       return callBack(todayListWrap);
     }
 
-    /** 
+    /**
      * * 리스트 업데이트
      */
     function listUpdate(callBack) {
       var item = todayListItemWrap.children();
-      
+
       todayListTitle.html(_data.keyword_service.split('<br />').map((self, i) => i !== 0 && i % 2 === 1 ? self + '<br />' : self + ' '));
 
-      _data.article.forEach((self, i) => { 
+      _data.article.forEach((self, i) => {
         var insertDTM = utils.isToday(_data.serverDTM, utils.dateFormat(self.insert_dtm)) ? moment(utils.dateFormat(self.insert_dtm)).startOf('min').fromNow() : self.insert_dtm;
 
         item.eq(i).attr('data-link', self.link_url);
@@ -260,11 +260,11 @@ var newsEdge = (function() {
       return callBack(todayListWrap);
     }
 
-    /** 
+    /**
      * * 기사 목록 관련 이벤트 묶음
      */
     function listRefEvent() {
-      // 카드 옵션 
+      // 카드 옵션
       var cards = {
         width: 335,
         x: 0,
@@ -285,9 +285,9 @@ var newsEdge = (function() {
         minScale: .92 // 카드 스케일 최소값
       };
 
-      /** 
+      /**
        * * 카드 포지션 설정 후 히스토리 상태에 따른 위치 변경
-       */ 
+       */
       (function() {
         // 카드 포지션 설정
         for (var i = 0; i < cards.leng; i ++) {
@@ -300,10 +300,10 @@ var newsEdge = (function() {
           todayListItemWrap.children('.item').each(function(j, self) {
             if (j < cards.activeIndex && j < 4) gsap.set(self, { autoAlpha: 0, x: cards.width / 2, scale: .92 });
           });
-          
+
           gsap.to(todayListItemWrap, cards.duration, { x: cards.offsets[cards.activeIndex]});
         }
-        
+
         todayListItemCounts.children().removeClass('active');
         todayListItemCounts.children().eq(cards.activeIndex).addClass('active');
       })();
@@ -327,12 +327,12 @@ var newsEdge = (function() {
         cards.x = cards.initX + cards.distance;
         cards.direction = cards.distance > -1 ? 'right' : 'left'; // 터치 방향
         cards.movePercent = Math.abs(cards.distance / cards.width); // 이동한 범위 (%)
-        
+
         switch(cards.direction) {
           case 'left' :
             var ASP = cards.movePercent <= cards.moveLimit; // 모션 시작 지점
             var LP = cards.movePercent - cards.moveLimit; // 왼쪽 이동 범위
-            
+
             if (cards.activeIndex < cards.leng - 2) {
               gsap.set(todayListItemWrap.children('.item').eq(cards.activeIndex), {
                 autoAlpha: ASP ? 1 : 1 - (LP + cards.moveLimit * 1.1),
@@ -363,7 +363,7 @@ var newsEdge = (function() {
               cards.prevIndex = cards.activeIndex;
               cards.activeIndex = Math.min(cards.activeIndex + 1, cards.leng - 1);
 
-              history.replaceState({...history.state, listIndex : cards.activeIndex}, '네이트뉴스');
+              history.replaceState({...history.state, listIndex : cards.activeIndex}, 'nateNews');
 
               if (cards.activeIndex < cards.leng - 1 && cards.activeIndex !== cards.leng - 1) {
                 gsap.to(todayListItemWrap.children('.item').eq(cards.activeIndex - 1), cards.duration, { autoAlpha: 0, x: cards.move, scale: cards.minScale });
@@ -375,7 +375,7 @@ var newsEdge = (function() {
               cards.prevIndex = cards.activeIndex;
               cards.activeIndex = Math.max(0, cards.activeIndex - 1);
 
-              history.replaceState({...history.state, listIndex : cards.activeIndex}, '네이트뉴스');
+              history.replaceState({...history.state, listIndex : cards.activeIndex}, 'nateNews');
 
               if (cards.activeIndex >= 0 && cards.activeIndex !== 5) {
                 gsap.to(todayListItemWrap.children('.item').eq(cards.activeIndex), cards.duration, { autoAlpha: 1, x: 0, scale: 1 });
@@ -383,10 +383,10 @@ var newsEdge = (function() {
             }
             break;
         }
-        
+
         todayListItemCounts.children().removeClass('active');
         todayListItemCounts.children().eq(cards.activeIndex).addClass('active');
-        
+
         if (cards.activeIndex >= 0 && cards.activeIndex !== 5 && cards.activeIndex - 1 !== -1) {
           gsap.to(todayListItemWrap.children('.item').eq(cards.activeIndex - 1), cards.duration, { autoAlpha: 0 });
         }
@@ -399,7 +399,7 @@ var newsEdge = (function() {
 
         $this.addClass('active');
 
-        /** 
+        /**
          * * Whiteboard style
          */
         gsap.delayedCall(cards.duration / 2, function() {
@@ -413,7 +413,7 @@ var newsEdge = (function() {
             ease: 'power4.inOut',
             onComplete: function () {
               gsap.delayedCall(cards.duration / 2, function () {
-                gsap.to(todayListEffect, cards.duration, {                      
+                gsap.to(todayListEffect, cards.duration, {
                   scale: (!$this.hasClass('more')) ? 25 : 50,
                   ease: 'power4.inOut',
                   onComplete: function () {
@@ -488,12 +488,12 @@ var newsEdge = (function() {
       data: null
     }
 
-    /** 
+    /**
      * * 옵션값 선 계산
      */
     function calcPresume() {
       var headerHeight = header.getBoundingClientRect().height;
-      var gap = 58; // 375 미만 브라우저에서 버블 컨테이너 viewbox 제어용 수치 (0 => 58로 변경됨) 
+      var gap = 58; // 375 미만 브라우저에서 버블 컨테이너 viewbox 제어용 수치 (0 => 58로 변경됨)
       var areaHeight = headerHeight + gap + window.innerWidth;
 
       if (orientation) { // 세로모드
@@ -503,7 +503,7 @@ var newsEdge = (function() {
       }
     }
 
-    /** 
+    /**
      * * 버블 위치 계산
      */
     var calcBubblesPoints = (function() {
@@ -514,91 +514,91 @@ var newsEdge = (function() {
           x: .12,
           y: .026
         },
-        {
-          x: .357,
-          y: .357
-        },
-        {
-          x: .053,
-          y: .453
-        },
-        {
-          x: .56,
-          y: .213
-        },
-        {
-          x: .653,
-          y: .693
-        },
-        {
-          x: .546,
-          y: .001
-        },
-        {
-          x: .23,
-          y: .80
-        },
-        {
-          x: .48,
-          y: .80
-        },
-        {
-          x: .753,
-          y: .46
-        },
-        {
-          x: .7467,
-          y: .0667
-        }],
+          {
+            x: .357,
+            y: .357
+          },
+          {
+            x: .053,
+            y: .453
+          },
+          {
+            x: .56,
+            y: .213
+          },
+          {
+            x: .653,
+            y: .693
+          },
+          {
+            x: .546,
+            y: .001
+          },
+          {
+            x: .23,
+            y: .80
+          },
+          {
+            x: .48,
+            y: .80
+          },
+          {
+            x: .753,
+            y: .46
+          },
+          {
+            x: .7467,
+            y: .0667
+          }],
         // Landscape Percent
         [{
           x: -0.3013,
           y: .040
         },
-        {
-          x: -0.2507,
-          y: 0.5600
-        },
-        {
-          x: -0.1333,
-          y: 0.1333
-        },
-        {
-          x: 0.3200,
-          y: 0.0373
-        },
-        {
-          x: 0.3067,
-          y: 0.3733
-        },
-        {
-          x: 0.6187,
-          y: 0.1280
-        },
-        {
-          x: 0.7520,
-          y: 0.3707
-        },
-        {
-          x: 1.0560,
-          y: 0.0320
-        },
-        {
-          x: 1.0987,
-          y: 0.2880
-        },
-        {
-          x: 0.9600,
-          y: 0.4907
-        }]
+          {
+            x: -0.2507,
+            y: 0.5600
+          },
+          {
+            x: -0.1333,
+            y: 0.1333
+          },
+          {
+            x: 0.3200,
+            y: 0.0373
+          },
+          {
+            x: 0.3067,
+            y: 0.3733
+          },
+          {
+            x: 0.6187,
+            y: 0.1280
+          },
+          {
+            x: 0.7520,
+            y: 0.3707
+          },
+          {
+            x: 1.0560,
+            y: 0.0320
+          },
+          {
+            x: 1.0987,
+            y: 0.2880
+          },
+          {
+            x: 0.9600,
+            y: 0.4907
+          }]
       ];
-      
+
       return function(data) {
         var positions = (orientation) ? utils.shuffleArray(forceXY[0]) : utils.shuffleArray(forceXY[1]);
         var radiusScale = d3.scaleLinear().domain([0, 100]).range([0, options.width]);
         var r;
         var checkPos = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-        
+
         if (bubbles.prevSq !== null) {
           bubbles.prevPos = data.map((self, i) => {
             var prevPos = bubbles.prevSq.indexOf(self.keyword_sq) !== -1 ? bubbles.prevPos[bubbles.prevSq.indexOf(self.keyword_sq)] : -1;
@@ -614,7 +614,7 @@ var newsEdge = (function() {
 
         return options.percent.map(function(percent, i) {
           r = radiusScale(options.percent[i] / 2);
-          
+
           return {
             x: (options.width * (bubbles.prevPos[i] !== undefined ? positions[bubbles.prevPos[i]].x : positions[i].x)) + r,
             y: (options.height * (bubbles.prevPos[i] !== undefined ? positions[bubbles.prevPos[i]].y : positions[i].y)) + r,
@@ -622,8 +622,8 @@ var newsEdge = (function() {
         });
       }
     })();
-    
-    /** 
+
+    /**
      * * 버블 데이터 계산
      */
     function calcBubblesData(data) {
@@ -642,128 +642,128 @@ var newsEdge = (function() {
       });
     }
 
-    /** 
+    /**
      * * 버블 접근성 태그 삽입
      */
     function bubbleAccessibility() {
       var selection = bubbles.selection;
 
       selection
-        .attr('role', 'group')
-        .attr('aria-labelledby', 'title desc')
+          .attr('role', 'group')
+          .attr('aria-labelledby', 'title desc')
 
       selection
-        .append('title')
-        .attr('id', 'title')
-        .text(decodeURI('%ED%95%9C%EB%88%88%EC%97%90 %EB%B3%B4%EB%8A%94 %EC%98%A4%EB%8A%98'));
+          .append('title')
+          .attr('id', 'title')
+          .text(decodeURI('%ED%95%9C%EB%88%88%EC%97%90 %EB%B3%B4%EB%8A%94 %EC%98%A4%EB%8A%98'));
 
       selection
-        .append('desc')
-        .attr('id', 'desc')
-        .text(decodeURI('%ED%98%84%EC%9E%AC%EC%8B%9C%EA%B0%84 %EC%8B%A4%EC%8B%9C%EA%B0%84 %EC%9D%B4%EC%8A%88%EB%A5%BC %ED%82%A4%EC%9B%8C%EB%93%9C %ED%98%95%ED%83%9C%EB%A1%9C %EC%A0%9C%EA%B3%B5'));
+          .append('desc')
+          .attr('id', 'desc')
+          .text(decodeURI('%ED%98%84%EC%9E%AC%EC%8B%9C%EA%B0%84 %EC%8B%A4%EC%8B%9C%EA%B0%84 %EC%9D%B4%EC%8A%88%EB%A5%BC %ED%82%A4%EC%9B%8C%EB%93%9C %ED%98%95%ED%83%9C%EB%A1%9C %EC%A0%9C%EA%B3%B5'));
 
       selection
-        .append('g')
-        .attr('id', 'bubbleGroupWrap');
+          .append('g')
+          .attr('id', 'bubbleGroupWrap');
     }
 
-    /** 
+    /**
      * * 버블 생성
      */
     function bubblesRender(data) {
       var selection = bubbles.selection;
       var options = bubbles.options;
-      
+
       selection
-        .attr('width', options.width)
-        .attr('height', options.height)
-        .attr('viewBox', [0, 0, options.width, options.height]);
+          .attr('width', options.width)
+          .attr('height', options.height)
+          .attr('viewBox', [0, 0, options.width, options.height]);
 
       var fillColor = d3.scaleOrdinal()
-        .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-        .range(options.color);
+          .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+          .range(options.color);
 
       var fontScale = d3.scaleLinear()
-        .domain([0, 100])
-        .range([0, options.width]);
-      
-      var bubbleGroupWrap = d3.select('#bubbleGroupWrap');
+          .domain([0, 100])
+          .range([0, options.width]);
 
+      var _t = d3.select('#bubbleGroupWrap .wrap-old');
+      var bubbleGroupWrap = _t.size()  > 0 ? d3.select('#bubbleGroupWrap').append('g').attr('class', 'wrap-new') : d3.select('#bubbleGroupWrap').append('g').attr('class', 'wrap-old');
       var bubbleGroup = bubbleGroupWrap
-        .selectAll('.bubbleGroup')
-        .data(data, function(d) { return d.keyword_sq; })
-        .join(
-          function (enter) {
-            var group = enter = enter
-              .append('g')
-                .attr('class', 'bubbleGroup')
-                .attr('role', 'list')
-                .attr('aria-label', 'bubble UI');
+          .selectAll('.bubbleGroup')
+          .data(data, function(d) { return d.keyword_sq; })
+          .join(
+              function (enter) {
+                var group = enter = enter
+                    .append('g')
+                    .attr('class', 'bubbleGroup')
+                    .attr('role', 'list')
+                    .attr('aria-label', 'bubble UI');
 
-            var wrap = group
-              .append('svg')
-                .attr('class', 'bubbleWrap')
+                var wrap = group
+                    .append('svg')
+                    .attr('class', 'bubbleWrap')
 
-            var wrapGroup = wrap
-              .append('g')
-                .attr('class', 'bubble')
-                .attr('role', 'listitem');
+                var wrapGroup = wrap
+                    .append('g')
+                    .attr('class', 'bubble')
+                    .attr('role', 'listitem');
 
-            wrapGroup
-              .append('circle')
-                .attr('class', 'bubbleCircle');
+                wrapGroup
+                    .append('circle')
+                    .attr('class', 'bubbleCircle');
 
-            wrapGroup
-              .append('text')
-              .attr('class', 'bubbleText');
+                wrapGroup
+                    .append('text')
+                    .attr('class', 'bubbleText');
 
-            enterT(enter);
-            return enter;
-          },
-          function (update) {
-            updateT(update);
-            return update;
-          },
-          function (exit) {
-            exitT(exit);
-            return exit;
-          }
-        )
-        .attr('transform', function(d) {
-          return 'translate('+ d.x + ', '+ d.y +')';
-        })
-        .on('click', function(d) {
-          if (!State.isClick) State.isClick = true;
-          else return;
-        
-          /** 
-           * * Statistics (PV)
-           */
-          if (typeof draw_ndr === 'function') {
-            var sRef2 = '';
+                enterT(enter);
+                return enter;
+              },
+              function (update) {
+                updateT(update);
+                return update;
+              },
+              function (exit) {
+                exitT(exit);
+                return exit;
+              }
+          )
+          .attr('transform', function(d) {
+            return 'translate('+ d.x + ', '+ d.y +')';
+          })
+          .on('click', function(d) {
+            if (!State.isClick) State.isClick = true;
+            else return;
 
-            try {
-              draw_mndr('m_ndr.nate.com/news/today/keyword'+(d.index + 1), gUserJS_sAppFrom, '', gUserJS_sAppSkai, gUserJS_sAppNdruk, sRef2);
-            } catch(e) {
-              draw_mndr('m_ndr.nate.com/news/today/keyword'+(d.index + 1), '', '', '', '', sRef2);
+            /**
+             * * Statistics (PV)
+             */
+            if (typeof draw_ndr === 'function') {
+              var sRef2 = '';
+
+              try {
+                draw_mndr('m_ndr.nate.com/news/today/keyword'+(d.index + 1), gUserJS_sAppFrom, '', gUserJS_sAppSkai, gUserJS_sAppNdruk, sRef2);
+              } catch(e) {
+                draw_mndr('m_ndr.nate.com/news/today/keyword'+(d.index + 1), '', '', '', '', sRef2);
+              }
             }
-          }
-          /** 
-           * * Statistics (Click)
-           */
-          if (typeof olapclick === 'function') {
-            olapclick(`TOK${(d.index + 1 < 10) ? '0' + (d.index + 1) : (d.index + 1)}`);
-          }
+            /**
+             * * Statistics (Click)
+             */
+            if (typeof olapclick === 'function') {
+              olapclick(`TOK${(d.index + 1 < 10) ? '0' + (d.index + 1) : (d.index + 1)}`);
+            }
 
 
-          callArticle({
-            selection : this,
-            keyword_service: d.keyword_service,
-            keyword_dtm: d.keyword_dtm,
-            keyword_sq: d.keyword_sq,
-            index: d.index
-          }, false);
-        });
+            callArticle({
+              selection : this,
+              keyword_service: d.keyword_service,
+              keyword_dtm: d.keyword_dtm,
+              keyword_sq: d.keyword_sq,
+              index: d.index
+            }, false);
+          });
 
       function enterT(selection) {
         var wrap = selection.select('.bubbleWrap');
@@ -772,26 +772,26 @@ var newsEdge = (function() {
         var text = selection.select('.bubbleText');
 
         selection.attr('data-importance', function(d, i) { return i });
-        
+
         wrap
-          .attr('width', function(d) { return d.radius * 2; })
-          .attr('height', function(d) { return d.radius * 2; })
-          .attr('viewBox', function(d) {
-            return [0, 0, d.radius * 2, d.radius * 2];
-          });
-        
+            .attr('width', function(d) { return d.radius * 2; })
+            .attr('height', function(d) { return d.radius * 2; })
+            .attr('viewBox', function(d) {
+              return [0, 0, d.radius * 2, d.radius * 2];
+            });
+
         bubble
-          .attr('transform', 'scale(0)')
-          .transition()
+            .attr('transform', 'scale(0)')
+            .transition()
             .delay(function(d, i) {
               return i * 30;
             })
             .ease(options.ease[0])
             .duration(options.duration)
-          .attr('transform', 'scale(1)');
+            .attr('transform', 'scale(1)');
 
         circle
-          .transition()
+            .transition()
             .delay(function(d, i) {
               return i * 30;
             })
@@ -805,38 +805,38 @@ var newsEdge = (function() {
             });
 
         text
-          .attr('stroke', function (d, i) {
-            return (i < 5) ? '#fff' : '#333';
-          })
-          .attr('stroke-width', 0)
-          .attr('fill', function (d, i) {
-            return (i < 5) ? '#fff' : '#333';
-          })
-          .attr('font-size', function (d, i) {
-            return fontScale(options.sizes[i]) + 'px';
-          })
-          .style('text-anchor', 'middle');
+            .attr('stroke', function (d, i) {
+              return (i < 5) ? '#fff' : '#333';
+            })
+            .attr('stroke-width', 0)
+            .attr('fill', function (d, i) {
+              return (i < 5) ? '#fff' : '#333';
+            })
+            .attr('font-size', function (d, i) {
+              return fontScale(options.sizes[i]) + 'px';
+            })
+            .style('text-anchor', 'middle');
 
         var lineBreak = text
-          .selectAll('.lineBreak')
-          .data(function(d) {
-            return d.keyword_service.split('<br />').map(self => self.trim()).slice(0, 3);
-          });
+            .selectAll('.lineBreak')
+            .data(function(d) {
+              return d.keyword_service.split('<br />').map(self => self.trim()).slice(0, 3);
+            });
 
         lineBreak
-          .enter()
-          .append('tspan')
+            .enter()
+            .append('tspan')
             .attr('class', 'lineBreak')
             .attr('x', 0)
             .attr('y', function () {
               switch(this.parentNode.childElementCount) {
-                case 1: 
+                case 1:
                   return '.3em'
-                case 2: 
+                case 2:
                   return '-.3em';
-                case 3: 
+                case 3:
                   return '-.9em';
-                default: 
+                default:
                   return 0;
               }
             })
@@ -855,69 +855,69 @@ var newsEdge = (function() {
         var text = selection.select('.bubbleText');
 
         selection.attr('data-importance', function(d, i) { return i });
-          
+
         wrap
-          .attr('width', function(d) { return d.radius * 2; })
-          .attr('height', function(d) { return d.radius * 2; })
-          .attr('viewBox', function(d) {
-            return [0, 0, d.radius * 2, d.radius * 2];
-          });
-        
+            .attr('width', function(d) { return d.radius * 2; })
+            .attr('height', function(d) { return d.radius * 2; })
+            .attr('viewBox', function(d) {
+              return [0, 0, d.radius * 2, d.radius * 2];
+            });
+
         bubble
-          .attr('transform', 'scale(0)')
-          .transition()
+            .attr('transform', 'scale(0)')
+            .transition()
             .delay(function(d, i) {
               return i * 30;
             })
             .ease(options.ease[0])
             .duration(options.duration)
-          .attr('transform', 'scale(1)');
+            .attr('transform', 'scale(1)');
 
         circle
-          .transition()
-          .delay(function(d, i) { return i; })
-          .ease(options.ease[0])
-          .duration(options.duration)
-          .attr('r', function(d) { return d.radius; })
-          .attr('cx', 0)
-          .attr('cy', 0)
-          .attr('fill', function(d, i) {
-            return fillColor(i);
-          })
-        
+            .transition()
+            .delay(function(d, i) { return i; })
+            .ease(options.ease[0])
+            .duration(options.duration)
+            .attr('r', function(d) { return d.radius; })
+            .attr('cx', 0)
+            .attr('cy', 0)
+            .attr('fill', function(d, i) {
+              return fillColor(i);
+            })
+
         text
-          .attr('stroke', function (d, i) {
-            return (i < 5) ? '#fff' : '#333';
-          })
-          .attr('stroke-width', 0)
-          .attr('fill', function (d, i) {
-            return (i < 5) ? '#fff' : '#333';
-          })
-          .attr('font-size', function (d, i) {
-            return fontScale(options.sizes[i]) + 'px';
-          })
-          .style('text-anchor', 'middle');
+            .attr('stroke', function (d, i) {
+              return (i < 5) ? '#fff' : '#333';
+            })
+            .attr('stroke-width', 0)
+            .attr('fill', function (d, i) {
+              return (i < 5) ? '#fff' : '#333';
+            })
+            .attr('font-size', function (d, i) {
+              return fontScale(options.sizes[i]) + 'px';
+            })
+            .style('text-anchor', 'middle');
 
         var lineBreak = text
-          .selectAll('.lineBreak')
-          .data(function(d) {
-            return d.keyword_service.split('<br />').map(self => self.trim()).slice(0, 3);
-          });
+            .selectAll('.lineBreak')
+            .data(function(d) {
+              return d.keyword_service.split('<br />').map(self => self.trim()).slice(0, 3);
+            });
 
         lineBreak
-          .enter()
-          .append('tspan')
+            .enter()
+            .append('tspan')
             .attr('class', 'lineBreak')
             .attr('x', 0)
             .attr('y', function () {
               switch(this.parentNode.childElementCount) {
-                case 1: 
+                case 1:
                   return '.3em'
-                case 2: 
+                case 2:
                   return '-.3em';
-                case 3: 
+                case 3:
                   return '-.9em';
-                default: 
+                default:
                   return 0;
               }
             })
@@ -931,17 +931,17 @@ var newsEdge = (function() {
 
       function exitT(selection) {
         selection
-          .transition()
+            .transition()
             .duration(options.duration * 3)
-          .style('opacity', 0);
-        
+            .style('opacity', 0);
+
         selection.remove();
       }
 
       return bubbleGroup;
     }
 
-    /** 
+    /**
      * * 버블 애니메이션 시뮬레이터
      */
     function bubblesSimulation(bubbleGroup, data, types) {
@@ -950,76 +950,76 @@ var newsEdge = (function() {
       var simulation = {
         init: function(selection) {
           var simulator = d3.forceSimulation()
-            .alphaTarget(0)
-            .velocityDecay(options.velocityDecay)
-            .force('x', d3.forceX(options.width / 2).strength((orientation) ? options.forceStrength * 12 : options.forceStrength * 4))
-            .force('y', d3.forceY(options.height / 2).strength((orientation) ? options.forceStrength * 12 : options.forceStrength * 4))
-            .force('charge', d3.forceManyBody().strength(options.forceStrength))
-            .force('collide', d3.forceCollide().radius(function(d) { return d.radius + options.gap; }))
-            .on('tick', function(d, i) {
-              selection
-                .transition()
-                .duration(options.duration / 10)
-                .attr('transform', function(d) {
-                  return 'translate(' + (d.x - 1) +', '+ (d.y - 1) +')';
-                });
+              //.alphaTarget(0)
+              .velocityDecay(options.velocityDecay)
+              .force('x', d3.forceX(options.width / 2).strength((orientation) ? options.forceStrength * 12 : options.forceStrength * 4))
+              .force('y', d3.forceY(options.height / 2).strength((orientation) ? options.forceStrength * 12 : options.forceStrength * 4))
+              .force('charge', d3.forceManyBody().strength(options.forceStrength))
+              .force('collide', d3.forceCollide().radius(function(d) { return d.radius + options.gap; }))
+              .on('tick', function(d, i) {
+                selection
+                    .transition()
+                    .duration(options.duration / 10)
+                    .attr('transform', function(d) {
+                      return 'translate(' + (d.x - 1) +', '+ (d.y - 1) +')';
+                    });
 
-              return selection;
-            })
-            .on('end', function () {
-              
-            })
-            .nodes(data);
+                return selection;
+              })
+              .on('end', function () {
+
+              })
+              .nodes(data);
 
           return simulator;
         },
         dragStart: function (selection) {
           var simulator = d3.forceSimulation()
-            .alphaTarget(1)
-            .velocityDecay(options.velocityDecay)
-            .force('x', d3.forceX((options.width / 2)).strength(options.forceStrength * 12))
-            .force('y', d3.forceY((options.height / 2)).strength(options.forceStrength * 12))
-            .force('charge', d3.forceManyBody().strength(options.forceStrength))
-            .force('collide', d3.forceCollide().radius(function(d) { return d.radius - ((options.gap + 150) * utils.getRandomIntInclusive(0, 0, true)); }).strength(options.forceStrength * 60))
-            .on('tick', function () {
-              selection
-                .transition()
-                .duration(options.duration / 10)
-                .attr('transform', function(d) {
-                  return 'translate(' + (d.x - 1) +', '+ (d.y - 1) +') scale(.8)';
-                });
+              .alphaTarget(1)
+              .velocityDecay(options.velocityDecay)
+              .force('x', d3.forceX((options.width / 2)).strength(options.forceStrength * 12))
+              .force('y', d3.forceY((options.height / 2)).strength(options.forceStrength * 12))
+              .force('charge', d3.forceManyBody().strength(options.forceStrength))
+              .force('collide', d3.forceCollide().radius(function(d) { return d.radius - ((options.gap + 150) * utils.getRandomIntInclusive(0, 0, true)); }).strength(options.forceStrength * 60))
+              .on('tick', function () {
+                selection
+                    .transition()
+                    .duration(options.duration / 10)
+                    .attr('transform', function(d) {
+                      return 'translate(' + (d.x - 1) +', '+ (d.y - 1) +') scale(.8)';
+                    });
 
-              return selection;
-            })
-            .on('end', function () {
+                return selection;
+              })
+              .on('end', function () {
 
-            })
-            .nodes(data);
+              })
+              .nodes(data);
 
           return simulator;
         },
         dragEnd: function (selection) {
           var simulator = d3.forceSimulation()
-            .alphaTarget(0)
-            .velocityDecay(options.velocityDecay)
-            .force('x', d3.forceX(options.width / 2).strength(options.forceStrength * 12))
-            .force('y', d3.forceY(options.height / 2).strength(options.forceStrength * 12))
-            .force('charge', d3.forceManyBody())
-            .force('collide', d3.forceCollide().radius(function(d) { return d.radius + options.gap; }))
-            .on('tick', function() {
-              selection
-                .transition()
-                  .duration(options.duration / 10)
-                .attr('transform', function(d) {
-                  return 'translate(' + (d.x - 1) +', '+ (d.y - 1) +') scale(1)';
-                });
+              .alphaTarget(0)
+              .velocityDecay(options.velocityDecay)
+              .force('x', d3.forceX(options.width / 2).strength(options.forceStrength * 12))
+              .force('y', d3.forceY(options.height / 2).strength(options.forceStrength * 12))
+              .force('charge', d3.forceManyBody())
+              .force('collide', d3.forceCollide().radius(function(d) { return d.radius + options.gap; }))
+              .on('tick', function() {
+                selection
+                    .transition()
+                    .duration(options.duration / 10)
+                    .attr('transform', function(d) {
+                      return 'translate(' + (d.x - 1) +', '+ (d.y - 1) +') scale(1)';
+                    });
 
-              return selection;
-            })
-            .on('end', function () {
-              
-            })
-            .nodes(data);
+                return selection;
+              })
+              .on('end', function () {
+
+              })
+              .nodes(data);
 
           return simulator;
         }
@@ -1032,7 +1032,7 @@ var newsEdge = (function() {
           break;
         case 'onDragStart':
           if (!!simulator) simulator.stop();
-          return simulator = simulation.dragStart(bubbleGroup);
+          //return simulator = simulation.dragStart(bubbleGroup);
           break;
         case 'onDragEnd':
           if (!!simulator) simulator.stop();
@@ -1040,7 +1040,6 @@ var newsEdge = (function() {
           break;
       }
     }
-
     return {
       init: function() {
         bubbleAccessibility();
@@ -1063,7 +1062,7 @@ var newsEdge = (function() {
         bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onInit');
       },
       dragStart: function () {
-        bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragStart');
+        //bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragStart');
       },
       dragEnd: function() {
         caller.resetKeyword();
@@ -1072,9 +1071,30 @@ var newsEdge = (function() {
 
           for (let key in res.data) caller.keyword = res.data[key];
 
-          bubbles.data = calcBubblesData(caller.keyword);
-          bubbles.group = bubblesRender(bubbles.data);
-          bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');
+          gsap.timeline()
+              .add(_ => {
+                bubbles.simulator.stop().force('collide', d3.forceCollide().radius(d => d.radius - 14)).restart()
+              })
+
+              .add(_ => {
+                d3.select('.wrap-old').selectAll('.bubbleGroup').transition().delay((d, i) => {
+                  console.log(i)
+                  return i * (i > 4 ? 50 : 100)
+                }).attr('style', 'transform: scale(0);opacity:0;transition: all 1s;')
+                bubbles.simulator.stop().force('collide', d3.forceCollide().radius(d => d.radius + 14)).restart()
+              },'+=.5')
+              /*.add(_ => {
+                bubbles.data = calcBubblesData(caller.keyword);
+                bubbles.group = bubblesRender(bubbles.data);
+              }, '+=.3')
+              .add(_ => {
+                //d3.select('.wrap-old').remove();
+                bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');
+              })
+*/
+
+
+
         });
       }
     }
@@ -1111,39 +1131,39 @@ var newsEdge = (function() {
       percent: null,
       data: null
     };
-
-    /** 
+    /**
      * * 옵션값 선 계산
      */
     function calcPresume(percent) {
       return Math.min(window.innerWidth, 375) * percent;
     }
 
-    /** 
+    /**
      * * 프로그레스 바 시간대 계산
      */
     function calcProgressBarTimestamp() {
-      /** 
-       * * 컨트롤러 조절 범위 (분 => 시간) 변경 
+      /**
+       * * 컨트롤러 조절 범위 (분 => 시간) 변경
        * ! (산출물 적용 O / 테스트/라이브 X)
-       * 
+       *
        * 변경된 내용 :
        * @variable onDateMille
        * @variable timestamp.server
-       * @variable timestamp.now 
+       * @variable timestamp.now
        */
       var oneDateMilli = (((1000 * 60) * 60) * 24); // (((1000 * 60) * 60) * 24) - (1000 * 60) // 23시간 59분 => 23시간으로 변경
 
       var timestamp = {};
-      
+
       timestamp.min = moment(caller.minDTM).valueOf();
-      timestamp.server = moment(caller.serverDTM).minutes(0).seconds(0).valueOf(); // minutes() / seconds() 추가
-      timestamp.now = moment(caller.progressDTM).minutes(0).seconds(0).valueOf();  // minutes() / seconds() 추가
+      timestamp.server = moment(caller.serverDTM).valueOf(); // minutes() / seconds() 추가
+      timestamp.now = moment(caller.progressDTM).valueOf(); // minutes() / seconds() 추가
       timestamp.start = moment(caller.progressDTM).startOf('day').valueOf();
       timestamp.end = moment(caller.progressDTM).endOf('day').valueOf();
       timestamp.percent = (timestamp.now - timestamp.start) / oneDateMilli;
       timestamp.minLimit = (utils.convertTime(caller.minDTM, 'YMD') === utils.convertTime(caller.progressDTM, 'YMD')) ? (timestamp.min - timestamp.start) / oneDateMilli : 0;
       timestamp.maxLimit = (utils.convertTime(caller.serverDTM, 'YMD') === utils.convertTime(caller.progressDTM, 'YMD')) ? (timestamp.server - timestamp.start) / oneDateMilli : 1;
+
       timestamp.perToTime = function(milli, toFixed) {
         return utils.convertTime((milli * oneDateMilli) + this.start, toFixed);
       }
@@ -1151,7 +1171,7 @@ var newsEdge = (function() {
       return timestamp;
     }
 
-    /** 
+    /**
      * * 프로그레스 바 데이터 계산
      */
     function calcProgressBarData(options, timestamp) {
@@ -1177,191 +1197,191 @@ var newsEdge = (function() {
       })[0];
     }
 
-    /** 
+    /**
      * * 프로그레스 바 생성
      */
     function progressBarRender(data) {
       var selection = progressBar.selection;
       var options = progressBar.options
-      
+
       selection
-        .attr('width', options.width)
-        .attr('height', options.height)
-        .attr('viewBox', [0, 0, options.width, options.height]);
+          .attr('width', options.width)
+          .attr('height', options.height)
+          .attr('viewBox', [0, 0, options.width, options.height]);
 
       var progress = selection
-        .selectAll('.progress')
-        .data([data])
-        .join(
-          function (enter) {
-            enter = enter
-              .append('g')
-                .attr('class', 'progress');
+          .selectAll('.progress')
+          .data([data])
+          .join(
+              function (enter) {
+                enter = enter
+                    .append('g')
+                    .attr('class', 'progress');
 
-            var linearGradient = enter
-              .append('defs')
-              .append('linearGradient')
-                .attr('id', 'pathLinear')
+                var linearGradient = enter
+                    .append('defs')
+                    .append('linearGradient')
+                    .attr('id', 'pathLinear')
 
-            linearGradient
-              .append('stop')
-                .attr('offset', '0%')
-                .attr('stop-color', '#639eff');
-            
-            linearGradient
-              .append('stop')
-                .attr('offset', '100%')
-                .attr('stop-color', 'rgba(91, 108, 255, .98)');
+                linearGradient
+                    .append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', '#639eff');
 
-            enter
-              .append('path')
-              .attr('class', 'pathBackboard');
+                linearGradient
+                    .append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', 'rgba(91, 108, 255, .98)');
 
-            enter
-              .append('path')
-              .attr('class', 'pathBack');
+                enter
+                    .append('path')
+                    .attr('class', 'pathBackboard');
 
-            enter
-              .append('path')
-                .attr('class', 'pathFront');
-            
-            var group = enter
-              .append('g')
-                .attr('class', 'timeGroup');
+                enter
+                    .append('path')
+                    .attr('class', 'pathBack');
 
-            group
-              .append('circle')
-                .attr('class', 'timeKnob');
-            
-            group
-              .append('rect')
-                .attr('class', 'timeKnobEmpty')
-                .attr('x', function(d) {
-                  return -(d.knob.r * 2);
-                })
-                .attr('y', function(d) {
-                  return -(d.knob.r * 2);
-                })
-                .attr('width', function(d) {
-                  return d.knob.r * 4
-                })
-                .attr('height', function(d) {
-                  return d.knob.r * 4
-                })
-                .attr('fill', 'transparent');
-            
-            var timeTooltip = group
-              .append('svg')
-                .attr('class', 'timeTooltip')
-                .attr('xmlns', 'http://www.w3.org/2000/svg')
-                .attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+                enter
+                    .append('path')
+                    .attr('class', 'pathFront');
 
-            var filterDefs = timeTooltip
-              .append('defs');
-            
-            var filter1 = filterDefs
-              .append('filter')
-                .attr('id', 'filter1Back')
-                .attr('width', '128.9%')
-                .attr('height', '167.4%')
-                .attr('x', '-14.4%')
-                .attr('y', '-28.5%')
-                .attr('filterUnits', 'objectBoundingBox');
+                var group = enter
+                    .append('g')
+                    .attr('class', 'timeGroup');
 
-            filter1
-              .append('feOffset')
-                .attr('result', 'shadowOffsetOuter1')
-                .attr('in', 'SourceAlpha')
-                .attr('dy', 2)
-            
-            filter1
-              .append('feGaussianBlur')
-                .attr('result', 'shadowBlurOuter1')
-                .attr('in', 'shadowOffsetOuter1')
-                .attr('stdDeviation', 4)
+                group
+                    .append('circle')
+                    .attr('class', 'timeKnob');
 
-            filter1
-              .append('feColorMatrix')
-              .attr('in', 'shadowBlurOuter1')
-              .attr('values' , '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0');
+                group
+                    .append('rect')
+                    .attr('class', 'timeKnobEmpty')
+                    .attr('x', function(d) {
+                      return -(d.knob.r * 2);
+                    })
+                    .attr('y', function(d) {
+                      return -(d.knob.r * 2);
+                    })
+                    .attr('width', function(d) {
+                      return d.knob.r * 4
+                    })
+                    .attr('height', function(d) {
+                      return d.knob.r * 4
+                    })
+                    .attr('fill', 'transparent');
 
-            filter1
-              .append('rect')
-              .attr('id', 'filter1Rect');
+                var timeTooltip = group
+                    .append('svg')
+                    .attr('class', 'timeTooltip')
+                    .attr('xmlns', 'http://www.w3.org/2000/svg')
+                    .attr('xmlns:xlink', 'http://www.w3.org/1999/xlink');
 
-            var filter2 = filterDefs
-              .append('filter')
-                .attr('id', 'filter2Back')
-                .attr('width', '356.7%')
-                .attr('height', '367.1%')
-                .attr('x', '-128.3%')
-                .attr('y', '-85%')
-                .attr('filterUnits', 'objectBoundingBox');
+                var filterDefs = timeTooltip
+                    .append('defs');
 
-            filter2
-              .append('feOffset')
-                .attr('result', 'shadowOffsetOuter1')
-                .attr('in', 'SourceAlpha')
-                .attr('dy', 4)
-            
-            filter2
-              .append('feGaussianBlur')
-                .attr('result', 'shadowBlurOuter1')
-                .attr('in', 'shadowOffsetOuter1')
-                .attr('stdDeviation', 3)
+                var filter1 = filterDefs
+                    .append('filter')
+                    .attr('id', 'filter1Back')
+                    .attr('width', '128.9%')
+                    .attr('height', '167.4%')
+                    .attr('x', '-14.4%')
+                    .attr('y', '-28.5%')
+                    .attr('filterUnits', 'objectBoundingBox');
 
-            filter2
-              .append('feColorMatrix')
-              .attr('in', 'shadowBlurOuter1')
-              .attr('values' , '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0');
+                filter1
+                    .append('feOffset')
+                    .attr('result', 'shadowOffsetOuter1')
+                    .attr('in', 'SourceAlpha')
+                    .attr('dy', 2)
 
-            filter2
-              .append('path')
-              .attr('id', 'filter2Path');
+                filter1
+                    .append('feGaussianBlur')
+                    .attr('result', 'shadowBlurOuter1')
+                    .attr('in', 'shadowOffsetOuter1')
+                    .attr('stdDeviation', 4)
+
+                filter1
+                    .append('feColorMatrix')
+                    .attr('in', 'shadowBlurOuter1')
+                    .attr('values' , '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0');
+
+                filter1
+                    .append('rect')
+                    .attr('id', 'filter1Rect');
+
+                var filter2 = filterDefs
+                    .append('filter')
+                    .attr('id', 'filter2Back')
+                    .attr('width', '356.7%')
+                    .attr('height', '367.1%')
+                    .attr('x', '-128.3%')
+                    .attr('y', '-85%')
+                    .attr('filterUnits', 'objectBoundingBox');
+
+                filter2
+                    .append('feOffset')
+                    .attr('result', 'shadowOffsetOuter1')
+                    .attr('in', 'SourceAlpha')
+                    .attr('dy', 4)
+
+                filter2
+                    .append('feGaussianBlur')
+                    .attr('result', 'shadowBlurOuter1')
+                    .attr('in', 'shadowOffsetOuter1')
+                    .attr('stdDeviation', 3)
+
+                filter2
+                    .append('feColorMatrix')
+                    .attr('in', 'shadowBlurOuter1')
+                    .attr('values' , '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0');
+
+                filter2
+                    .append('path')
+                    .attr('id', 'filter2Path');
 
 
-            var timeTooltipGroup = timeTooltip
-              .append('g');
+                var timeTooltipGroup = timeTooltip
+                    .append('g');
 
-            timeTooltipGroup
-              .append('use')
-                .attr('fill' ,'#000')
-                .attr('filter', 'url(#filter1Back)')
-                .attr('xlink:xlink:href', '#filter1Rect');
-                
+                timeTooltipGroup
+                    .append('use')
+                    .attr('fill' ,'#000')
+                    .attr('filter', 'url(#filter1Back)')
+                    .attr('xlink:xlink:href', '#filter1Rect');
 
-            timeTooltipGroup
-              .append('use')
-                .attr('fill' ,'#fff')
-                .attr('xlink:xlink:href', '#filter1Rect')
 
-            timeTooltipGroup
-              .append('use')
-                .attr('fill' ,'#000')
-                .attr('filter', 'url(#filter2Back)')
-                .attr('xlink:xlink:href', '#filter2Path');
+                timeTooltipGroup
+                    .append('use')
+                    .attr('fill' ,'#fff')
+                    .attr('xlink:xlink:href', '#filter1Rect')
 
-            timeTooltipGroup
-              .append('use')
-                .attr('fill' ,'#fff')
-                .attr('xlink:xlink:href', '#filter2Path');
+                timeTooltipGroup
+                    .append('use')
+                    .attr('fill' ,'#000')
+                    .attr('filter', 'url(#filter2Back)')
+                    .attr('xlink:xlink:href', '#filter2Path');
 
-            timeTooltipGroup
-              .append('text')
-                .attr('class', 'timeText');
-              
-            enterT(enter);
-            return enter;
-          },
-          function (update) {
-            updateT(update);
-            return update;
-          },
-          function (exit) {
-            exitT(exit);
-            return exit;
-          }
-        );
+                timeTooltipGroup
+                    .append('use')
+                    .attr('fill' ,'#fff')
+                    .attr('xlink:xlink:href', '#filter2Path');
+
+                timeTooltipGroup
+                    .append('text')
+                    .attr('class', 'timeText');
+
+                enterT(enter);
+                return enter;
+              },
+              function (update) {
+                updateT(update);
+                return update;
+              },
+              function (exit) {
+                exitT(exit);
+                return exit;
+              }
+          );
 
       function enterT(selection) {
         var pathBackboard = selection.select('.pathBackboard');
@@ -1373,106 +1393,109 @@ var newsEdge = (function() {
         var tooltipRect = tooltip.select('rect');
         var tooltipPath = tooltip.select('path');
         var tooltipText = tooltip.select('text');
-        
+
         pathBackboard
-          .attr('d', function(d) { return d.path.backboard; })
-          .attr('stroke-width', 1)
-          .attr('stroke', '#c7ccd1')
-          .attr('fill', 'none')
-          .attr('shape-rendering', 'crispEdges');
+            .attr('d', function(d) { return d.path.backboard; })
+            .attr('stroke-width', 1)
+            .attr('stroke', '#c7ccd1')
+            .attr('fill', 'none')
+            .attr('shape-rendering', 'crispEdges');
 
         pathBack
-          .attr('d', function(d) { return d.path.back; })
-          .attr('stroke-width', function(d) {
-            return d.height * 0.20833333333333334;
-          })
-          .attr('stroke', '#e6e8ea');
+            .attr('d', function(d) { return d.path.back; })
+            .attr('stroke-width', function(d) {
+              return d.height * 0.20833333333333334;
+            })
+            .attr('stroke', '#e6e8ea');
 
         pathFront
-          .attr('d', function(d) { return d.path.front; })
-          .attr('stroke-width', function(d) {
-            return d.height * 0.2916666666666667;
-          })
-          .attr('stroke', 'url(#pathLinear)')
-          .attr('stroke-linecap', 'round')
-          .attr('fill', '#5b6cff');
+            .attr('d', function(d) { return d.path.front; })
+            .attr('stroke-width', function(d) {
+              return d.height * 0.2916666666666667;
+            })
+            .attr('stroke', 'url(#pathLinear)')
+            .attr('stroke-linecap', 'round')
+            .attr('fill', '#5b6cff');
 
         knob
-          .attr('r', function(d) { return d.knob.r; })
-          .attr('stroke', '#5b6cff')
-          .attr('stroke-width', 1)
-          .attr('fill', '#fff');
+            .attr('r', function(d) { return d.knob.r; })
+            .attr('stroke', '#5b6cff')
+            .attr('stroke-width', 1)
+            .attr('fill', '#fff');
 
         tooltip
-          .attr('width', function(d) {
-            return d.width * 0.36;
-          })
-          .attr('height', function(d) {
-            return d.height * 0.8333333333333334;
-          })
-          .attr('viebox',function(d){
-            return [0, 0, d.width * 0.36, d.height * 0.8333333333333334]
-          });
-        
+            .attr('width', function(d) {
+              return d.width * 0.36;
+            })
+            .attr('height', function(d) {
+              return d.height * 0.8333333333333334;
+            })
+            .attr('viebox',function(d){
+              return [0, 0, d.width * 0.36, d.height * 0.8333333333333334]
+            });
+
         tooltipRect
-          .attr('width', function(d) {
-            return d.width * 0.36;
-          })
-          .attr('height', function(d) {
-            return d.height * 0.8333333333333334;
-          })
-          .attr('x', function(d) {
-            return (d.percent * 100 > 84) ? -(((d.width * .36) / 2) - (84 - d.percent * 100)) : -((d.width * .36) / 2);
-          })
-          .attr('y', function(d) {
-            return -(d.height + d.knob.r + 4);
-          })
-          .attr('rx', function(d) {
-            return d.knob.r * 2;
-          });
-        
+            .attr('width', function(d) {
+              return d.width * 0.36;
+            })
+            .attr('height', function(d) {
+              return d.height * 0.8333333333333334;
+            })
+            .attr('x', function(d) {
+              return (d.percent * 100 > 84) ? -(((d.width * .36) / 2) - (84 - d.percent * 100)) : -((d.width * .36) / 2);
+            })
+            .attr('y', function(d) {
+              return -(d.height + d.knob.r + 4);
+            })
+            .attr('rx', function(d) {
+              return d.knob.r * 2;
+            });
+
         tooltipPath
-          .attr('transform', function(d) {
-            return 'translate('+ -(d.knob.r + 2) +' '+ -(d.knob.r * 2) +')';
-          })
-          .attr('d', function(d) {
-            return 'M 19.285 0 L 15 8.235 10.714 0 h 8.571z';
-          });
-      
+            .attr('transform', function(d) {
+              return 'translate('+ -(d.knob.r + 2) +' '+ -(d.knob.r * 2) +')';
+            })
+            .attr('d', function(d) {
+              return 'M 19.285 0 L 15 8.235 10.714 0 h 8.571z';
+            });
+
         tooltipText
-          .attr('alignment-baseline', 'middle')
-          .attr('text-anchor', 'middle')
-          .attr('x', function (d) {
-            return (84 < d.percent * 100) ? (84 - d.percent * 100) : 0;
-          })
-          .attr('y', function(d) {
-            return -((d.knob.r * 3) + 2);
-          })
-          .attr('font-size', function(d){
-            return d.width * 0.088 +'px';
-          });
+            .attr('alignment-baseline', 'middle')
+            .attr('text-anchor', 'middle')
+            .attr('x', function (d) {
+              return (84 < d.percent * 100) ? (84 - d.percent * 100) : 0;
+            })
+            .attr('y', function(d) {
+              return -((d.knob.r * 3) + 2);
+            })
+            .attr('font-size', function(d){
+              return d.width * 0.088 +'px';
+            });
 
         var lineBreak = tooltipText
-          .selectAll('tspan')
+            .selectAll('tspan')
             .data(function(d) {
-              return d.HM.split(' ');
+              // 서버시간 > 2020-08-20 09:23:00 이면 현재 10분단위 정책이므로 09:20으로 변환
+              let t = d.HM.split(' '), c = parseInt( t.pop() / 10) * 10;
+              t.push(c === 0 ? '00':c)
+              return t
             });
 
         lineBreak
-          .enter()
-          .append('tspan')
+            .enter()
+            .append('tspan')
             .attr('class', 'break')
             .attr('dx', function(d, i) {
-              return i === 1 ? i * 4 : i * 2.5; 
+              return i === 1 ? i * 4 : i * 2.5;
             })
             .attr('dy', function(d, i) {
-              return i === 1 ? '-.1em' : '.1em'; 
+              return i === 1 ? '-.1em' : '.1em';
             })
             .attr('fill', function(d, i) {
               return i === 1 ? '#7c8aff' : '#000'
             })
-            .text(function(time) { 
-              return time; 
+            .text(function(time) {
+              return time;
             });
       }
 
@@ -1486,92 +1509,95 @@ var newsEdge = (function() {
         var tooltipRect = tooltip.select('rect');
         var tooltipPath = tooltip.select('path');
         var tooltipText = tooltip.select('text');
-        
+
         pathBackboard
-          .attr('d', function(d) { return d.path.backboard; })
-          .attr('stroke-width', 1);
-          
+            .attr('d', function(d) { return d.path.backboard; })
+            .attr('stroke-width', 1);
+
         pathBack
-          .attr('d', function(d) { return d.path.back; })
-          .attr('stroke-width', function(d) {
-            return d.height * 0.20833333333333334;
-          });
+            .attr('d', function(d) { return d.path.back; })
+            .attr('stroke-width', function(d) {
+              return d.height * 0.20833333333333334;
+            });
 
         pathFront
-          .attr('d', function(d) { return d.path.front; })
-          .attr('stroke-width', function(d) { 
-            return d.height * .2916666666666667;
-          });
+            .attr('d', function(d) { return d.path.front; })
+            .attr('stroke-width', function(d) {
+              return d.height * .2916666666666667;
+            });
 
         knob
-          .attr('r', function(d) { return d.knob.r; });
+            .attr('r', function(d) { return d.knob.r; });
 
         tooltip
-          .attr('width', function(d) {
-            return d.width * .36;
-          })
-          .attr('height', function(d) {
-            return d.height * .8333333333333334;
-          })
-          .attr('viebox', function(d) {
-            return [0, 0, d.width * .36, d.height * .8333333333333334];
-          });
-        
-        tooltipRect
-          .attr('width', function(d) {
-            return d.width * .36;
-          })
-          .attr('height', function(d) {
-            return d.height * .8333333333333334;
-          })
-          .attr('x', function(d) {
-            return (d.percent * 100 > 84) ? -(((d.width * .36) / 2) - (84 - d.percent * 100)) : -((d.width * .36) / 2);
-          })
-          .attr('y', function(d) {
-            return -(d.height + d.knob.r + 4);
-          })
-          .attr('rx', function(d) {
-            return d.knob.r * 2;
-          });
+            .attr('width', function(d) {
+              return d.width * .36;
+            })
+            .attr('height', function(d) {
+              return d.height * .8333333333333334;
+            })
+            .attr('viebox', function(d) {
+              return [0, 0, d.width * .36, d.height * .8333333333333334];
+            });
 
-        
+        tooltipRect
+            .attr('width', function(d) {
+              return d.width * .36;
+            })
+            .attr('height', function(d) {
+              return d.height * .8333333333333334;
+            })
+            .attr('x', function(d) {
+              return (d.percent * 100 > 84) ? -(((d.width * .36) / 2) - (84 - d.percent * 100)) : -((d.width * .36) / 2);
+            })
+            .attr('y', function(d) {
+              return -(d.height + d.knob.r + 4);
+            })
+            .attr('rx', function(d) {
+              return d.knob.r * 2;
+            });
+
+
         tooltipPath
-          .attr('transform', function(d) {
-            return 'translate('+ 0 +' '+ -(d.knob.r * 2 + 2) +')';
-          })
-          .attr('d', function(d) {
-            return 'M '+ (d.knob.r / 2) +' 0 l '+ -(d.knob.r / 2) + ' '+ d.knob.r + ' '+ -(d.knob.r / 2) + ' '+ -(d.knob.r) + ' h '+ d.knob.r +'z';
-          });
+            .attr('transform', function(d) {
+              return 'translate('+ 0 +' '+ -(d.knob.r * 2 + 2) +')';
+            })
+            .attr('d', function(d) {
+              return 'M '+ (d.knob.r / 2) +' 0 l '+ -(d.knob.r / 2) + ' '+ d.knob.r + ' '+ -(d.knob.r / 2) + ' '+ -(d.knob.r) + ' h '+ d.knob.r +'z';
+            });
 
         tooltipText
-          .attr('x', function (d) {
-            return (84 < d.percent * 100) ? (84 - d.percent * 100) : 0;
-          })
-          .attr('y', function(d) {
-            return -((d.knob.r * 3) + 2);
-          })
-          .attr('font-size', function(d){
-            return d.width * 0.088 +'px';
-          });
-          
+            .attr('x', function (d) {
+              return (84 < d.percent * 100) ? (84 - d.percent * 100) : 0;
+            })
+            .attr('y', function(d) {
+              return -((d.knob.r * 3) + 2);
+            })
+            .attr('font-size', function(d){
+              return d.width * 0.088 +'px';
+            });
+
 
         var lineBreak = tooltipText
-          .selectAll('tspan')
+            .selectAll('tspan')
             .data(function(d) {
-              return d.HM.split(' ');
+              // 서버시간 > 2020-08-20 09:23:00 이면 현재 10분단위 정책이므로 09:20으로 변환
+              let t = d.HM.split(' '), c = parseInt( t.pop() / 10) * 10;
+              t.push(c === 0 ? '00':c)
+              return t
             });
 
         lineBreak
-          .text(function(time) { 
-            return time; 
-          });
+            .text(function(time) {
+              return time;
+            });
       }
 
       function exitT(selection) {
         selection
-          .transition()
-          .duration(options.duration * 3)
-          .style('opacity', 0);
+            .transition()
+            .duration(options.duration * 3)
+            .style('opacity', 0);
 
         selection.remove();
       }
@@ -1579,14 +1605,14 @@ var newsEdge = (function() {
       return progress;
     }
 
-    /** 
+    /**
      * * 프로그레스 바 이벤트 정의
      */
     function progressBarEvent(data) {
-      /** 
-       * * 컨트롤러 조절 범위 (분 => 시간) 변경 
+      /**
+       * * 컨트롤러 조절 범위 (분 => 시간) 변경
        * ! 산출물 적용 [O] / 테스트&라이브 적용 [X]
-       * 
+       *
        * 변경된 내용:
        * @variable progressBar.percent
        * @options bounds.minX, bounds.maxX
@@ -1630,17 +1656,17 @@ var newsEdge = (function() {
       gsap.set(`${progressID} .pathFront`, { clearProps: 'all' });
 
       progressBar.TL
-        .from(`${progressID} .pathFront`, 1, {
-          drawSVG: '0%'
-        })
-        .to(`${progressID} .timeGroup`, 1, {
-          scale: 1,
-          motionPath: {
-            path: `${progressID} .pathFront`
-          }
-        }, 0)
-        .progress(progressBar.percent);
-      
+          .from(`${progressID} .pathFront`, 1, {
+            drawSVG: '0%'
+          })
+          .to(`${progressID} .timeGroup`, 1, {
+            scale: 1,
+            motionPath: {
+              path: `${progressID} .pathFront`
+            }
+          }, 0)
+          .progress(progressBar.percent);
+
       function onDragAndThrowUpdate() {
         gsap.to(`${progressID} .timeKnob`, .3, { scale: 1.3, transformOrigin: '50% 50%' });
 
@@ -1651,7 +1677,7 @@ var newsEdge = (function() {
       }
 
       function onDragStart() {
-        /** 
+        /**
          * * Statistics (Click)
          */
         if (typeof olapclick === 'function') {
@@ -1712,14 +1738,14 @@ var newsEdge = (function() {
     var timeLog = document.querySelector('.timeLog');
     var btnShare = document.querySelector('.btnShare');
 
-    /** 
+    /**
      * * 키워드 최신 업데이트 시간 표기 (당일 서버시간 기준)
      */
     function setDisplayLogTime(time) {
       timeLog.innerText = utils.convertTime(time, 'STANDARD');
     }
 
-    /** 
+    /**
      * * 시간대 표기
      */
     function setDisplayTragetTime(time) {
@@ -1730,7 +1756,7 @@ var newsEdge = (function() {
       });
     }
 
-    /** 
+    /**
      * * 시간대 제한 범위 적용
      */
     function setDisabledTirgger() {
@@ -1748,7 +1774,7 @@ var newsEdge = (function() {
         timeTravelTriggers[2].disabled = false;
 
         timeLog.innerText = '';
-        
+
         btnShare.disabled = true;
       } else if (progressDate === maxDate) {
         timeTravelTriggers[0].disabled = false;
@@ -1760,15 +1786,15 @@ var newsEdge = (function() {
         timeTravelTriggers[0].disabled = false;
         timeTravelTriggers[1].disabled = false;
         timeTravelTriggers[2].disabled = false;
-        
+
         timeLog.innerText = '';
-        
+
         btnShare.disabled = true;
       }
     }
 
-    /** 
-     * * 시간대 별(이전/다음/오늘) 변경 범위 계산 
+    /**
+     * * 시간대 별(이전/다음/오늘) 변경 범위 계산
      */
     function confirmTimeTravle(timeline, callBack) {
       var minDateMilli = moment(timeline.minDTM).valueOf();
@@ -1822,6 +1848,8 @@ var newsEdge = (function() {
       }
     }
 
+
+
     return {
       setDisplayLogTime: setDisplayLogTime,
       setDisplayTragetTime: setDisplayTragetTime,
@@ -1833,7 +1861,6 @@ var newsEdge = (function() {
             return update(target.getAttribute('data-travel'));
           });
         });
-
         setDisplayLogTime(caller.updateDTM);
         setDisplayTragetTime(caller.progressDTM);
         setDisabledTirgger();
@@ -1872,7 +1899,7 @@ var newsEdge = (function() {
       var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
 
       if (!isReserved) return null;
-      else return searches.substr(1).split('#').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+      else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
     })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index']);
 
     // 쿼리 (init) 체크
@@ -1904,7 +1931,7 @@ var newsEdge = (function() {
     });
   }
 
-  /** 
+  /**
    * * 공유하기 (히스토리)
    */
   function layerSharePopUp(state) {
@@ -1912,12 +1939,12 @@ var newsEdge = (function() {
     return state ? layerShare.classList.add('active') : layerShare.classList.remove('active');
   }
 
-  /** 
+  /**
    * * 기사 목록 (히스토리 / 쿼리)
-   * 
+   *
    * @param {object} d - 히스토리/쿼리 데이터
    * @param {boolean} immediate - 애니메이션 없이 즉시실행
-   * 
+   *
    */
   function callArticle(d, immediate) {
     const selection = document.querySelector('.bubbleGroup[data-importance="'+ d.index +'"]');
@@ -1954,16 +1981,17 @@ var newsEdge = (function() {
         };
 
         // 카드 노출시 url표시
-        let { origin, pathname } = window.location;
-        window.location.replace(`${origin}${pathname}#keyword_dtm=${d.keyword_dtm}#keyword_sq=${d.keyword_sq}#index=${d.index}`);
+        /*let { origin, pathname } = window.location;
+
+        window.location.replace(`${origin}${pathname}#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}`);*/
         history.pushState(Datum, 'natenews');
         // 히스토리 정보
-        /*if (history.state !== null && history.state.name === 'Article') history.replaceState(Datum, '네이트뉴스');
-        else history.pushState(Datum, '네이트뉴스');*/
+        /*if (history.state !== null && history.state.name === 'Article') history.replaceState(Datum, 'nateNews');
+        else history.pushState(Datum, 'nateNews');*/
 
         articlesController.setClickedBubble.call(selection);
         articlesController.setListRefData(Datum);
-        
+
         if (!State.isRender) {
           State.isRender = true;
 
@@ -1996,7 +2024,6 @@ var newsEdge = (function() {
     bubblesController.init();
     progressBarController.init();
     timeTravelController.init();
-    
     controlHistory();
     controlResize();
   }
@@ -2015,7 +2042,7 @@ var newsEdge = (function() {
     timeTravelController.confirmTimeTravle(timeline, function(newTimeline) {
       caller.resetKeyword();
       caller.dataLoadEvent(newTimeline.path, (res) => {
-        /** 
+        /**
          * * Statistics (PV)
          */
         if (typeof draw_mndr === 'function') {
@@ -2062,12 +2089,12 @@ var newsEdge = (function() {
 document.addEventListener('DOMContentLoaded', function() {
   const myData = (() => {
     const keyword = Symbol('KEYWORD'),
-          article = Symbol('ARTICLE'),
-          serviceDTM = Symbol('SERVICE_DTM'),
-          minDTM = Symbol('MIN_DTM'),
-          serverDTM = Symbol('SERVER_DTM'),
-          updateDTM = Symbol('UPDATE_DTM'),
-          progressDTM = Symbol('PROGRESS_DTM');
+        article = Symbol('ARTICLE'),
+        serviceDTM = Symbol('SERVICE_DTM'),
+        minDTM = Symbol('MIN_DTM'),
+        serverDTM = Symbol('SERVER_DTM'),
+        updateDTM = Symbol('UPDATE_DTM'),
+        progressDTM = Symbol('PROGRESS_DTM');
 
     class myData {
       constructor() {
@@ -2103,7 +2130,7 @@ document.addEventListener('DOMContentLoaded', function() {
       set serviceDTM(t){
         this[serviceDTM] = t;
       }
-      
+
       get minDTM() {
         return this[minDTM];
       }
@@ -2151,24 +2178,24 @@ document.addEventListener('DOMContentLoaded', function() {
           type = 'articleList';
         } else {
           type = path.split('=')[1] || '2020-08-21 12:00:00';
-        }
+        }*/
         $.ajax({
           type: 'GET',
-          url: './src/data/fake.json',
+          url: path,
           dataType: 'json',
           processData: false
         })
-        .then(function(data) {
-          return data[type]; 
-        })
-        .done(function(data) {
-          callback(data);
-        })
-        .fail(function() {
-          console.log('fail');
-        });*/
+            /*.then(function(data) {
+              return data[type];
+            })*/
+            .done(function(data) {
+              callback(data);
+            })
+            .fail(function() {
+              console.log('fail');
+            });
 
-        plast.$dataloader.AJAX(plast.$dataloader.ARG.url(path).onComplete((res) => {
+        /*plast.$dataloader.AJAX(plast.$dataloader.ARG.url(path).onComplete((res) => {
           if (res.status === 200) {
             try {
               callback(plast.$dataloader.parseJson(res.responseText));
@@ -2178,7 +2205,7 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             console.log('data error');
           }
-        }));
+        }));*/
       }
     }
 
@@ -2187,13 +2214,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const xhrData = new myData();
 
-  xhrData.dataLoadEvent(history.state !== null && history.state.name === 'Article' ? KEYWORD_URL + '?service_dtm='+ history.state.keyword_dtm : KEYWORD_URL, (res) => {
+  let qs = ((searches, reservedQuery) => {
+    var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
+
+    if (!isReserved) return null;
+    else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+  })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index', 'MM']);
+
+  let initPath = KEYWORD_URL;
+  if (history.state !== null && history.state.name === 'Article') {
+    initPath = KEYWORD_URL + '?service_dtm='+ history.state.keyword_dtm;
+  } else if(qs && qs.hasOwnProperty('keyword_dtm')) {
+    initPath = KEYWORD_URL + '?service_dtm='+ qs.keyword_dtm;
+  }
+
+  xhrData.dataLoadEvent(initPath, (res) => {
+
+
     xhrData.minDTM = utils.dateFormat('2020-08-20 09:00:00');
     xhrData.serverDTM = utils.dateFormat(res.server_dtm);
     xhrData.updateDTM = utils.dateFormat(res.update_dtm);
     xhrData.serviceDTM = utils.dateFormat(res.service_dtm);
     xhrData.progressDTM = utils.dateFormat(history.state !== null && history.state.name === 'Article' ? history.state.progressDTM : res.server_dtm);
 
+    if(qs){
+      let c = moment(res.service_dtm)
+      console.log(utils.dateFormat(res.service_dtm), qs.MM, res.service_dtm)
+      xhrData.progressDTM = utils.dateFormat(res.service_dtm);
+    }
     for (let key in res.data) xhrData.keyword = res.data[key];
 
     newsEdge.init(xhrData);

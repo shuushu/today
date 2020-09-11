@@ -13,7 +13,7 @@ const paths = {
 
 const entry = [
     'node_modules/@babel/polyfill/dist/polyfill.js',
-    'src/js/today-before-bundle.js'
+    'src/js/today-utf-8.js'
 ];
 
 const scripts = () => {

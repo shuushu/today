@@ -147,7 +147,7 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
 .browserInfo .inner h2 { margin: 86px 0 0; color: #777; font-size: 17px; font-weight: 500; line-height: 24px; letter-spacing: -.47px; text-align: center; }
 .browserInfo .inner p { color: #777; font-size: 17px; font-weight: 400; line-height: 24px; letter-spacing: -.47px; text-align: center; }
 
-/* °¡·Î ¸ðµå (ÀüÃ¼) */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½Ã¼) */
 @media all and (orientation: landscape) {
   .todayList { height: 100%; max-height: 475px; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
   .todayList .btnTodayClose { top: calc((5.33vh - 6px)); }
@@ -158,7 +158,7 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
   .todayListItemCounts { display: none; }
 }
 
-/* °¡·Î ¸ðµå (³ëÆ®) */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½ï¿½Æ®) */
 @media (max-height: 375px) and (orientation: landscape) {
   .todayList .btnTodayClose { top: calc((16vh  - 6px) / 2); }
   .todayList .todayListTitle { top: calc(16vh / 2); }
@@ -177,19 +177,19 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
   .todayListItem .item .info .thumb-nail { display: none; }
 }
 
-/* °¡·Î ¸ðµå (ÆÐµå ±âÁ¾) */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (ï¿½Ðµï¿½ ï¿½ï¿½ï¿½ï¿½) */
 @media all and (min-width: 1080px) {
   .todayListItem::-webkit-scrollbar { width: 2px; }
   .todayListItem::-webkit-scrollbar-track { background: transparent; }
   .todayListItem::-webkit-scrollbar-thumb { background: transparent; }
 }
 
-/* °¡·Î (iphone 5) */
+/* ï¿½ï¿½ï¿½ï¿½ (iphone 5) */
 @media all and (max-width: 320px) {
   .todayListItemCounts { left: 250px; }
 }
 
-/* °¡·Î (Fold) */
+/* ï¿½ï¿½ï¿½ï¿½ (Fold) */
 @media all and (max-width: 280px) {
   .todayListItemCounts { left: 200px; }
 }
@@ -205,4 +205,15 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
   0% { transform: scale(1) }
   50% { transform: scale(1.1) }
   100% { transform: scale(1) }
+}
+
+.bubbleGroup {
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+
 }

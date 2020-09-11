@@ -18,7 +18,7 @@ export default class Calendar extends Controller {
       date = date.join('%20');
       return date;
     }
-
+    return server_dtm
   }
 
   prev() {

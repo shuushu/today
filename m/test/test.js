@@ -1,7 +1,11 @@
 'use strict';
 /* 테스트 전역변수 */
-const TEST_KEYWORD_URL = '//test-m.news.nate.com/today/keywordList';
-const TEST_ARTICLE_URL = '//test-m.news.nate.com/today/articleList';
+/*const TEST_KEYWORD_URL = '//test-m.news.nate.com/today/keywordList';
+const TEST_ARTICLE_URL = '//test-m.news.nate.com/today/articleList';*/
+
+const TEST_KEYWORD_URL  = '../../json/keywordList.json';
+const TEST_ARTICLE_URL  = '../../json/articleList.json';
+
 var setProgressWidth = (254 / 375);
 var setProgressHeight = (48 / 375);
 let resizeCircleTimer,
@@ -100,23 +104,16 @@ const myData = (() => {
       this.convertToTimeStamp();
     }
     static dataLoadEvent(path) {
-      var type;
-      if (path.indexOf('keyword_sq') !== -1) {
-        type = 'articleList';
-      } else {
-        type = path.split('=')[1] || '2020-07-10 12:00:00';
-      }
-
       return new Promise(resolve => {
           $.ajax({
             type: 'GET',
-            url: '../src/data/fake.json',
+            url: path,
             //url: path,
             dataType: 'json',
             processData: false
           })
           .done((data) => {
-            resolve(data[type]);
+            resolve(data);
           })
           .fail(function () {
             console.log('fail');

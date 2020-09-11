@@ -67,16 +67,35 @@ export default class Progress extends Controller {
 
   _updateTooltipTime() {
     let { progress_dtm, service_dtm, server_dtm } = this.data.time,
-        isDrag = this.current !== null,
-        c = service_dtm > server_dtm ? (_ => {    
-          if (service_dtm > server_dtm) {
-            this.data.time.service_dtm = server_dtm;
-          }
-          return server_dtm
-        })() : this.covert,
-        r = isDrag ?  c : progress_dtm;
-        
-    d3.select('.timeText .hh').text(moment(r).format('HH'));
-    d3.select('.timeText .mm').text(moment(r).format('mm'));
+        isDrag = this.current !== null;
+    /* c = service_dtm >= server_dtm ? (_ => {
+       this.data.time.service_dtm = server_dtm;
+       return server_dtm
+     })() : this.covert,
+     r = isDrag ?  c : progress_dtm;*/
+    // AM PM check
+    if(moment(this.covert).format('HH:mm') !== '00:00') {
+      this.AMPM = moment(this.covert).format('A')
+    }
+
+    let zz = `${moment(service_dtm).format('YYYY-MM-DD')} ${ moment(isDrag ? this.covert : server_dtm).format('HH:mm:ss')}`;
+    /**
+     * data > 프로그래스 업데이트
+     * 프로그래스 범위가  00:00 ~ 다음날 00:00 까지 지정할 수 있으므로
+     * 다음날  00:00 드래그 후 달력 > 다음 날짜 로 업데이트시 하루 더 지난 상태로 업데이트 된다
+     * 만약 서버시간보다 초과하면 서버시간으로 변경한다.
+     */
+    if(zz.split(' ').pop() === '00:00:00' && this.AMPM === 'PM') {
+      let zzz = moment(progress_dtm).add(1, 'days').format('YYYY-MM-DD 00:00:00');
+      this.data.time.progress_dtm = zzz;
+      console.log(zzz, this.data.time)
+      this.AMPM = 'AM';
+    } else {
+      this.data.time.progress_dtm = zz;
+    }
+
+
+    d3.select('.timeText .hh').text(moment(zz).format('HH'));
+    d3.select('.timeText .mm').text(moment(zz).format('mm'));
   }
 }
