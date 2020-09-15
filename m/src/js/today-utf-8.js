@@ -1072,26 +1072,27 @@ var newsEdge = (function() {
           for (let key in res.data) caller.keyword = res.data[key];
 
           gsap.timeline()
+              .add(_ => {                                
+                d3.select('.wrap-old').selectAll('.bubbleGroup .bubbleCircle').transition().delay((_, i) => {
+                  let v= i+1; 
+                  return v * (v > 4 ? 50 : 150)
+                }).attr('style', 'transform: scale(0);opacity:0;transition: all 0.4s;')
+                d3.select('.wrap-old').selectAll('.bubbleGroup .bubbleText').transition().delay((_, i) => {
+                  let v= i+1; 
+                  return v * (v > 4 ? 50 : 150)
+                }).attr('style', 'transform: scale(0);opacity:0;transition: all 0.4s;text-anchor: middle;')
+              },'+=.2')
               .add(_ => {
-                bubbles.simulator.stop().force('collide', d3.forceCollide().radius(d => d.radius - 14)).restart()
-              })
-
-              .add(_ => {
-                d3.select('.wrap-old').selectAll('.bubbleGroup').transition().delay((d, i) => {
-                  console.log(i)
-                  return i * (i > 4 ? 50 : 100)
-                }).attr('style', 'transform: scale(0);opacity:0;transition: all 1s;')
-                bubbles.simulator.stop().force('collide', d3.forceCollide().radius(d => d.radius + 14)).restart()
-              },'+=.5')
-              /*.add(_ => {
                 bubbles.data = calcBubblesData(caller.keyword);
                 bubbles.group = bubblesRender(bubbles.data);
               }, '+=.3')
-              .add(_ => {
-                //d3.select('.wrap-old').remove();
-                bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');
+              .add(_ => {                
+                bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');                
               })
-*/
+              .add(_ => { 
+                d3.select('.wrap-old').remove();
+                d3.select('.wrap-new').attr('class','wrap-old')
+              }, '+=1')
 
 
 
