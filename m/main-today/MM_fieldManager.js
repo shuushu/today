@@ -1270,22 +1270,34 @@
  * * newsEdge Init
  */
 (function($) {
+
+
     function _init($target, $container, $data) {
-        stage.removeEvent('contentReady');
+        stage.removeEvent('contentReady');        
         $container.addEvent('recieveData', _start);
     }
 
     function _start($target , $container , $data ){
-        $container.index===4 ? _todayInit() : _todayRemove();
+        var isCheck = $container[0].querySelector('#bubbleGroupWrap') === null;
+
+        if ($container[0].querySelector('.newsEdge')) {
+            $container.index===4 && _todayInit(isCheck);
+        }       
+        if ($container.index < 3 || $container.index > 5 ) {            
+            TODAY.b = false;
+        }
+        if ($container.index !== 4){
+            _todayRemove();
+        }
     }
 
-
-    function _todayInit() {
-        stage.trigger('newsToday' , '2222s');
+    function _todayInit(checked) {
+        stage.removeEvent('newsTodayStop');
+        stage.trigger('newsToday', checked);
     }
     function _todayRemove() {
-        console.log('today remove');
         stage.removeEvent('newsToday');
+        stage.trigger('newsTodayStop');
     }
 
     stage.addEvent('contentReady', _init);
