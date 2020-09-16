@@ -1,21 +1,3 @@
-// Today 환경변수
-let TODAY = {
-    d: null,
-    sm: null,
-    b: false // 돔 리드로우 일어날때 이벤트가 해제됨, 바인딩 해주고 2번 바인딩 안되게 체크
-};
-
-/**
-** Moment 글로벌 설정
-*/
-moment.locale('ko');
-moment.updateLocale('ko', {relativeTime : { h: `${decodeURI('1%EC%8B%9C%EA%B0%84')}` } });
-/**
-** Gsap 플러그인 등록 (필수)
-*/
-gsap.registerPlugin(Draggable, DrawSVGPlugin, MotionPathPlugin, ScrollToPlugin, InertiaPlugin);
-
-
 /**
  ** newsEdge Init
  */
@@ -28,6 +10,17 @@ stage.addEvent('newsTodayStop', ()=>{
 });
 
 function _todayInit(_,checked) {
+    /**
+     ** Moment 글로벌 설정
+     */
+    moment.locale('ko');
+    moment.updateLocale('ko', {relativeTime : { h: `${decodeURI('1%EC%8B%9C%EA%B0%84')}` } });
+    /**
+     ** Gsap 플러그인 등록 (필수)
+     */
+    gsap.registerPlugin(Draggable, DrawSVGPlugin, MotionPathPlugin, ScrollToPlugin, InertiaPlugin);
+
+
     var newsEdge = (function() {
         var header = document.getElementById('header');
         var bubblesID = '#newsEdgeBubbles';

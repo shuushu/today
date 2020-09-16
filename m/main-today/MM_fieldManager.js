@@ -1267,9 +1267,54 @@
 })();
 
 /**
- * * newsEdge Init
+ * * newsTODAY Init
  */
-(function($) {
+// Today 환경변수
+var TODAY = {
+    load: false, // plugin dynamic call
+    d: null, // data
+    sm: null, // siumulator
+    b: false // 돔 리드로우 일어날때 이벤트가 해제됨, 바인딩 해주고 2번 바인딩 안되게 체크
+};
+(function() {
+    var getScript = function (source) {
+        return new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            var prior = document.getElementsByTagName('script')[document.getElementsByTagName('script').length-1];
+            script.async = 1;
+            script.onerror = function(e){
+                reject(e);
+            };
+
+            script.onload = script.onreadystatechange = (_, isAbort) => {
+                if (isAbort || !script.readyState || /loaded|complete/.test(script.readyState)) {
+                    script.onload = script.onreadystatechange = null;
+                    script = undefined;
+                    path.shift();
+                    resolve(true)
+                }
+            };
+
+            script.type = "text/javascript";
+            script.src = source;
+            prior.parentNode.appendChild(script);
+        });
+    };
+    var path = [
+        'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js',
+        '//m.news.nate.com/js/today/gsap.min.js',
+        '//m.news.nate.com/js/today/CustomEase.min.js',
+        '//m.news.nate.com/js/today/Draggable.min.js',
+        '//m.news.nate.com/js/today/DrawSVGPlugin.min.js',
+        '//m.news.nate.com/js/today/MotionPathPlugin.min.js',
+        '//m.news.nate.com/js/today/ScrollToPlugin.min.js',
+        '//m.news.nate.com/js/today/InertiaPlugin.min.js',
+        '//m.news.nate.com/js/today/d3.v5.min.js',
+        '//m.news.nate.com/js/today/moment-with-locale.min.js',
+        '//m.news.nate.com/js/today/moment-timezone-with-data.min.js',
+        '//m.news.nate.com/js/today/utils.js',
+        '/js4/js/today-main.js'
+    ]
 
 
     function _init($target, $container, $data) {
@@ -1278,16 +1323,34 @@
     }
 
     function _start($target , $container , $data ){
-        var isCheck = $container[0].querySelector('#bubbleGroupWrap') === null;
-
-        if ($container[0].querySelector('.newsEdge')) {
-            $container.index===4 && _todayInit(isCheck);
-        }       
-        if ($container.index < 3 || $container.index > 5 ) {            
-            TODAY.b = false;
-        }
-        if ($container.index !== 4){
-            _todayRemove();
+        if(TODAY.load === false) {
+            path.reduce(function (prevProm, item) {
+                return prevProm.then(function () {
+                    return getScript(item);
+                })
+            }, Promise.resolve())
+            .then(() => {
+                // 성공 후 처리
+                TODAY.load = true;
+                return _start($target , $container, $data);
+            })
+            .catch((e) => {
+                e.target.outerHTML = '';
+                console.log(path  + ' : path Error')
+            })
+        } else {
+            var isCheck = $container[0].querySelector('#bubbleGroupWrap') === null;
+            if ($container[0].querySelector('.newsEdge')) {
+                $container.index === 4 && _todayInit(isCheck);
+            }
+            if ($container.index < 3 || $container.index > 5 ) {
+                if (TODAY) {
+                    TODAY.b = false;
+                }
+            }
+            if ($container.index !== 4){
+                _todayRemove();
+            }
         }
     }
 
@@ -1301,5 +1364,5 @@
     }
 
     stage.addEvent('contentReady', _init);
-})(plast);
+})();
 
