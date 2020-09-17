@@ -1324,6 +1324,7 @@ var TODAY = {
 
     function _start($target , $container , $data ){
         if(TODAY.load === false) {
+            TODAY.load = 'ing';
             path.reduce(function (prevProm, item) {
                 return prevProm.then(function () {
                     return getScript(item);
@@ -1340,8 +1341,8 @@ var TODAY = {
             })
         } else {
             var isCheck = $container[0].querySelector('#bubbleGroupWrap') === null;
-            if ($container[0].querySelector('.newsEdge')) {
-                $container.index === 4 && _todayInit(isCheck);
+            if ($container[0].querySelector('#contents') && $container.index === 4) {
+                 _todayInit(isCheck);
             }
             if ($container.index < 3 || $container.index > 5 ) {
                 if (TODAY) {

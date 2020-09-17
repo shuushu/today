@@ -5,11 +5,15 @@
 stage.addEvent('newsToday' , _todayInit);
 stage.addEvent('newsTodayStop', ()=>{
     if(TODAY.sm) {
-        TODAY.sm.stop();        
+        TODAY.sm.stop();
     }    
 });
 
 function _todayInit(_,checked) {
+    console.log('isCheck', checked)
+    // isErrorPage
+    let errorWrap = document.querySelector('.errorWrap');
+
     /**
      ** Moment 글로벌 설정
      */
@@ -19,7 +23,164 @@ function _todayInit(_,checked) {
      ** Gsap 플러그인 등록 (필수)
      */
     gsap.registerPlugin(Draggable, DrawSVGPlugin, MotionPathPlugin, ScrollToPlugin, InertiaPlugin);
+    /**
+     ** 날짜 (prev, today, next) / 업데이트 로그 제어
+     */
+        // xhrData Reference 할당
+    var caller;
+    var timeTravelController = () => {
+        var timeTravel = document.querySelector('.timeTravel');
+        var timeTravelTriggers = [document.querySelector('.btnTravel.prev'), document.querySelector('.btnTravel.next'), document.querySelector('.btnTravel.today')];
+        var timeTravelDisplayTargets = [timeTravel.querySelector('.year'), timeTravel.querySelector('.month'), timeTravel.querySelector('.date')];
+        var btnShare = document.querySelector('.btnShare');
 
+        // 키워드 최신 업데이트 시간 표기 (당일 서버시간 기준)
+        function setDisplayLogTime(time) {
+            var timeLog = document.querySelector('.timeLog');
+            if(!timeLog) {
+                var el = document.createElement('div');
+                el.className = 'timeLog';
+                el.innerHTML = `${moment(time).format('YYYY.MM.DD HH:mm')} ${decodeURI('%EA%B8%B0%EC%A4%80%0D%0A')}`;
+                document.querySelector('#contents').appendChild(el);
+            }
+        }
+
+        // 시간대 표기
+        function setDisplayTragetTime(time) {
+            var displayTime = utils.convertTime(time, 'YMD');
+
+            displayTime.split('-').forEach(function(time, i) {
+                timeTravelDisplayTargets[i].innerText = time;
+            });
+        }
+
+        // 시간대 제한 범위 적용
+        function setDisabledTirgger() {
+            var minDate = utils.convertTime(moment(caller.minDTM), 'YMD');
+            var maxDate = utils.convertTime(moment(caller.serverDTM).valueOf(), 'YMD');
+            var progressDate = utils.convertTime(moment(caller.progressDTM).valueOf(), 'YMD');
+            var timeLog = document.querySelector('.timeLog');
+
+            timeLog.style.display = 'none';
+            if (minDate === maxDate) {
+                timeTravelTriggers[0].disabled = true;
+                timeTravelTriggers[1].disabled = true;
+                timeTravelTriggers[2].disabled = true;
+                timeLog.style.display = 'block';
+            } else if (progressDate === minDate) {
+                timeTravelTriggers[0].disabled = true;
+                timeTravelTriggers[1].disabled = false;
+                timeTravelTriggers[2].disabled = false;
+
+                btnShare.disabled = true;
+            } else if (progressDate === maxDate) {
+                timeTravelTriggers[0].disabled = false;
+                timeTravelTriggers[1].disabled = true;
+                timeTravelTriggers[2].disabled = true;
+
+                btnShare.disabled = false;
+                timeLog.style.display = 'block';
+            } else {
+                timeTravelTriggers[0].disabled = false;
+                timeTravelTriggers[1].disabled = false;
+                timeTravelTriggers[2].disabled = false;
+
+                btnShare.disabled = true;
+            }
+        }
+
+        // 시간대 별(이전/다음/오늘) 변경 범위 계산
+        function confirmTimeTravle(timeline, callBack) {
+            var minDateMilli = moment(timeline.minDTM).valueOf();
+            var maxDateMilli = moment(timeline.serverDTM).valueOf();
+
+            var serviceMilli = moment(timeline.serviceDTM).valueOf();
+            var progressMilli = moment(timeline.progressDTM).valueOf();
+
+            if (timeline.dateType === 'prev' || timeline.dateType === 'next') {
+                serviceMilli = utils.varOperator(timeline.dateType, serviceMilli, (((1000 * 60) * 60) * 24));
+                progressMilli = utils.varOperator(timeline.dateType, progressMilli, (((1000 * 60) * 60) * 24));
+            }
+
+            switch(timeline.dateType) {
+                case 'prev':
+                    if (serviceMilli >= minDateMilli) {
+                        return callBack({
+                            path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
+                            serviceDTM: utils.convertTime(serviceMilli, 'YMDH'),
+                            progressDTM: utils.convertTime(progressMilli, 'YMDHM')
+                        });
+                    } else {
+                        return callBack({
+                            path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(minDateMilli, 'YMDH')}`,
+                            serviceDTM: utils.convertTime(minDateMilli, 'YMDH'),
+                            progressDTM: utils.convertTime(minDateMilli, 'YMDHM')
+                        });
+                    }
+                case 'next':
+                    if (serviceMilli <= maxDateMilli) {
+                        return callBack({
+                            path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
+                            serviceDTM: utils.convertTime(serviceMilli, 'YMDH'),
+                            progressDTM: utils.convertTime(progressMilli, 'YMDHM')
+                        });
+                    } else {
+                        return callBack({
+                            path: KEYWORD_URL,
+                            serviceDTM: null,
+                            progressDTM: null,
+                            limitType: 'maxLimit'
+                        });
+                    }
+                case 'today':
+                    return callBack({
+                        path: KEYWORD_URL,
+                        serviceDTM: null,
+                        progressDTM: null,
+                        limitType:'maxLimit'
+                    });
+                case 'current':
+                    return callBack({
+                        path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
+                        serviceDTM: utils.convertTime(serviceMilli, 'YMDH'),
+                        progressDTM: utils.convertTime(progressMilli, 'YMDHM')
+                    });
+            }
+        }
+
+
+
+        return {
+            setDisplayLogTime: setDisplayLogTime,
+            setDisplayTragetTime: setDisplayTragetTime,
+            setDisabledTirgger: setDisabledTirgger,
+            confirmTimeTravle: confirmTimeTravle,
+            init: function() {
+                timeTravelTriggers.forEach(function(target) {
+                    target.addEventListener('click', function() {
+                        return update(target.getAttribute('data-travel'));
+                    });
+                });
+                setDisplayLogTime(caller.updateDTM);
+                setDisplayTragetTime(caller.progressDTM);
+                setDisabledTirgger();
+                TODAY.b = true;
+            },
+            events: _ => {
+                if(!TODAY.b && !errorWrap) {
+                    timeTravelTriggers.forEach(function(target) {
+                        var f = function (){
+                            return newsEdge.update(this.getAttribute('data-travel'));
+                        }
+                        target.removeEventListener('click', f)
+                        target.addEventListener('click', f)
+                    })
+                    newsEdge.update('current');
+                    TODAY.b = true;
+                }
+            }
+        }
+    };
 
     var newsEdge = (function() {
         var header = document.getElementById('header');
@@ -27,14 +188,11 @@ function _todayInit(_,checked) {
         var progressID = '#newsEdgeProgress';
         var bubblesController;
         var progressBarController;
-        var articlesController;
-        var timeTravelController;
+
 
         // 최초 화면 방향 체크 (가로모드/세로모드)
         var orientation = window.matchMedia('(orientation: portrait)').matches;
 
-        // xhrData Reference 할당
-        var caller;
         /**
         ** 상태 제어
         */
@@ -1251,159 +1409,6 @@ function _todayInit(_,checked) {
 
 
         /**
-        ** 날짜 (prev, today, next) / 업데이트 로그 제어
-        */
-        timeTravelController = (function controlTimeTravel() {
-            var timeTravel = document.querySelector('.timeTravel');
-            var timeTravelTriggers = [document.querySelector('.btnTravel.prev'), document.querySelector('.btnTravel.next'), document.querySelector('.btnTravel.today')];
-            var timeTravelDisplayTargets = [timeTravel.querySelector('.year'), timeTravel.querySelector('.month'), timeTravel.querySelector('.date')];
-            var timeLog = document.querySelector('.timeLog');
-            var btnShare = document.querySelector('.btnShare');
-
-            // 키워드 최신 업데이트 시간 표기 (당일 서버시간 기준)
-            function setDisplayLogTime(time) {
-                if($('.timeLog').length === 0) {
-                    $('.newsEdge').after(`<div class="timeLog">${moment(time).format('YYYY.MM.DD HH:mm')} ${decodeURI('%EA%B8%B0%EC%A4%80%0D%0A')}</div>`)
-                }                
-            }
-
-            // 시간대 표기
-            function setDisplayTragetTime(time) {
-                var displayTime = utils.convertTime(time, 'YMD');
-            
-                displayTime.split('-').forEach(function(time, i) {
-                    timeTravelDisplayTargets[i].innerText = time;
-                });
-            }
-
-            // 시간대 제한 범위 적용
-            function setDisabledTirgger() {
-                var minDate = utils.convertTime(moment(caller.minDTM), 'YMD');
-                var maxDate = utils.convertTime(moment(caller.serverDTM).valueOf(), 'YMD');
-                var progressDate = utils.convertTime(moment(caller.progressDTM).valueOf(), 'YMD');
-                
-                $('.timeLog').hide();
-                if (minDate === maxDate) {
-                    timeTravelTriggers[0].disabled = true;
-                    timeTravelTriggers[1].disabled = true;
-                    timeTravelTriggers[2].disabled = true;
-                    $('.timeLog').show();
-                } else if (progressDate === minDate) {
-                    timeTravelTriggers[0].disabled = true;
-                    timeTravelTriggers[1].disabled = false;
-                    timeTravelTriggers[2].disabled = false;
-
-                    btnShare.disabled = true;
-                } else if (progressDate === maxDate) {
-                    timeTravelTriggers[0].disabled = false;
-                    timeTravelTriggers[1].disabled = true;
-                    timeTravelTriggers[2].disabled = true;
-                    $('.timeLog').show();
-                    btnShare.disabled = false;
-                } else {
-                    timeTravelTriggers[0].disabled = false;
-                    timeTravelTriggers[1].disabled = false;
-                    timeTravelTriggers[2].disabled = false;
-
-                    btnShare.disabled = true;
-                }
-            }
-
-            // 시간대 별(이전/다음/오늘) 변경 범위 계산
-            function confirmTimeTravle(timeline, callBack) {
-                var minDateMilli = moment(timeline.minDTM).valueOf();
-                var maxDateMilli = moment(timeline.serverDTM).valueOf();
-
-                var serviceMilli = moment(timeline.serviceDTM).valueOf();
-                var progressMilli = moment(timeline.progressDTM).valueOf();
-
-                if (timeline.dateType === 'prev' || timeline.dateType === 'next') {
-                    serviceMilli = utils.varOperator(timeline.dateType, serviceMilli, (((1000 * 60) * 60) * 24));
-                    progressMilli = utils.varOperator(timeline.dateType, progressMilli, (((1000 * 60) * 60) * 24));
-                }
-
-                switch(timeline.dateType) {
-                    case 'prev':
-                        if (serviceMilli >= minDateMilli) {
-                            return callBack({
-                                path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
-                                serviceDTM: utils.convertTime(serviceMilli, 'YMDH'),
-                                progressDTM: utils.convertTime(progressMilli, 'YMDHM')
-                            });
-                        } else {
-                            return callBack({
-                                path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(minDateMilli, 'YMDH')}`,
-                                serviceDTM: utils.convertTime(minDateMilli, 'YMDH'),
-                                progressDTM: utils.convertTime(minDateMilli, 'YMDHM')
-                            });
-                        }
-                    case 'next':
-                        if (serviceMilli <= maxDateMilli) {
-                            return callBack({
-                                path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
-                                serviceDTM: utils.convertTime(serviceMilli, 'YMDH'),
-                                progressDTM: utils.convertTime(progressMilli, 'YMDHM')
-                            });
-                        } else {
-                            return callBack({
-                                path: KEYWORD_URL,
-                                serviceDTM: null,
-                                progressDTM: null,
-                                limitType: 'maxLimit'
-                            });
-                        }
-                    case 'today':
-                        return callBack({
-                            path: KEYWORD_URL,
-                            serviceDTM: null,
-                            progressDTM: null,
-                            limitType:'maxLimit'
-                        });
-                    case 'current':
-                        return callBack({
-                            path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
-                            serviceDTM: utils.convertTime(serviceMilli, 'YMDH'),
-                            progressDTM: utils.convertTime(progressMilli, 'YMDHM')
-                        });
-                }
-            }
-
-
-
-            return {
-                setDisplayLogTime: setDisplayLogTime,
-                setDisplayTragetTime: setDisplayTragetTime,
-                setDisabledTirgger: setDisabledTirgger,
-                confirmTimeTravle: confirmTimeTravle,
-                init: function() {                    
-                    timeTravelTriggers.forEach(function(target) {
-                        target.addEventListener('click', function() {
-                            return update(target.getAttribute('data-travel'));
-                        });
-                    });
-                    setDisplayLogTime(caller.updateDTM);
-                    setDisplayTragetTime(caller.progressDTM);
-                    setDisabledTirgger();
-                    TODAY.b = true;
-                },
-                events: _ => {
-                    if(!TODAY.b) {
-                        timeTravelTriggers.forEach(function(target) {
-                            var f = function (){
-                                return update(this.getAttribute('data-travel'));
-                            }
-                            target.removeEventListener('click', f)
-                            target.addEventListener('click', f)
-                        })
-                        update('current');
-                        TODAY.b = true;
-                    }
-                }
-            }
-        })();
-
-
-        /**
         ** 리사이즈 제어
         */
         function controlResize() {
@@ -1477,7 +1482,7 @@ function _todayInit(_,checked) {
         }
 
         return {
-            init: function (xhrData) {                
+            init: function (xhrData) {
                 return init(xhrData);
             },
             update: function(dateType) {
@@ -1573,20 +1578,29 @@ function _todayInit(_,checked) {
             resetArticle() {
                 this[article] = [];
             }
+//parameters
 
             dataLoadEvent(path, callback) {
-                $.ajax({
-                    type: 'GET',
-                    url: path,
-                    dataType: 'json',
-                    processData: false
-                })
-                .done(function(data) {
-                    callback(data);
-                })
-                .fail(function() {
-                    console.log('fail');
-                });
+                //plast.$dataloader.JSON_P(plast.$dataloader.ARG.method('get').requestHeaders({'origin': 'https://ndev.nate.com'}).parameters({'callback': 'mtoday'}).url(path).onComplete(function($data){
+                plast.$dataloader.AJAX(plast.$dataloader.ARG.requestHeaders({'Origin': '//m.news.nate.com/'}).method('get').url(path).onComplete(function($data){
+                    if ($data.status === 200) {
+                        callback(JSON.parse($data.responseText));
+                    } else {
+                        // 네트워크 예외처리
+                        if (errorWrap) return;
+                        let newsEdge = document.querySelector('.newsEdge');
+                        let timeLog = document.querySelector('.timeLog');
+                        if(timeLog) {
+                            timeLog.style.display = 'none';
+                        }
+                        newsEdge.style.display = 'none';
+
+                        let el = document.createElement('div')
+                        el.className = 'errorWrap'
+                        el.innerHTML = '<div class="conWrap" id="content" role="main"><div class="error"><div class="eBox"><p>일시적인 오류가 발생하여<br>페이지를 표시할 수 없습니다.</p><p>잠시 후 다시 이용해주세요.</p><a href="//'+ document.domain +'"  onclick="MM_GLOBAL.resetTab(); return MM_GLOBAL.ndrclick(\'ERR01\');" class="restart">다시시도</a></div></div></div>';
+                        document.querySelector('#contents').appendChild(el)
+                    }
+                }));
             }
         }
 
@@ -1606,11 +1620,14 @@ function _todayInit(_,checked) {
             xhrData.progressDTM = utils.dateFormat(history.state !== null && history.state.name === 'Article' ? history.state.progressDTM : res.server_dtm);
     
             for (let key in res.data) xhrData.keyword = res.data[key];
-            
+            timeTravelController = timeTravelController();
             newsEdge.init(xhrData);
         });
     } else {
-        newsEdge.bindEvent();
+        if(!errorWrap) {
+            timeTravelController = timeTravelController();
+            newsEdge.bindEvent();
+        }
     }
 
 }
