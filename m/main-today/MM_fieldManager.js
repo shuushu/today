@@ -17,7 +17,7 @@
     }
 
     function _reset($target , $container , $data ){
-        if($container.index === MM_PAGING.ADH || $container.index === MM_PAGING.TRAVEL || $container.index === MM_PAGING.BEAUTY || $container.index === MM_PAGING.LIVING ) return;//		if($container.index !== 0 && __isListShow)__isListShow = false , _addRoll(false);
+        if($container.index === MM_PAGING.ADH || $container.index === MM_PAGING.TRAVEL || $container.index === MM_PAGING.BEAUTY || $container.index === MM_PAGING.LIVING ) return;//        if($container.index !== 0 && __isListShow)__isListShow = false , _addRoll(false);
         if($container.index !== MM_PAGING.NEWS_A && $container.index !== MM_PAGING.RANK_B && $container.index !== MM_PAGING.SHOP_B && __isListShow) __isListShow = false, _addRoll(false);
         if(__checkMap.indexOf($container.index) > -1) return;
         if($container.index !== MM_PAGING.NEWS_A && $container.index !== MM_PAGING.RANK_B && $container.index !== MM_PAGING.SHOP_B) __checkMap.push($container.index);
@@ -79,13 +79,13 @@
                     })
                     .onChange(_setState)
                     .onMouseMove(function(){
-//							  stage.trigger('BLOCK_ON');
+//                            stage.trigger('BLOCK_ON');
                     })
                     .onMouseUp(function(){
-//							   stage.trigger('BLOCK_OFF');
+//                             stage.trigger('BLOCK_OFF');
                     })
                     .onComplete(function(){
-//							  stage.trigger('BLOCK_OFF');
+//                            stage.trigger('BLOCK_OFF');
                     })
                     .turm(function($index){
                         return _getW();
@@ -528,8 +528,8 @@
         __listMap = {},__endNum = 0 , __ADD = 20;
 
     function _init($target , $container , $data){
-//		stage.removeEvent('contentReady');
-//		$container.addEvent('recieveData' , _reset).addEvent('addPannList' , _listReset);
+//      stage.removeEvent('contentReady');
+//      $container.addEvent('recieveData' , _reset).addEvent('addPannList' , _listReset);
     }
 
     function _reset($target , $container , $data){
@@ -749,8 +749,8 @@
     var _container, _cols = [], _dataMap = [], _sizeMap, _sizeAll, _colLength;
 
     function _init($target , $container , $data){
-//		stage.removeEvent('contentReady');
-//		stage.addEvent('contentReady', _setting).addEvent('dataReset', _setting);
+//      stage.removeEvent('contentReady');
+//      stage.addEvent('contentReady', _setting).addEvent('dataReset', _setting);
     }
 
     function _setting($target , $container , $data){
@@ -798,7 +798,7 @@
     function _update(){
         var sum = 0, slotNumber = 0;
 //        $.$each(_cols, function($item){
-//        	$item.style({width:_colLength==3 ? '33.3%' : _colLength==2 ? '50%' : '100%'});
+//          $item.style({width:_colLength==3 ? '33.3%' : _colLength==2 ? '50%' : '100%'});
 //        });
         $.$each(_dataMap, function($item,$i){
             sum += _sizeMap[$i];
@@ -1333,6 +1333,9 @@ var TODAY = {
             .then(() => {
                 // 성공 후 처리
                 TODAY.load = true;
+                // 로딩바 제거
+                document.querySelector('#contents').removeChild(document.querySelector('.today-loader'))
+                
                 return _start($target , $container, $data);
             })
             .catch((e) => {

@@ -10,7 +10,6 @@ stage.addEvent('newsTodayStop', ()=>{
 });
 
 function _todayInit(_,checked) {
-    console.log('isCheck', checked)
     // isErrorPage
     let errorWrap = document.querySelector('.errorWrap');
 
@@ -158,7 +157,7 @@ function _todayInit(_,checked) {
             init: function() {
                 timeTravelTriggers.forEach(function(target) {
                     target.addEventListener('click', function() {
-                        return update(target.getAttribute('data-travel'));
+                        return newsEdge.update(target.getAttribute('data-travel'));
                     });
                 });
                 setDisplayLogTime(caller.updateDTM);
