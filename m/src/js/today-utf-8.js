@@ -2,7 +2,22 @@
  * * BFCache(webkit - Page Cache) Issue (page reload)
  */
 window.addEventListener('pageshow', function(e) {
-  if (e.persisted && history.state !== null && history.state.name === 'Article') window.location.reload();
+  //if (e.persisted && history.state !== null && history.state.name === 'Article') window.location.reload();
+  if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+    if(sessionStorage.getItem('TODAY_CARD') === 'true') {
+      sessionStorage.setItem('TODAY_CARD', 'false');
+      window.location.reload();
+    }
+
+
+    /*let data = JSON.parse(sessionStorage.getItem('TD')),
+        { keyword_dtm, keyword_sq, target } = getUrlQuery;
+    data['target'] = target;
+    data['keyword_dtm'] = keyword_dtm;
+    data['keyword_sq'] = keyword_sq;*/
+    //loadToday();
+  }
+
 });
 
 
@@ -17,6 +32,18 @@ moment.updateLocale('ko', {relativeTime : { h: `${decodeURI('1%EC%8B%9C%EA%B0%84
  * * Gsap 플러그인 등록 (필수)
  */
 gsap.registerPlugin(Draggable, DrawSVGPlugin, MotionPathPlugin, ScrollToPlugin, InertiaPlugin);
+
+
+//
+let getUrlQuery = ((searches, reservedQuery) => {
+  var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
+
+  if (!isReserved) return null;
+  else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+})(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index', 'target','v']);
+if(getUrlQuery && getUrlQuery.target === 'MAIN') {
+  getUrlQuery['redirect'] = '//ndev.nate.com'
+}
 
 
 /**
@@ -169,7 +196,7 @@ var newsEdge = (function() {
 
               todayListWrap.removeClass('lowScore highScore');
               bubbleGroupSiblings.forEach(self => gsap.to(self.querySelector('.bubble'), duration / 2, { scale: 1, autoAlpha: 1, ease: 'power2.inOut' }));
-              history.pushState(null, null, window.location.pathname);
+              //history.pushState(null, null, window.location.pathname);
             }
           });
 
@@ -294,15 +321,18 @@ var newsEdge = (function() {
           cards.offsets.push(-((cards.width + cards.margin) * i));
         }
 
-        if (history.state.listIndex !== undefined) {
+        if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+          cards.prevIndex = cards.activeIndex = Number(sessionStorage.getItem('TODAY'))
+        } else if (history.state && history.state.listIndex !== undefined) {
           cards.prevIndex = cards.activeIndex = history.state.listIndex;
-
-          todayListItemWrap.children('.item').each(function(j, self) {
-            if (j < cards.activeIndex && j < 4) gsap.set(self, { autoAlpha: 0, x: cards.width / 2, scale: .92 });
-          });
-
-          gsap.to(todayListItemWrap, cards.duration, { x: cards.offsets[cards.activeIndex]});
         }
+
+        todayListItemWrap.children('.item').each(function(j, self) {
+          if (j < cards.activeIndex && j < 4) gsap.set(self, { autoAlpha: 0, x: cards.width / 2, scale: .92 });
+        });
+
+        gsap.to(todayListItemWrap, cards.duration, { x: cards.offsets[cards.activeIndex]});
+
 
         todayListItemCounts.children().removeClass('active');
         todayListItemCounts.children().eq(cards.activeIndex).addClass('active');
@@ -363,7 +393,12 @@ var newsEdge = (function() {
               cards.prevIndex = cards.activeIndex;
               cards.activeIndex = Math.min(cards.activeIndex + 1, cards.leng - 1);
 
-              history.replaceState({...history.state, listIndex : cards.activeIndex}, 'nateNews');
+              if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+                sessionStorage.setItem('TODAY', cards.activeIndex)
+              } else {
+                history.replaceState({...history.state, listIndex : cards.activeIndex}, decodeURI('%EB%84%A4%EC%9D%B4%ED%8A%B8%EB%89%B4%EC%8A%A4%0D%0A'));
+              }
+
 
               if (cards.activeIndex < cards.leng - 1 && cards.activeIndex !== cards.leng - 1) {
                 gsap.to(todayListItemWrap.children('.item').eq(cards.activeIndex - 1), cards.duration, { autoAlpha: 0, x: cards.move, scale: cards.minScale });
@@ -375,7 +410,11 @@ var newsEdge = (function() {
               cards.prevIndex = cards.activeIndex;
               cards.activeIndex = Math.max(0, cards.activeIndex - 1);
 
-              history.replaceState({...history.state, listIndex : cards.activeIndex}, 'nateNews');
+              if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+                sessionStorage.setItem('TODAY', cards.activeIndex)
+              } else {
+                history.replaceState({...history.state, listIndex : cards.activeIndex}, decodeURI('%EB%84%A4%EC%9D%B4%ED%8A%B8%EB%89%B4%EC%8A%A4%0D%0A'));
+              }
 
               if (cards.activeIndex >= 0 && cards.activeIndex !== 5) {
                 gsap.to(todayListItemWrap.children('.item').eq(cards.activeIndex), cards.duration, { autoAlpha: 1, x: 0, scale: 1 });
@@ -418,7 +457,8 @@ var newsEdge = (function() {
                   ease: 'power4.inOut',
                   onComplete: function () {
                     gsap.set('body', { clearProps: 'background' });
-
+                    State.isPopPop = false;
+                    sessionStorage.setItem('TODAY_CARD', 'true');
                     return window.location = $this.attr('data-link');
                   }
                 });
@@ -429,9 +469,15 @@ var newsEdge = (function() {
       });
 
       todayListWrap.find('.btnTodayClose').on('click.PopPop', function() {
-        if (gsap.isTweening(todayListItem)) return;
 
-        articlesController.popOut();
+        if(getUrlQuery && getUrlQuery.target === 'MAIN') {
+          //window.location.href = getUrlQuery.redirect;
+          history.back();
+        } else {
+          if (gsap.isTweening(todayListItem)) return;
+          articlesController.popOut();
+          history.pushState(null, null)
+        }
       });
     }
 
@@ -444,6 +490,7 @@ var newsEdge = (function() {
       },
       setListRefData: function (data) {
         _data = data;
+        return data
       },
       listRender: function(callBack) {
         listRender(callBack);
@@ -687,8 +734,8 @@ var newsEdge = (function() {
           .domain([0, 100])
           .range([0, options.width]);
 
-      var _t = d3.select('#bubbleGroupWrap .wrap-old');
-      var bubbleGroupWrap = _t.size()  > 0 ? d3.select('#bubbleGroupWrap').append('g').attr('class', 'wrap-new') : d3.select('#bubbleGroupWrap').append('g').attr('class', 'wrap-old');
+      var bubbleGroupWrap = d3.select('#bubbleGroupWrap');
+
       var bubbleGroup = bubbleGroupWrap
           .selectAll('.bubbleGroup')
           .data(data, function(d) { return d.keyword_sq; })
@@ -950,7 +997,7 @@ var newsEdge = (function() {
       var simulation = {
         init: function(selection) {
           var simulator = d3.forceSimulation()
-              //.alphaTarget(0)
+              .alphaTarget(0)
               .velocityDecay(options.velocityDecay)
               .force('x', d3.forceX(options.width / 2).strength((orientation) ? options.forceStrength * 12 : options.forceStrength * 4))
               .force('y', d3.forceY(options.height / 2).strength((orientation) ? options.forceStrength * 12 : options.forceStrength * 4))
@@ -1032,7 +1079,7 @@ var newsEdge = (function() {
           break;
         case 'onDragStart':
           if (!!simulator) simulator.stop();
-          //return simulator = simulation.dragStart(bubbleGroup);
+          return simulator = simulation.dragStart(bubbleGroup);
           break;
         case 'onDragEnd':
           if (!!simulator) simulator.stop();
@@ -1040,6 +1087,7 @@ var newsEdge = (function() {
           break;
       }
     }
+
     return {
       init: function() {
         bubbleAccessibility();
@@ -1062,7 +1110,7 @@ var newsEdge = (function() {
         bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onInit');
       },
       dragStart: function () {
-        //bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragStart');
+        bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragStart');
       },
       dragEnd: function() {
         caller.resetKeyword();
@@ -1071,31 +1119,9 @@ var newsEdge = (function() {
 
           for (let key in res.data) caller.keyword = res.data[key];
 
-          gsap.timeline()
-              .add(_ => {                                
-                d3.select('.wrap-old').selectAll('.bubbleGroup .bubbleCircle').transition().delay((_, i) => {
-                  let v= i+1; 
-                  return v * (v > 4 ? 50 : 150)
-                }).attr('style', 'transform: scale(0);opacity:0;transition: all 0.4s;')
-                d3.select('.wrap-old').selectAll('.bubbleGroup .bubbleText').transition().delay((_, i) => {
-                  let v= i+1; 
-                  return v * (v > 4 ? 50 : 150)
-                }).attr('style', 'transform: scale(0);opacity:0;transition: all 0.4s;text-anchor: middle;')
-              },'+=.2')
-              .add(_ => {
-                bubbles.data = calcBubblesData(caller.keyword);
-                bubbles.group = bubblesRender(bubbles.data);
-              }, '+=.3')
-              .add(_ => {                
-                bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');                
-              })
-              .add(_ => { 
-                d3.select('.wrap-old').remove();
-                d3.select('.wrap-new').attr('class','wrap-old')
-              }, '+=1')
-
-
-
+          bubbles.data = calcBubblesData(caller.keyword);
+          bubbles.group = bubblesRender(bubbles.data);
+          bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');
         });
       }
     }
@@ -1896,39 +1922,30 @@ var newsEdge = (function() {
    */
   function controlHistory() {
     // 메인/속보/공유하기 관련 쿼리 존재 유/무 체크
-    let qs = ((searches, reservedQuery) => {
-      var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
-
-      if (!isReserved) return null;
-      else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
-    })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index']);
-
     // 쿼리 (init) 체크
-    if (history.state === null && qs !== null) {
+    if (history.state === null && getUrlQuery !== null) {
       callArticle({
-        selection : document.querySelector('.bubbleGroup[data-importance="'+ qs.index +'"]'),
-        keyword_service: caller.keyword[parseInt(qs.index, 10)].keyword_service,
-        keyword_dtm: qs.keyword_dtm,
-        keyword_sq: qs.keyword_sq,
-        index: parseInt(qs.index, 10)
+        selection : document.querySelector('.bubbleGroup[data-importance="'+ getUrlQuery.index +'"]'),
+        keyword_service: caller.keyword[parseInt(getUrlQuery.index, 10)].keyword_service,
+        keyword_dtm: getUrlQuery.keyword_dtm,
+        keyword_sq: getUrlQuery.keyword_sq,
+        index: parseInt(getUrlQuery.index, 10)
       }, true);
     }
 
-    // 히스토리 (init/reload) 체크
-    if (history.state !== null && history.state.name === 'LayerShare') layerSharePopUp(true);
-    if (history.state !== null && history.state.name === 'Article') callArticle(history.state, true);
+    if (history.state !== null && history.state.name === 'Article') {
+      callArticle(history.state, true);
+    }
 
     // 히스토리 (Back/Forward) 체크
     window.addEventListener('popstate', function() {
+      // 카드 돌아가면서 커지는 흰판 제거(ios히스토리 백시 간헐적 버그 발생)
+      $('.todayListEffect').removeAttr('style');
+      $('.listItemWrap .item, .listItemWrap .more').removeClass('active');
       (history.state !== null && history.state.name === 'LayerShare') ? layerSharePopUp(true) : layerSharePopUp(false);
-      // (history.state !== null && history.state.name === 'Article') ? callArticle(history.state, true) : (State.isPopPop) ? articlesController.popOut(true) : null;
-      (history.state !== null && history.state.name === 'Article') ? null : (State.isPopPop) ? (_ => {
+      (history.state !== null && history.state.name === 'Article') ? callArticle(history.state, true) : (State.isPopPop) ? (_=>{
         articlesController.popOut(true);
-        history.pushState(null, null, window.location.pathname);
       })() : null;
-
-
-
     });
   }
 
@@ -1948,70 +1965,127 @@ var newsEdge = (function() {
    *
    */
   function callArticle(d, immediate) {
-    const selection = document.querySelector('.bubbleGroup[data-importance="'+ d.index +'"]');
     const fillColor = ['rgba(21, 45, 255, .7)', 'rgba(47, 134, 255, .7)', 'rgba(20, 187, 190, .7)', 'rgba(86, 55, 255, .7)', 'rgba(141, 201, 29, .7)', 'rgba(212, 216, 220, .7)', 'rgba(212, 216, 220, .7)', 'rgba(212, 216, 220, .7)', 'rgba(212, 216, 220, .7)', 'rgba(212, 216, 220, .7)'];
+    const setVal = (d, res) => {
+      // 히스토리 저장
+      const Datum = {
+        name: 'Article',
+        serverDTM: d.keyword_dtm,
+        article: caller.article,
+        keyword_service: (_ => {
+          let searchString = res.search_link;
+          if (searchString && searchString.indexOf('q=') >= 0) {
+            return searchString.split('q=').pop();
+          } else {
+            return d.keyword_service
+          }
+        })(),
+        keyword_dtm: d.keyword_dtm,
+        keyword_sq: d.keyword_sq,
+        index: d.index,
+        listIndex: (d.listIndex !== undefined) ? d.listIndex : 0,
+        refs: {
+          link: res.search_link,
+          cnt: res.search_cnt
+        },
+        fill: fillColor[d.index]
+      };
 
-    if (!State.isPopPop) {
-      caller.resetArticle();
+      if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+        // App일때 historyAPI사용하지 않음 - 웹뷰에서 관리됨
+        Datum.listIndex = sessionStorage.getItem('TODAY');
+        sessionStorage.setItem('TD', JSON.stringify(Datum));
+      } else {
+        if (history.state && history.state.name === 'Article') {
+          history.replaceState(Datum, decodeURI('%EB%84%A4%EC%9D%B4%ED%8A%B8%EB%89%B4%EC%8A%A4%0D%0A'));
+        } else {
+          history.pushState(Datum, decodeURI('%EB%84%A4%EC%9D%B4%ED%8A%B8%EB%89%B4%EC%8A%A4%0D%0A'));
+        }
+      }
+
+      return Datum;
+    }
+
+    if (d.target === 'MAIN' && !State.isPopPop) {
+      caller = d.xhrData;
+      $('#header').hide();
+      $('body, #todayListWrap').css({
+        display: 'block',
+        overflow: 'hidden',
+        background: utils.RGBAToRGB(fillColor[getUrlQuery.index])
+      }).addClass(() => getUrlQuery.index > 4 ? 'lowScore' : 'highScore');
+
+      /*
+      * A > B페이지로 이동 후 백버튼 눌러 > A로 갈때
+      * ios에서 popstate호출, pc호출 안됨
+      * A>B>A로 온후 히스토리 백 눌렀을때 pc/ios 둘다 popstate호출
+      * */
+
+
+      window.addEventListener('popstate', function () {
+        // 카드 돌아가면서 커지는 흰판 제거(ios히스토리 백시 간헐적 버그 발생)
+        $('.todayListEffect').removeAttr('style');
+        $('.listItemWrap .item, .listItemWrap .more').removeClass('active');
+
+        if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+          console.log('app')
+        } else {
+          (history.state !== null && history.state.name === 'Article') ? callArticle(history.state, true) : window.close();
+        }
+      });
       caller.dataLoadEvent(`${ARTICLE_URL}?keyword_dtm=${d.keyword_dtm}&keyword_sq=${d.keyword_sq}`, (res) => {
         for (let key in res.data) caller.article = res.data[key];
 
-        // 히스토리 저장
-        const Datum = {
-          name: 'Article',
-          serverDTM: caller.serverDTM,
-          progressDTM: caller.progressDTM,
-          article: caller.article,
-          keyword_service: (_ => {
-            let searchString = res.search_link;
-            if(searchString && searchString.indexOf('q=') >= 0) {
-              return searchString.split('q=').pop();
-            } else {
-              return d.keyword_service
-            }
-          })(),
-          keyword_dtm: d.keyword_dtm,
-          keyword_sq: d.keyword_sq,
-          index: d.index,
-          listIndex: (d.listIndex !== undefined) ? d.listIndex : 0,
-          refs: {
-            link: res.search_link,
-            cnt: res.search_cnt
-          },
-          fill: fillColor[d.index]
-        };
-
-        // 카드 노출시 url표시
-        /*let { origin, pathname } = window.location;
-
-        window.location.replace(`${origin}${pathname}#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}`);*/
-        history.pushState(Datum, 'natenews');
-        // 히스토리 정보
-        /*if (history.state !== null && history.state.name === 'Article') history.replaceState(Datum, 'nateNews');
-        else history.pushState(Datum, 'nateNews');*/
-
-        articlesController.setClickedBubble.call(selection);
-        articlesController.setListRefData(Datum);
-
-        if (!State.isRender) {
-          State.isRender = true;
-
-          articlesController.listRender(() => {
-            State.isPopPop = true;
-            State.isClick = false;
-
-            articlesController.popUp(immediate);
+        articlesController.setListRefData(setVal(d, res));
+        articlesController.listRender(() => {
+          $('.todayList .btnTodayClose, .todayListTitle, .todayListItem').css({
+            opacity: 1,
+            visibility: 'inherit',
+            transform: 'translate(0px, 0px)'
           });
-        } else {
-          articlesController.listUpdate(() => {
-            State.isPopPop = true;
-            State.isClick = false;
-
-            articlesController.popUp(immediate);
-          });
-        }
-        articlesController.listRefEvent();
+          articlesController.listRefEvent();
+        });
       });
+    } else {
+      if (!State.isPopPop) {
+        const selection = document.querySelector('.bubbleGroup[data-importance="' + d.index + '"]');
+        caller.resetArticle();
+        caller.dataLoadEvent(`${ARTICLE_URL}?keyword_dtm=${d.keyword_dtm}&keyword_sq=${d.keyword_sq}`, (res) => {
+          for (let key in res.data) caller.article = res.data[key];
+          // 히스토리 정보
+          // if (history.state !== null && history.state.name === 'Article') {
+          //   history.replaceState(Datum, decodeURI('%EB%84%A4%EC%9D%B4%ED%8A%B8%EB%89%B4%EC%8A%A4%0D%0A'));
+          // } else {
+          //   history.pushState(Datum, decodeURI('%EB%84%A4%EC%9D%B4%ED%8A%B8%EB%89%B4%EC%8A%A4%0D%0A'));
+          // }
+
+          // 카드 노출시 url표시
+          //let { origin, pathname } = window.location;
+          //window.location.replace(`${origin}${pathname}#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}`);
+
+          articlesController.setClickedBubble.call(selection);
+          articlesController.setListRefData(setVal(d, res));
+
+          if (!State.isRender) {
+            State.isRender = true;
+
+            articlesController.listRender(() => {
+              State.isPopPop = true;
+              State.isClick = false;
+
+              articlesController.popUp(immediate);
+            });
+          } else {
+            articlesController.listUpdate(() => {
+              State.isPopPop = true;
+              State.isClick = false;
+
+              articlesController.popUp(immediate);
+            });
+          }
+          articlesController.listRefEvent();
+        });
+      }
     }
   }
 
@@ -2021,11 +2095,10 @@ var newsEdge = (function() {
    */
   function init(xhrData) {
     caller = xhrData;
-
     bubblesController.init();
+    controlHistory();
     progressBarController.init();
     timeTravelController.init();
-    controlHistory();
     controlResize();
   }
 
@@ -2079,7 +2152,8 @@ var newsEdge = (function() {
     },
     update: function(dateType) {
       return update(dateType);
-    }
+    },
+    callArticle
   }
 })();
 
@@ -2212,43 +2286,75 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return myData;
   })();
+  let xhrData = new myData();
+  // 메인에서 진입시 바로 카드뷰 보이게 하기위해
+  if(getUrlQuery && getUrlQuery.target === 'MAIN'){
+    let { keyword_dtm, keyword_sq, target } = getUrlQuery,
+        temp = {
+          keyword_dtm,
+          keyword_sq,
+          index: parseInt(getUrlQuery.index, 10),
+          target,
+          xhrData
+        }
 
-  const xhrData = new myData();
-
-  let qs = ((searches, reservedQuery) => {
-    var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
-
-    if (!isReserved) return null;
-    else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
-  })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index', 'MM']);
-
-  let initPath = KEYWORD_URL;
-  if (history.state !== null && history.state.name === 'Article') {
-    initPath = KEYWORD_URL + '?service_dtm='+ history.state.keyword_dtm;
-  } else if(qs && qs.hasOwnProperty('keyword_dtm')) {
-    initPath = KEYWORD_URL + '?service_dtm='+ qs.keyword_dtm;
-  }
-
-  xhrData.dataLoadEvent(initPath, (res) => {
-
-
-    xhrData.minDTM = utils.dateFormat('2020-08-20 09:00:00');
-    xhrData.serverDTM = utils.dateFormat(res.server_dtm);
-    xhrData.updateDTM = utils.dateFormat(res.update_dtm);
-    xhrData.serviceDTM = utils.dateFormat(res.service_dtm);
-    xhrData.progressDTM = utils.dateFormat(history.state !== null && history.state.name === 'Article' ? history.state.progressDTM : res.server_dtm);
-
-    if(qs){
-      let c = moment(res.service_dtm)
-      console.log(utils.dateFormat(res.service_dtm), qs.MM, res.service_dtm)
-      xhrData.progressDTM = utils.dateFormat(res.service_dtm);
+    if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+      // App일때 historyAPI사용하지 않음 - 웹뷰에서 관리됨
+      temp['listIndex'] = sessionStorage.getItem('TODAY');
+    } else {
+      if (history.state && history.state.name === 'Article') {
+        temp['listIndex'] = history.state.listIndex;
+        temp = Object.assign(temp,history.state);
+      }
     }
-    for (let key in res.data) xhrData.keyword = res.data[key];
-
-    newsEdge.init(xhrData);
-  });
 
 
+    newsEdge.callArticle(temp);
+
+    /**
+     * * Statistics (PV)
+     */
+    if (typeof draw_ndr === 'function') {
+      var sRef2 = '';
+
+      try {
+        draw_mndr('m_ndr.nate.com/news/today/keyword'+(temp.index + 1), gUserJS_sAppFrom, '', gUserJS_sAppSkai, gUserJS_sAppNdruk, sRef2);
+      } catch(e) {
+        draw_mndr('m_ndr.nate.com/news/today/keyword'+(temp.index + 1), '', '', '', '', sRef2);
+      }
+    }
+  } else {
+    let initPath = KEYWORD_URL;
+
+    if (history.state !== null && history.state.name === 'Article') {
+      initPath = KEYWORD_URL + '?service_dtm='+ history.state.keyword_dtm;
+    } else if(getUrlQuery && getUrlQuery.hasOwnProperty('keyword_dtm')) {
+      initPath = KEYWORD_URL + '?service_dtm='+ getUrlQuery.keyword_dtm;
+    }
+    xhrData.dataLoadEvent(initPath, (res) => {
+      xhrData.minDTM = utils.dateFormat('2020-08-20 09:00:00');
+      xhrData.serverDTM = utils.dateFormat(res.server_dtm);
+      xhrData.updateDTM = utils.dateFormat(res.update_dtm);
+      xhrData.serviceDTM = utils.dateFormat(res.service_dtm);
+      xhrData.progressDTM = utils.dateFormat(history.state !== null && history.state.name === 'Article' ? history.state.progressDTM : res.server_dtm);
+
+      if(getUrlQuery){
+        xhrData.progressDTM = utils.dateFormat(moment(res.service_dtm).minute(getUrlQuery.MM).format('YYYY-MM-DD HH:mm:ss'));
+      }
+      for (let key in res.data) xhrData.keyword = res.data[key];
+
+      newsEdge.init(xhrData);
+
+      if (typeof draw_ndr === 'function') {
+        var sRef2 = '';
+        try {
+          draw_mndr('m_ndr.nate.com/news/today', gUserJS_sAppFrom, '', gUserJS_sAppSkai, gUserJS_sAppNdruk, sRef2);
+        } catch (e) {
+          draw_mndr('m_ndr.nate.com/news/today', '', '', '', '', sRef2);
+        }
+      }
+    });
+  }
   /**
    * * 공유하기
    */
@@ -2266,7 +2372,7 @@ document.addEventListener('DOMContentLoaded', function() {
       leyerPopup.classList.toggle('active');
       leyerPopup.querySelector('.shareLinkUrl').disabled = true;
 
-      return (leyerPopup.classList.contains('active')) ? history.pushState({name: 'LayerShare'}, 'share') : history.pushState(null, null);
+      //return (leyerPopup.classList.contains('active')) ? history.pushState({name: 'LayerShare'}, 'share') : history.pushState(null, null);
     });
   });
 });

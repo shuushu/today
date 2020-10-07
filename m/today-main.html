@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>한눈에 보는 오늘</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <meta property="og:url" content="">
+  <meta property="og:title" content="한눈에 보는 오늘">
+  <meta property="og:image" content="./src/images/og_nate_today.png">
+  <meta property="og:description" content="#한눈에 보는 오늘">
+  
+  
+
+<!-- 절대경로로 테스트 먼저..여기서 부터:S -->
+<link type="text/css" rel="stylesheet" href="//nimg.nate.com/ui/etc/today/m/src/css/today.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<script type="text/javascript" src="//m.news.nate.com/js/today/gsap.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/CustomEase.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/Draggable.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/DrawSVGPlugin.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/MotionPathPlugin.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/ScrollToPlugin.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/InertiaPlugin.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/d3.v5.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/moment-with-locale.min.js"></script>
+<script type="text/javascript" src="//m.news.nate.com/js/today/moment-timezone-with-data.min.js"></script>
+<!-- 여기까지:E -->
+</head>
+
+<body>   
+
+
+<!-- 여기서 부터:S --> 
+    <div id="contents">
+      <!-- 뉴스엣지 컨테이너-->
+      <div class="newsEdge">
+        <!-- 이전/다음/오늘 이동 및 날짜 표시 -->
+        <div class="timeTravel">
+          <p class="timeline">
+            <!-- <button type="button" class="btnTravel prev" data-travel="prev" onclick="olapclick('TOB01');">이전</button> -->
+            <button type="button" class="btnTravel prev" data-travel="prev">이전</button>
+            <span class="year"></span>
+            <span class="month"></span>
+            <span class="date"></span>
+            <!-- <button type="button" class="btnTravel next" data-travel="next" onclick="olapclick('TOB02');">다음</button> -->
+            <button type="button" class="btnTravel next" data-travel="next">다음</button>
+          </p>
+          <!-- <button type="button" class="btnTravel today" data-travel="today" onclick="olapclick('TOB00');">오늘</button> -->
+          <button type="button" class="btnTravel today" data-travel="today">오늘</button>
+        </div>
+        <!-- // 이전/다음/오늘 이동 및 날짜 표시 -->
+        <!-- 공유하기 -->
+        <div class="socialShare">
+          <button type="button" class="btnShare">공유하기</button>
+        </div>
+        <!-- // 공유하기 -->
+        <!-- 버블 -->
+        <div class="bubblesWrap">
+          <svg id="newsEdgeBubbles"></svg>
+        </div>
+        <!-- // 버블 -->
+        <!-- 버블 컨트롤러 -->
+        <div class="progressWrap active">
+          <button type="button" class="btnProgress">타임라인</button>
+          <svg id="newsEdgeProgress" class="newsEdgeProgress"></svg>
+        </div>
+        <!-- //버블 컨트롤러 -->
+        <!-- 뉴스 리스트 -->
+        <div id="todayListWrap"></div>
+        <!-- // 뉴스 리스트 -->
+    </div>
+    <!-- // 뉴스엣지 컨테이너-->
+    <script>
+      var KEYWORD_URL = '/js4/today-json/keywordList.json';
+      var ARTICLE_URL = '/js4/today-json/articleList.json';
+      // var KEYWORD_URL = '//test-news.nate.com/today/keywordList';
+      // var ARTICLE_URL = '//test-news.nate.com/today/articleList';
+      
+      //<![CDATA[
+        // ndr code
+        var sRef2 = '';
+        // try {
+        //   draw_mndr('m_ndr.nate.com/news/today/', gUserJS_sAppFrom, '', gUserJS_sAppSkai, gUserJS_sAppNdruk, sRef2);
+        // } catch(e) {
+        //   draw_mndr('m_ndr.nate.com/news/today/', '', '', '', '', sRef2);
+        // }
+      //]]>
+    </script>
+	<script type="text/javascript" src="//m.news.nate.com/js/today/userAgent.js?202009091600"></script>
+	<script type="text/javascript" src="//m.news.nate.com/js/today/utils.js?202009091600"></script>
+    <script type="text/javascript" src="/js4/js/today-main.js"></script>
+<!-- 여기서 부터:E --> 
+      
+
+      <!-- 공유하기 레이어 팝업 > 우선 주석 -->
+      <!-- <div class="layerPopup share">
+        <div class="inner">
+          <button type="button" class="btnClosePopup">닫기</button>
+          <div class="content">
+            <strong class="title">공유하기</strong>
+            <ul class="shareList">
+              <li>
+                <a class="shareNateon" href="javascript:;" title="새창으로 이동" id="sns-no" onclick="checkMobileAgent('네이트온 쪽지') ? shareSNS('no') : false; olapclick('TOS01'); return false;">네이트온</a>
+              </li>
+              <li>
+                <a class="shareFacebook" href="javascript:;" title="새창으로 이동" id="sns-fb" onclick="shareSNS('fb'); olapclick('TOS02'); return false;">페이스북</a>
+              </li>
+              <li>
+                <a class="shareTwetter" href="javascript:;" title="새창으로 이동" id="sns-tw" onclick="shareSNS('tw'); olapclick('TOS03'); return false;">트위터</a>
+              </li>
+            </ul>
+            <div class="shareInput">
+              <input type="text" value="" class="shareLinkUrl" readonly />
+            </div>
+          </div>
+          <button type="button" class="btnCopyURL" onclick="utils.CopyUrlToClipboard('.shareLinkUrl')">URL 복사</button>
+        </div>
+        <div class="dimm"></div>
+      </div> -->
+      <!-- //공유하기 레이어 팝업-->
+
+
+
+  
+</body>
+
+</html>

@@ -1,7 +1,13 @@
 /**
  ** newsEdge Init
  */
-
+var DM = '//test-m.news.nate.com';
+//var DM = '//m.news.nate.com';
+function mndr(v) {
+    if(MM_GLOBAL && typeof MM_GLOBAL.ndrclick === 'function') {
+        MM_GLOBAL.ndrclick(v);
+    }
+}
 stage.addEvent('newsToday' , _todayInit);
 stage.addEvent('newsTodayStop', ()=>{
     if(TODAY.sm) {
@@ -71,20 +77,16 @@ function _todayInit(_,checked) {
                 timeTravelTriggers[1].disabled = false;
                 timeTravelTriggers[2].disabled = false;
 
-                btnShare.disabled = true;
             } else if (progressDate === maxDate) {
                 timeTravelTriggers[0].disabled = false;
                 timeTravelTriggers[1].disabled = true;
                 timeTravelTriggers[2].disabled = true;
 
-                btnShare.disabled = false;
                 timeLog.style.display = 'block';
             } else {
                 timeTravelTriggers[0].disabled = false;
                 timeTravelTriggers[1].disabled = false;
                 timeTravelTriggers[2].disabled = false;
-
-                btnShare.disabled = true;
             }
         }
 
@@ -103,6 +105,7 @@ function _todayInit(_,checked) {
 
             switch(timeline.dateType) {
                 case 'prev':
+                    mndr('NNT101');
                     if (serviceMilli >= minDateMilli) {
                         return callBack({
                             path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
@@ -117,6 +120,7 @@ function _todayInit(_,checked) {
                         });
                     }
                 case 'next':
+                    mndr('NNT102');
                     if (serviceMilli <= maxDateMilli) {
                         return callBack({
                             path: `${KEYWORD_URL}?service_dtm=${utils.convertTime(serviceMilli, 'YMDH')}`,
@@ -132,6 +136,7 @@ function _todayInit(_,checked) {
                         });
                     }
                 case 'today':
+                    mndr('NNT103');
                     return callBack({
                         path: KEYWORD_URL,
                         serviceDTM: null,
@@ -475,10 +480,9 @@ function _todayInit(_,checked) {
                         return 'translate('+ d.x + ', '+ d.y +')';
                     })
                     .on('click', function(d) {
-                        if (!State.isClick) State.isClick = true;
-                        else return;
-
-                        window.location.href = `https://m.news.nate.com/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}`       
+                        // 통계
+                        mndr(`NNT2${((n)=> (n < 10) ? `0${n}` : n)(d.index+1)}`);
+                        window.open(`${DM}/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`, '_blank');
                     });
 
                 function enterT(selection) {
@@ -790,7 +794,8 @@ function _todayInit(_,checked) {
                         bubbles.group = bubblesRender(bubbles.data);
                         TODAY.sm = bubbles.simulator = bubblesSimulation(bubbles.group, bubbles.data, 'onDragEnd');                        
                         TODAY.d = caller;
-                        stage.trigger('BLOCK_OFF');                        
+                        stage.trigger('BLOCK_OFF');
+                        mndr('NNT104');
                     });
                 }
             }
@@ -1401,7 +1406,7 @@ function _todayInit(_,checked) {
                     progressBar.data = calcProgressBarData(progressBar.options, progressBar.timestamp);
 
                     progressBarRender(progressBar.data);
-                    progressBarEvent(progressBar.data);
+                    //progressBarEvent(progressBar.data);
                 }
             }
         })();
@@ -1480,8 +1485,15 @@ function _todayInit(_,checked) {
             });
         }
 
+
+        function toggleParentActive(e) {
+            e.preventDefault();
+            e.target.parentNode.classList.toggle('active');
+        }
+
         return {
             init: function (xhrData) {
+                document.querySelector('.btnProgress').addEventListener('click', toggleParentActive);
                 return init(xhrData);
             },
             update: function(dateType) {
@@ -1489,6 +1501,7 @@ function _todayInit(_,checked) {
             },
             bindEvent: function() {
                 caller = TODAY.d;
+                document.querySelector('.btnProgress').addEventListener('click', toggleParentActive);
                 return bindEvent();
             }
         }
@@ -1577,29 +1590,38 @@ function _todayInit(_,checked) {
             resetArticle() {
                 this[article] = [];
             }
-//parameters
-
             dataLoadEvent(path, callback) {
-                //plast.$dataloader.JSON_P(plast.$dataloader.ARG.method('get').requestHeaders({'origin': 'https://ndev.nate.com'}).parameters({'callback': 'mtoday'}).url(path).onComplete(function($data){
-                plast.$dataloader.AJAX(plast.$dataloader.ARG.requestHeaders({'Origin': '//m.news.nate.com/'}).method('get').url(path).onComplete(function($data){
-                    if ($data.status === 200) {
-                        callback(JSON.parse($data.responseText));
-                    } else {
-                        // 네트워크 예외처리
-                        if (errorWrap) return;
-                        let newsEdge = document.querySelector('.newsEdge');
-                        let timeLog = document.querySelector('.timeLog');
-                        if(timeLog) {
-                            timeLog.style.display = 'none';
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() { // 요청에 대한 콜백
+                    if (xhr.readyState === xhr.DONE) { // 요청이 완료되면
+                        // 로딩바 제거
+                        let loading = document.querySelector('.today-loader'),
+                            newsEdge = document.querySelector('.newsEdge');
+                        if(loading) {
+                            document.querySelector('#contents').removeChild(loading)
                         }
-                        newsEdge.style.display = 'none';
 
-                        let el = document.createElement('div')
-                        el.className = 'errorWrap'
-                        el.innerHTML = '<div class="conWrap" id="content" role="main"><div class="error"><div class="eBox"><p>일시적인 오류가 발생하여<br>페이지를 표시할 수 없습니다.</p><p>잠시 후 다시 이용해주세요.</p><a href="//'+ document.domain +'"  onclick="MM_GLOBAL.resetTab(); return MM_GLOBAL.ndrclick(\'ERR01\');" class="restart">다시시도</a></div></div></div>';
-                        document.querySelector('#contents').appendChild(el)
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            callback(JSON.parse(xhr.responseText));
+                            newsEdge.style.display = 'block';
+                        } else {
+                            // 네트워크 예외처리
+                            if (errorWrap) return;
+                            let timeLog = document.querySelector('.timeLog');
+                            if(timeLog) {
+                                timeLog.style.display = 'none';
+                            }
+                            newsEdge.style.display = 'none';
+
+                            let el = document.createElement('div');
+                            el.className = 'errorWrap';
+                            el.innerHTML = `<div class="conWrap" id="content" role="main"><div class="error"><div class="eBox"><p>${decodeURI('%EC%9D%BC%EC%8B%9C%EC%A0%81%EC%9D%B8 %EC%98%A4%EB%A5%98%EA%B0%80 %EB%B0%9C%EC%83%9D%ED%95%98%EC%97%AC')}<br>${decodeURI('%ED%8E%98%EC%9D%B4%EC%A7%80%EB%A5%BC %ED%91%9C%EC%8B%9C%ED%95%A0 %EC%88%98 %EC%97%86%EC%8A%B5%EB%8B%88%EB%8B%A4.')}</p><p>${decodeURI('%EC%9E%A0%EC%8B%9C %ED%9B%84 %EB%8B%A4%EC%8B%9C %EC%9D%B4%EC%9A%A9%ED%95%B4%EC%A3%BC%EC%84%B8%EC%9A%94.')}</p><a href="//${document.domain}"  onclick="MM_GLOBAL.resetTab(); return MM_GLOBAL.ndrclick('ERR01');" class="restart">${decodeURI('%EB%8B%A4%EC%8B%9C%EC%8B%9C%EB%8F%84')}</a></div></div></div>`;
+                            document.querySelector('#contents').appendChild(el)
+                        }
                     }
-                }));
+                };
+                xhr.open('GET', path); // 메소드와 주소 설정
+                xhr.send(); // 요청 전송
             }
         }
 
@@ -1608,7 +1630,10 @@ function _todayInit(_,checked) {
 
     const xhrData = new myData();
     // testPAth
-    var KEYWORD_URL = '//m.news.nate.com/today/keywordList';
+    //var KEYWORD_URL = `//${DM}/api/today/keywordList`;
+    var KEYWORD_URL = `//m.news.nate.com/api/today/keywordList`,
+        blockevent = () => { stage.trigger('BLOCK_ON') };
+
 
     if(checked) {
         xhrData.dataLoadEvent(KEYWORD_URL, (res) => {
@@ -1629,4 +1654,6 @@ function _todayInit(_,checked) {
         }
     }
 
+    document.querySelector('.progressWrap').removeEventListener('touchstart', blockevent);
+    document.querySelector('.progressWrap').addEventListener('touchstart', blockevent);
 }

@@ -1301,19 +1301,18 @@ var TODAY = {
         });
     };
     var path = [
-        'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js',
-        '//m.news.nate.com/js/today/gsap.min.js',
-        '//m.news.nate.com/js/today/CustomEase.min.js',
-        '//m.news.nate.com/js/today/Draggable.min.js',
-        '//m.news.nate.com/js/today/DrawSVGPlugin.min.js',
-        '//m.news.nate.com/js/today/MotionPathPlugin.min.js',
-        '//m.news.nate.com/js/today/ScrollToPlugin.min.js',
-        '//m.news.nate.com/js/today/InertiaPlugin.min.js',
-        '//m.news.nate.com/js/today/d3.v5.min.js',
-        '//m.news.nate.com/js/today/moment-with-locale.min.js',
-        '//m.news.nate.com/js/today/moment-timezone-with-data.min.js',
-        '//m.news.nate.com/js/today/utils.js',
-        '/js4/js/today-main.js'
+        '/js4/today/gsap.min.js',
+        '/js4/today/CustomEase.min.js',
+        '/js4/today/Draggable.min.js',
+        '/js4/today/DrawSVGPlugin.min.js',
+        '/js4/today/MotionPathPlugin.min.js',
+        '/js4/today/ScrollToPlugin.min.js',
+        '/js4/today/InertiaPlugin.min.js',
+        '/js4/today/d3.v5.min.js',
+        '/js4/today/moment-with-locale.min.js',
+        '/js4/today/moment-timezone-with-data.min.js',
+        '/js4/today/utils.js',
+        '/js4/today/today-main.js?v=' + new Date().getTime()
     ]
 
 
@@ -1333,9 +1332,6 @@ var TODAY = {
             .then(() => {
                 // 성공 후 처리
                 TODAY.load = true;
-                // 로딩바 제거
-                document.querySelector('#contents').removeChild(document.querySelector('.today-loader'))
-                
                 return _start($target , $container, $data);
             })
             .catch((e) => {

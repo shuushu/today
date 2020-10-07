@@ -3,7 +3,6 @@
 a { color: #111; text-decoration: none; outline: none; }
 a:hover, a:active { text-decoration: inherit; color: inherit; }
 
-
 .infoText { position: fixed; left: 0; bottom: 10px; right:0; z-index: 9999; padding: 10px 0; background: #fff; border:1px solid #000; text-align: center; }
 
 #wrap { overflow: hidden; min-width: 320px; }
@@ -177,19 +176,19 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
   .todayListItem .item .info .thumb-nail { display: none; }
 }
 
-/* ���� ��� (�е� ����) */
+
 @media all and (min-width: 1080px) {
   .todayListItem::-webkit-scrollbar { width: 2px; }
   .todayListItem::-webkit-scrollbar-track { background: transparent; }
   .todayListItem::-webkit-scrollbar-thumb { background: transparent; }
 }
 
-/* ���� (iphone 5) */
+/*  (iphone 5) */
 @media all and (max-width: 320px) {
   .todayListItemCounts { left: 250px; }
 }
 
-/* ���� (Fold) */
+/* (Fold) */
 @media all and (max-width: 280px) {
   .todayListItemCounts { left: 200px; }
 }
