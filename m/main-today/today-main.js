@@ -440,7 +440,7 @@ function _todayInit(_,checked) {
                         }                        
                      })
                     .join(
-                        function (enter) {
+                        function (enter,a,b) {
                             var group = enter = enter
                                 .append('g')
                                 .attr('class', 'bubbleGroup')
@@ -452,6 +452,10 @@ function _todayInit(_,checked) {
                                 .attr('class', 'bubbleWrap')
 
                             var wrapGroup = wrap
+                                .append('a')
+                                .attr('href', (d) => `${DM}/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`)
+                                .attr('target','_blank')
+                                .attr('class','link-item')
                                 .append('g')
                                 .attr('class', 'bubble')
                                 .attr('role', 'listitem');
@@ -482,7 +486,8 @@ function _todayInit(_,checked) {
                     .on('click', function(d) {
                         // 통계
                         mndr(`NNT2${((n)=> (n < 10) ? `0${n}` : n)(d.index+1)}`);
-                        window.open(`${DM}/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`, '_blank');
+
+                        //window.open(`${DM}/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`, '_blank');
                     });
 
                 function enterT(selection) {
