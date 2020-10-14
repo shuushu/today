@@ -17,7 +17,7 @@ svg text tspan { font-family: inherit; }
 
 .newsEdge { position: relative; width: 100%; }
 .newsEdge .inner { position: relative; width: 970px; margin: 0 auto; }
-.newsEdge .timeTravel { position: absolute; left: 0; top: 21px; z-index: 31; margin: 0 19px; vertical-align: top; font-family: 'Malgun Gothic', '¸¼Àº °íµñ', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
+.newsEdge .timeTravel { position: absolute; left: 0; top: 21px; z-index: 31; margin: 0 19px; vertical-align: top; font-family: 'Malgun Gothic', 'ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
 .newsEdge .timeTravel .timeline { display:inline-block; position: relative; color: #000; font-size: 0; line-height: 0; vertical-align: top; }
 .newsEdge .timeTravel .timeline span { display: inline-block; position: relative; font-size: 28px; line-height: .55; letter-spacing: -.35px; vertical-align: top; }
 .newsEdge .timeTravel .timeline span:after { content: '.'; display: block; position: absolute; left: -5px; bottom: 0; }
@@ -48,7 +48,7 @@ svg text tspan { font-family: inherit; }
 .progressWrap.active .newsEdgeProgress { opacity: 1; visibility: visible; }
 .progressWrap.active .timeTooltip { overflow: visible; }
 
-.todayListWrap { position: relative; width: 100%; height: 100%; min-height: 1122px; margin: 84px 0 0; background: #f8f8f8; box-sizing: border-box; font-family: 'Malgun Gothic', '¸¼Àº °íµñ', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
+.todayListWrap { position: relative; width: 100%; height: 100%; min-height: 1122px; margin: 84px 0 0; background: #f8f8f8; box-sizing: border-box; font-family: 'Malgun Gothic', 'ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
 .todayListWrap .todayListTop { position: relative; width:970px; margin: 0 auto; padding: 46px 0 0; }
 .todayListWrap .todayListTop .title { position: relative; width: 116px; height: 42px; margin: 0 0 7px; background: url('../images/ico/ico_today_2x.png') no-repeat center / 100%; color: transparent; font-size: 0; line-height: 0; }
 .todayListWrap .todayListTop .subTitle { padding: 0 0 37px; border-bottom: 1px solid #e4e4e4; color: #777; font-size: 17px; line-height: 1; letter-spacing: -.65px; }
@@ -83,7 +83,7 @@ svg text tspan { font-family: inherit; }
 .btnScrollTop:after { content: ''; display: block; position: absolute; left: 1px; top: 8px; right:0; width: 26px; height: 26px; margin: 0 auto; background: url('../images/ico/ico_top_2x.png') no-repeat center / 100%; -webkit-transition: transform .3s ease; transition: transform .3s ease; }
 .btnScrollTop:hover:after { -webkit-transform: translateY(-3px); transform: translateY(-3px); }
 
-.layerPopup.share { display: none; position: absolute; left: 0; top: 78px; right: 0; z-index: 1000; width: 970px; margin: 0 auto; font-family: 'Malgun Gothic', '¸¼Àº °íµñ', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
+.layerPopup.share { display: none; position: absolute; left: 0; top: 78px; right: 0; z-index: 1000; width: 970px; margin: 0 auto; font-family: 'Malgun Gothic', 'ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
 .layerPopup.share.active { display: block; }
 .layerPopup.share .inner { overflow:hidden; position: absolute; right: 23px; top: 0; width: 288px; height: 268px; border:1px solid #222; background: #fff; }
 .layerPopup.share .content { padding: 12px 35px; }
@@ -101,8 +101,8 @@ svg text tspan { font-family: inherit; }
 .layerPopup.share .shareInput:after { content: ''; display: block; position: absolute; right: 10px; top: 10px; width: 20px; height: 20px; background: url('../images/ico/ico_link_2x.png') no-repeat center center / 100%; }
 .layerPopup.share .shareInput .shareLinkUrl { overflow:hidden; position: relative; width: 218px; max-width: 218px; height: 40px; padding: 0 40px 2px 12px; border: 0; box-sizing: border-box; background: transparent; color: #030303; font-size: 13px; font-weight: 500; letter-spacing: -.2px; text-overflow: ellipsis; white-space: nowrap; word-break: break-all; -webkit-appearance: none; appearance: none; }
 
-/* ¾÷µ¥ÀÌÆ® ¾È³» ½ºÅ¸ÀÏ */
-.browserInfo { position: relative; width: 100%; min-height: 960px; font-family: 'Malgun Gothic', '¸¼Àº °íµñ', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½È³ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ */
+.browserInfo { position: relative; width: 100%; min-height: 960px; font-family: 'Malgun Gothic', 'ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
 .browserInfo .inner { position: absolute; left: 0; top: calc(50% + 100px); right: 0; -webkit-transform: translateY(-50%); -ms-transform: translateY(-50%); transform: translateY(-50%); }
 .browserInfo .inner:after { content: ''; display: block; position: absolute; left: 0; top: -88px; right: 0; width: 92px; height: 92px; margin: 0 auto; background: url('../images/ico/ico_caution_2x.png') no-repeat center / 100%; }
 .browserInfo .inner h2 { margin: 70px 0 50px; font-family: 'Noto Sans KR'; font-size: 32px; font-weight: 500; line-height: 40px; letter-spacing: -1.14px; text-align: center; }
@@ -114,6 +114,7 @@ svg text tspan { font-family: inherit; }
 .browserInfo .inner div a:last-child:after { content: none; }
 
 #footer { position: relative; padding: 42px 0 47px; border-top:0; background: #f8f8f8; }
+#mediaHome #footer{padding-top:42px;min-width: 1250px;}
 #footer h2 { position: absolute; top: -1000px; left: -1000px; width: 0; height: 0; font-size: 0; line-height: 0; }
 #footer h3 { float: left; position: static; width: 60px; height: 20px; font-size: 14px; font-weight: 700; line-height: 20px; text-indent: 0; }
 #footer dl {display: block; width: 100%; text-align: center }

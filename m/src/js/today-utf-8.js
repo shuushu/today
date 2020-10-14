@@ -1,21 +1,24 @@
+if( !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
+  if (window.navigator.userAgent.indexOf("MSIE ") > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)){
+      window.location = '//news.nate.com';
+  }
+}
+
 /**
  * * BFCache(webkit - Page Cache) Issue (page reload)
  */
-window.addEventListener('pageshow', function(e) {
+window.addEventListener('pageshow', function(e,a,b) {
   //if (e.persisted && history.state !== null && history.state.name === 'Article') window.location.reload();
-  if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
+  //if (e.persisted) window.location.reload();
+
+  if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app' && navigator.userAgent.indexOf('iPhone') > 0) {
     if(sessionStorage.getItem('TODAY_CARD') === 'true') {
+      // 카드 돌아가면서 커지는 흰판 제거(ios히스토리 백시 간헐적 버그 발생)
+      $('.todayListEffect').removeAttr('style');
+      $('.listItemWrap .item, .listItemWrap .more').removeClass('active');
       sessionStorage.setItem('TODAY_CARD', 'false');
-      window.location.reload();
+      //window.location.reload();
     }
-
-
-    /*let data = JSON.parse(sessionStorage.getItem('TD')),
-        { keyword_dtm, keyword_sq, target } = getUrlQuery;
-    data['target'] = target;
-    data['keyword_dtm'] = keyword_dtm;
-    data['keyword_sq'] = keyword_sq;*/
-    //loadToday();
   }
 
 });
@@ -42,7 +45,7 @@ let getUrlQuery = ((searches, reservedQuery) => {
   else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
 })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index', 'target','v']);
 if(getUrlQuery && getUrlQuery.target === 'MAIN') {
-  getUrlQuery['redirect'] = '//ndev.nate.com'
+  getUrlQuery['redirect'] = '//m.nate.com'
 }
 
 
@@ -126,7 +129,7 @@ var newsEdge = (function() {
     function popUp(immediate) {
       if (!!immediate) killTweens();
       var duration = !!immediate ? 0 : .3;
-
+      $('#contents').addClass('active')
       gsap.to(window, duration, {
         scrollTo : 0,
         ease : 'none',
@@ -196,6 +199,7 @@ var newsEdge = (function() {
 
               todayListWrap.removeClass('lowScore highScore');
               bubbleGroupSiblings.forEach(self => gsap.to(self.querySelector('.bubble'), duration / 2, { scale: 1, autoAlpha: 1, ease: 'power2.inOut' }));
+              $('#contents').removeClass('active')
               //history.pushState(null, null, window.location.pathname);
             }
           });
@@ -459,6 +463,13 @@ var newsEdge = (function() {
                     gsap.set('body', { clearProps: 'background' });
                     State.isPopPop = false;
                     sessionStorage.setItem('TODAY_CARD', 'true');
+                    sessionStorage.setItem('TODAY_CARD_CLICK', 'true');
+                    if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app' && navigator.userAgent.indexOf('iPhone') > 0){
+                      setTimeout(() => {
+                        $('.todayListEffect').removeAttr('style');
+                        $('.listItemWrap .item, .listItemWrap .more').removeClass('active');
+                      }, 500)
+                    }
                     return window.location = $this.attr('data-link');
                   }
                 });
@@ -469,10 +480,18 @@ var newsEdge = (function() {
       });
 
       todayListWrap.find('.btnTodayClose').on('click.PopPop', function() {
-
         if(getUrlQuery && getUrlQuery.target === 'MAIN') {
-          //window.location.href = getUrlQuery.redirect;
-          history.back();
+          //if(getUrlQuery.v === 'nate_app' && sessionStorage.getItem('TODAY_CARD_CLICK') === 'true') {
+          if(getUrlQuery.v === 'nate_app') {
+            //history.back();
+            window.location.href = getUrlQuery.redirect;
+          } else {
+            if(sessionStorage.getItem('TODAY_ING') === 'true') {
+              window.close();
+            } else {
+              window.location.href = getUrlQuery.redirect;
+            }
+          }
         } else {
           if (gsap.isTweening(todayListItem)) return;
           articlesController.popOut();
@@ -490,6 +509,9 @@ var newsEdge = (function() {
       },
       setListRefData: function (data) {
         _data = data;
+        if(_data.refs && _data.refs.link) {
+          _data.refs.link = encodeURI(_data.refs.link);
+        }
         return data
       },
       listRender: function(callBack) {
@@ -1911,7 +1933,7 @@ var newsEdge = (function() {
         bubblesController.resize();
         progressBarController.resize();
       }
-    }, 30);
+    }, 300);
 
     window.addEventListener('resize', newsEdgeResize);
   }
@@ -1954,7 +1976,14 @@ var newsEdge = (function() {
    */
   function layerSharePopUp(state) {
     var layerShare = document.querySelector('.layerPopup.share');
-    return state ? layerShare.classList.add('active') : layerShare.classList.remove('active');
+
+    if(state) {
+      $('#contents').addClass('active')
+      layerShare.classList.add('active')
+    } else {
+      $('#contents').removeClass('active')
+      layerShare.classList.remove('active');
+    }
   }
 
   /**
@@ -2027,11 +2056,7 @@ var newsEdge = (function() {
         $('.todayListEffect').removeAttr('style');
         $('.listItemWrap .item, .listItemWrap .more').removeClass('active');
 
-        if(getUrlQuery && getUrlQuery.target === 'MAIN' && getUrlQuery.v === 'nate_app') {
-          console.log('app')
-        } else {
-          (history.state !== null && history.state.name === 'Article') ? callArticle(history.state, true) : window.close();
-        }
+        (history.state !== null && history.state.name === 'Article') ? callArticle(history.state, true) : window.close();
       });
       caller.dataLoadEvent(`${ARTICLE_URL}?keyword_dtm=${d.keyword_dtm}&keyword_sq=${d.keyword_sq}`, (res) => {
         for (let key in res.data) caller.article = res.data[key];
@@ -2287,6 +2312,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return myData;
   })();
   let xhrData = new myData();
+
   // 메인에서 진입시 바로 카드뷰 보이게 하기위해
   if(getUrlQuery && getUrlQuery.target === 'MAIN'){
     let { keyword_dtm, keyword_sq, target } = getUrlQuery,
@@ -2305,6 +2331,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (history.state && history.state.name === 'Article') {
         temp['listIndex'] = history.state.listIndex;
         temp = Object.assign(temp,history.state);
+      }
+
+      // 세션체크: 앱 종료 후 다시 앱을 실행할 경우 대응
+      if(getUrlQuery.v.length === 0) {
+        let hash = window.location.hash;
+        hash = hash.replace('$v=','$v=checked')
+        history.replaceState('', '', hash);
+        sessionStorage.setItem('TODAY_ING', 'true');
       }
     }
 

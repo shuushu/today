@@ -5,7 +5,7 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
 
 .infoText { position: fixed; left: 0; bottom: 10px; right:0; z-index: 9999; padding: 10px 0; background: #fff; border:1px solid #000; text-align: center; }
 
-#wrap { overflow: hidden; min-width: 320px; }
+#wrap { overflow: hidden; min-width: 320px;}
 #contents { overflow: visible; }
 #contents:after { content: ''; display: block; clear: both; }
 #contents.unsupported-browser { display: none; }
@@ -79,6 +79,18 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
 .todayListTitle { overflow:hidden; position: relative; width: 100%; min-height: 68px; max-height: 68px; padding: 0 20px; box-sizing: border-box; font-size: 26px; font-weight: 300; font-style: normal; line-height: 34px; letter-spacing: -0.65px; color: #fff; opacity: 0; visibility: hidden; }
 
 .todayListItem { position: relative; width: 100%; height: 375px; padding: 30px 0; opacity: 0; visibility: hidden; -webkit-transform: translate(-500%, 0); transform: translate(-500%, 0); }
+.todayListItem::before,
+.todayListItem::after{
+  content:'';
+  position:absolute;
+  z-index:2000;
+  top: 0;
+  display:block;
+  width:30px;
+  height:100%;
+}
+.todayListItem::before{left:0}
+.todayListItem::after{right:0}
 .todayListItem ul.listItemWrap { width: 2100px; height: 100%; max-height:375px; padding: 0 20px; }
 .todayListItem ul li .face { display: block; overflow: hidden; position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 20px; box-shadow: 0 8px 14px 0 rgba(0, 0, 0, .14); background: #fff; -webkit-backface-visibility: hidden; backface-visibility: hidden;  -webkit-transition: transform .15s ease-in-out; transition: transform .15s ease-in-out; }
 .todayListItem ul li .face.frontFace { z-index: 1; }

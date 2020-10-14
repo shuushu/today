@@ -1,8 +1,6 @@
 /**
  ** newsEdge Init
  */
-var DM = '//test-m.news.nate.com';
-//var DM = '//m.news.nate.com';
 function mndr(v) {
     if(MM_GLOBAL && typeof MM_GLOBAL.ndrclick === 'function') {
         MM_GLOBAL.ndrclick(v);
@@ -12,8 +10,18 @@ stage.addEvent('newsToday' , _todayInit);
 stage.addEvent('newsTodayStop', ()=>{
     if(TODAY.sm) {
         TODAY.sm.stop();
-    }    
+    }
+
+    if (document.querySelector('.btnProgress')) {
+        document.querySelector('.btnProgress').removeEventListener('click', toggleParentActive);
+    }
 });
+
+function toggleParentActive(e) {
+    e.preventDefault();
+    e.target.parentNode.classList.toggle('active');
+}
+
 
 function _todayInit(_,checked) {
     // isErrorPage
@@ -453,7 +461,7 @@ function _todayInit(_,checked) {
 
                             var wrapGroup = wrap
                                 .append('a')
-                                .attr('href', (d) => `${DM}/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`)
+                                .attr('href', (d,i) => `//m.news.nate.com#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${i}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`)
                                 .attr('target','_blank')
                                 .attr('class','link-item')
                                 .append('g')
@@ -486,7 +494,6 @@ function _todayInit(_,checked) {
                     .on('click', function(d) {
                         // 통계
                         mndr(`NNT2${((n)=> (n < 10) ? `0${n}` : n)(d.index+1)}`);
-
                         //window.open(`${DM}/#$keyword_dtm=${d.keyword_dtm}$keyword_sq=${d.keyword_sq}$index=${d.index}$MM=${moment(caller.progressDTM).format('mm')}$target=MAIN$v=${MM_PARAMS.ref}`, '_blank');
                     });
 
@@ -1428,12 +1435,12 @@ function _todayInit(_,checked) {
                 if (currentWidth !== window.innerWidth && defaultRadio === window.devicePixelRatio) {
                     orientation = window.matchMedia('(orientation: portrait)').matches;
                     currentWidth = window.innerWidth;
-
                     bubblesController.resize();
                     progressBarController.resize();
                 }
-            }, 30);
+            }, 300);
 
+            window.removeEventListener('resize', newsEdgeResize);
             window.addEventListener('resize', newsEdgeResize);
         }
 
@@ -1447,10 +1454,11 @@ function _todayInit(_,checked) {
             bubblesController.init();
             progressBarController.init();
             timeTravelController.init();
-            controlResize();   
+            controlResize();
         }
         function bindEvent() {
             timeTravelController.events();
+            controlResize();
         }
 
         function update(dateType) {            
@@ -1488,12 +1496,6 @@ function _todayInit(_,checked) {
                     timeTravelController.setDisabledTirgger();                
                 });
             });
-        }
-
-
-        function toggleParentActive(e) {
-            e.preventDefault();
-            e.target.parentNode.classList.toggle('active');
         }
 
         return {

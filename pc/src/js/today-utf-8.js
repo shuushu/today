@@ -142,7 +142,7 @@ var newsEdge = (function() {
 
         todayListItemWrap.append(item);
       });
-      todayListItemMore = $(`<li class="more" role="link" data-link="${_data.refs.link}" onclick="olapclick('TOM00');"><div class="face frontFace"><div class="innerWrap">${decodeURI('%EB%B9%84%EC%8A%B7%ED%95%9C %EA%B8%B0%EC%82%AC')}<div><span class="size">${utils.withCommas(_data.refs.cnt)}</span><span>${decodeURI('%EA%B0%9C')}</span></div>${decodeURI('%EB%8D%94 %EB%B3%B4%EA%B8%B0%0D%0A')}</div></div><div class="face backFace"></div></li>`);
+      todayListItemMore = $(`<li class="more" role="link" data-link="${_data.refs.link}" onclick="ndrclick('TOM00');"><div class="face frontFace"><div class="innerWrap">${decodeURI('%EB%B9%84%EC%8A%B7%ED%95%9C %EA%B8%B0%EC%82%AC')}<div><span class="size">${utils.withCommas(_data.refs.cnt)}</span><span>${decodeURI('%EA%B0%9C')}</span></div>${decodeURI('%EB%8D%94 %EB%B3%B4%EA%B8%B0%0D%0A')}</div></div><div class="face backFace"></div></li>`);
       todayListItemWrap.append(todayListItemMore);
       todayListItem.append(todayListItemWrap);
       todayList.append(todayListItem);
@@ -245,6 +245,9 @@ var newsEdge = (function() {
     return {
       listSetData: function (data) {
         _data = data;
+        if(_data.refs && _data.refs.link) {
+          _data.refs.link = encodeURI(_data.refs.link);
+        }
       },
       listRender: function(callBack) {
         listRender(callBack);

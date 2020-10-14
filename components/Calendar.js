@@ -1,6 +1,5 @@
 import Controller from "./Controller";
 const renderListner = Symbol();
-
 export default class Calendar extends Controller {
   constructor(props) {
     super(props);
@@ -39,13 +38,23 @@ export default class Calendar extends Controller {
     this.render();
   }
 
+  _addEvent(p) {
+    Object.entries(p).forEach(([key,el]) => {
+      el.addEventListener('click', () => {
+        this.prev()
+      });
+    })
+  }
+
   _render(f) {
     if (this[renderListner] === null) {
       if(!f) {
         throw 'undefined callback function';
       }
       this[renderListner] = f;
+      this[renderListner].call(this)
+    } else {
+      this[renderListner].call(this)
     }
-    this[renderListner].call(this)
   }
 }

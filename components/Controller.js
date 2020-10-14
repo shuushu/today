@@ -1,4 +1,3 @@
-import {tfech} from "./utils";
 import Data from "./Data";
 
 const DATA = new Data();
@@ -16,21 +15,39 @@ export default class Controller {
       throw 'parameter error'
     }
     // 데이터 업데이트
-    const result = tfech(`${KEYWORD_URL}?service_dtm=${date}`);
-    result.then(res => {
-      if (res.result === 200) {
-        this.data.update(res)
-        this._update()
-      }
+    this.data.getData(date).then(res => {
+      this.data.update(res)
+      this._update()
     });
   }
 
   render(f) {
-    this.data.state.then(_ => {
+    this.data.fetchState.then(() => {
       this._render(f)
     })
   }
 
-  _update() { throw 'overwrite method' }
-  _render() { throw 'overwrite method' }
+  addEvent(f) {
+    this._addEvent(f);
+  }
+
+  removeEvent() {
+    this._removeEvent();
+  }
+
+  _update() {
+    throw 'overwrite method'
+  }
+
+  _render() {
+    throw 'overwrite method'
+  }
+
+  _addEvent() {
+    throw 'overwrite method'
+  }
+
+  _removeEvent() {
+    throw 'overwrite method'
+  }
 }
