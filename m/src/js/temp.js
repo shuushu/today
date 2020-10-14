@@ -17,7 +17,7 @@ cc.addEvent({
 });
 cc.render(function() {
   let { service_dtm, min_dtm, server_dtm, update_dtm } = this.data.time;
-  
+
   const timeLog = document.querySelector('.timeLog');
   try {
     timeLog.innerText = `${moment(update_dtm).format('YYYY.MM.DD HH:mm')}기준`;

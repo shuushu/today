@@ -52,9 +52,7 @@ export default class Calendar extends Controller {
         throw 'undefined callback function';
       }
       this[renderListner] = f;
-      this[renderListner].call(this)
-    } else {
-      this[renderListner].call(this)
     }
+    this[renderListner].call(this)
   }
 }
