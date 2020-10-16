@@ -18,6 +18,9 @@ export default class Calendar extends Controller {
   }
 
   _getDate(type) {
+    if (!type) {
+      throw Error('_getDate: empty parameter');
+    }
     let { service_dtm, min_dtm, server_dtm } = this.data.time,
         date = (service_dtm).split(' ');
 
