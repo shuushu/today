@@ -1622,6 +1622,7 @@ var newsEdge = (function() {
 
     const session = ((session) => session !== null ? JSON.parse(sessionStorage.getItem('Article')) : null)(sessionStorage.getItem('Article'));
     const Datum = session || qs;
+    const isScroll = !('qs' in window && qs && qs.preview === 'true');
 
     callArticle({
       selection : document.querySelector('.bubbleGroup[data-importance="'+ ((Datum !== null) ? parseInt(Datum.index, 10) : 0) +'"]'),
@@ -1629,7 +1630,7 @@ var newsEdge = (function() {
       keyword_dtm: Datum !== null ? Datum.keyword_dtm : caller.keyword[0].keyword_dtm,
       keyword_sq: Datum !== null ? Datum.keyword_sq : caller.keyword[0].keyword_sq,
       index: Datum !== null ? parseInt(Datum.index, 10) : 0
-    },  true);
+    },  isScroll);
   }
 
 
@@ -1897,12 +1898,12 @@ document.addEventListener('DOMContentLoaded', function() {
      * @TYPE_RESERVED = 255
      */
 
-    let qs = ((searches, reservedQuery) => {
+    window.qs = ((searches, reservedQuery) => {
       var isReserved = reservedQuery.every((query) => searches.indexOf(query) !== -1);
 
       if (!isReserved) return null;
-      else return searches.substr(1).split('$').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
-    })(window.location.hash, ['keyword_dtm', 'keyword_sq', 'index']);
+      else return searches.substr(1).split('&').reduce((pv, cv) => Object.assign(pv, { [cv.split('=')[0]]: decodeURIComponent(cv.split('=')[1])}), {});
+    })(window.location.search, ['keyword_dtm', 'keyword_sq', 'index']);
 
     let initPath = KEYWORD_URL;
     if (history.state !== null && history.state.name === 'Article') {

@@ -11,16 +11,13 @@ export default class Data {
             service_dtm: null,
             update_dtm: null
         };
-        this.fetchState;
-
-        this.getData().then(res => {
+        this.items = new Map();
+    }
+    load(v) {
+        const path =  v ? `${KEYWORD_URL}?service_dtm=${v}` : KEYWORD_URL;
+        tfech(path).then(res => {
             this.update(res)
         })
-    }
-    getData(v) {
-        const path =  v ? `${KEYWORD_URL}?service_dtm=${v}` : KEYWORD_URL;
-        this.fetchState = tfech(path);
-        return this.fetchState;
     }
     /**
      * @parms 서버 응답 값 {object}
@@ -36,5 +33,10 @@ export default class Data {
         this.time.server_dtm = server_dtm;
         this.time.service_dtm = service_dtm;
         this.time.update_dtm = update_dtm;
+
+        for(let [name, inst] of this.items) {
+            if('render' in inst) inst.render();
+        }
+
     }
 }

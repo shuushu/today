@@ -3,14 +3,77 @@ import Calendar from "../../../components/Calendar";
 import Bubble from "../../../components/Bubble";
 import Progress from "../../../components/Progress";
 import TMP_PROGRESS from "../../../tmp/TMP_PROGRESS";
+import Data from "../../../components/Data";
 
-window.bb = new Bubble();
-window.cc = new Calendar();
-window.pp = new Progress('.progressWrap');
+
+window.DATA = new Data();
+window.cc = new Calendar(DATA);
+window.bb = new Bubble(DATA);
+
+(() => {
+  const N_PREV = document.querySelector('.btnTravel.prev'),
+        N_NEXT = document.querySelector('.btnTravel.next'),
+        N_TODAY = document.querySelector('.btnTravel.today');
+
+  cc.render = function(){
+    let { service_dtm, min_dtm, server_dtm, update_dtm } = this.data.time;
+    const timeLog = document.querySelector('.timeLog');
+    try {
+      timeLog.innerText = `${moment(update_dtm).format('YYYY.MM.DD HH:mm')}기준`;
+    } catch (e) {
+      console.log('.timeLog not found')
+    }
+
+    service_dtm = service_dtm.split(' ')[0];
+    min_dtm = min_dtm.split(' ')[0];
+    server_dtm = server_dtm.split(' ')[0];
+
+    console.log(service_dtm, min_dtm)
+    // 최신 날짜 일때
+    if (service_dtm >= server_dtm) {
+      N_NEXT.setAttribute('disabled', true);
+      N_TODAY.style.display = 'none';
+      // 안내문구 노출
+      timeLog.style.display = 'block';
+    } else if(service_dtm <= min_dtm) {
+      N_PREV.setAttribute('disabled', true)
+    } else {
+      N_NEXT.removeAttribute('disabled');
+      N_PREV.removeAttribute('disabled');
+      N_TODAY.style.display = 'inline-block';
+      timeLog.style.display = 'none';
+    }
+
+    // 날짜 변경
+    const t = service_dtm.split('-');
+    document.querySelector('.timeline .year').innerText = t[0];
+    document.querySelector('.timeline .month').innerText = t[1];
+    document.querySelector('.timeline .date').innerText = t[2];
+  };
+
+
+  cc.addEvent({
+    prev: N_PREV,
+    next: N_NEXT,
+    today: N_TODAY
+  });
+})();
+
+
+
+
+
+DATA.items.set('calendar', cc);
+DATA.load();
+
+
+// window.pp = new Progress('.progressWrap');
 
 /**
  * 달력 렌더러, 이전/오늘/다음 이벤트 발생시 렌더러 업데이트 됨
  */
+
+/*
 cc.addEvent({
   prev: document.querySelector('.btnTravel.prev'),
   next: document.querySelector('.btnTravel.next')
@@ -32,7 +95,8 @@ cc.render(function() {
 
 
 
-});
+
+});*/
 /*cc.render(function() {
   let { service_dtm, min_dtm, server_dtm, update_dtm } = this.data.time;
 
