@@ -1,15 +1,13 @@
-var path = require('path');
+const path = require('path');
+
 module.exports = {
-    mode: 'production',
-    watch: true,
-    entry: './src/js/temp.js',
-    output: {
-        filename: 'test.js',
-        //path: path.resolve(__dirname, './'),
-    },
-    devtool: "source-map",
     module: {
         rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
             {
                 test: /\.m?js$/,
                 exclude: /(node_modules|bower_components)/,
@@ -20,11 +18,16 @@ module.exports = {
                     }
                 }
             }
-        ]
+        ],
+    },
+    watch: true,
+    devtool: "source-map",
+    resolve: {
+        extensions: [ '.tsx', '.ts', '.js' ],
     },
     devServer: {
         contentBase: path.join(__dirname),
         //compress: true,
-        port: 9000        
+        port: 9000
     }
 };

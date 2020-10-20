@@ -10,6 +10,7 @@ window.DATA = new Data();
 window.cc = new Calendar(DATA);
 window.bb = new Bubble(DATA);
 
+
 (() => {
   const N_PREV = document.querySelector('.btnTravel.prev'),
         N_NEXT = document.querySelector('.btnTravel.next'),
