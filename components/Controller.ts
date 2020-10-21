@@ -1,11 +1,11 @@
 export default abstract class Controller <D>{
-    data: any;
+    binder: any;
     constructor(data: D) {
-        this.data = data;
+        this.binder = data;
     }
 
     update(path: string) {
-        this.data.update(path).then(() => {
+        this.binder.update(path).then(() => {
             this._update();
         })
     }

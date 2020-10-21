@@ -19,8 +19,8 @@ interface items {
     }
 }
 class Data {
-    time: time;
-    keywordList?: items;
+    public time: time;
+    public keywordList?: items;
 
     constructor() {
         this.time = {
@@ -30,19 +30,7 @@ class Data {
             service_dtm: '',
             update_dtm: ''
         };
-    }
-
-
-    update(path: string) {
-        return fetch(path).then(response => response.json()).catch(error => console.log('[tfech]',error)).then(res => {
-            const { server_dtm, service_dtm, update_dtm, data } = res;
-
-            this.keywordList = data;
-            this.time.progress_dtm = this.time.progress_dtm || server_dtm;
-            this.time.server_dtm = server_dtm;
-            this.time.service_dtm = service_dtm;
-            this.time.update_dtm = update_dtm;
-        });
+        this.keywordList = {};
     }
 }
 export {

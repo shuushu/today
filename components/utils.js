@@ -202,12 +202,6 @@ const utils = {
   }
 }
 
-const tfech = (url) => {
-  return fetch(url).then(response => response.json()).catch(error => console.log('[tfech]',error));
-}
-
-
 export {
-  utils,
-  tfech
+  utils
 }
