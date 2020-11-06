@@ -6,21 +6,21 @@ interface time {
     update_dtm: string;
 }
 interface items {
-    [key: string]: {
-        count: number;
-        create_dtm: string;
-        ctgr_cd: string;
-        keyword_dtm: string;
-        keyword_name: string;
-        keyword_service: string;
-        keyword_sq: number;
-        mod_dtm: string;
-        score: number;
-    }
+    count: number;
+    create_dtm: string;
+    ctgr_cd: string;
+    keyword_dtm: string;
+    keyword_name: string;
+    keyword_service: string;
+    keyword_sq: number;
+    mod_dtm: string;
+    score: number;
 }
 class Data {
     public time: time;
-    public keywordList?: items;
+    public keywordList?: {
+        [key: string]: items
+    }
 
     constructor() {
         this.time = {

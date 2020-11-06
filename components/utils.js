@@ -202,6 +202,118 @@ const utils = {
   }
 }
 
+/**
+ * Return a descriptor removing the value and returning a getter
+ * The getter will return a .bind version of the function
+ * and memoize the result against a symbol on the instance
+ */
+
+export function boundMethod(target, key, descriptor) {
+  let fn = descriptor.value;
+
+  if (typeof fn !== 'function') {
+    throw new TypeError(`@boundMethod decorator can only be applied to methods not: ${typeof fn}`);
+  }
+
+  // In IE11 calling Object.defineProperty has a side-effect of evaluating the
+  // getter for the property which is being replaced. This causes infinite
+  // recursion and an "Out of stack space" error.
+  let definingProperty = false;
+
+  return {
+    configurable: true,
+    get() {
+      // eslint-disable-next-line no-prototype-builtins
+      if (definingProperty || this === target.prototype || this.hasOwnProperty(key) ||
+          typeof fn !== 'function') {
+        return fn;
+      }
+      const boundFn = fn.bind(this);
+      definingProperty = true;
+      Object.defineProperty(this, key, {
+        configurable: true,
+        get() {
+          return boundFn;
+        },
+        set(value) {
+          fn = value;
+          delete this[key];
+        }
+      });
+
+      definingProperty = false;
+
+      return boundFn;
+    },
+
+    set(value) {
+      fn = value;
+    }
+  };
+}
+
+
+
+/**
+ * Use boundMethod to bind all methods on the target.prototype
+ */
+
+export function boundClass(target) {
+  // (Using reflect to get all keys including symbols)
+  let keys;
+  // Use Reflect if exists
+
+  if (typeof Reflect !== 'undefined' && typeof Reflect.ownKeys === 'function') {
+    keys = Reflect.ownKeys(target.prototype);
+  } else {
+    keys = Object.getOwnPropertyNames(target.prototype);
+    // Use symbols if support is provided
+    if (typeof Object.getOwnPropertySymbols === 'function') {
+      keys = keys.concat(Object.getOwnPropertySymbols(target.prototype));
+    }
+  }
+
+  keys.forEach(key => {
+    // Ignore special case target method
+    if (key === 'constructor') {
+      return;
+    }
+
+    const descriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
+    // Only methods need binding
+    if (typeof descriptor.value === 'function') {
+      Object.defineProperty(target.prototype, key, boundMethod(target, key, descriptor));
+    }
+  });
+
+  return target;
+}
+
+function autobind(...args) {
+  if (args.length === 1) {
+    return boundClass(...args);
+  }
+  return boundMethod(...args);
+}
+
+// 웹팩 빌드시 euc-kr(news서버가 euc-kr)로 변환 후 빌드시
+const krStr = [
+  decodeURI('%EA%B8%B0%EC%A4%80'),// 기준
+  // svg 타이틀 > 한눈에보는 오늘
+  decodeURI('%ED%95%9C%EB%88%88%EC%97%90 %EB%B3%B4%EB%8A%94 %EC%98%A4%EB%8A%98'),
+  // svg desc > 현재시간 실시간 이슈를 키워드 형태로 제공
+  decodeURI('%ED%98%84%EC%9E%AC%EC%8B%9C%EA%B0%84 %EC%8B%A4%EC%8B%9C%EA%B0%84 %EC%9D%B4%EC%8A%88%EB%A5%BC %ED%82%A4%EC%9B%8C%EB%93%9C %ED%98%95%ED%83%9C%EB%A1%9C %EC%A0%9C%EA%B3%B5'),
+  decodeURI('%EC%88%9C%EC%9C%84 %ED%82%A4%EC%9B%8C%EB%93%9C'),  // n 순위 키워드
+  decodeURI('%EB%B9%84%EC%8A%B7%ED%95%9C %EA%B8%B0%EC%82%AC'),  // 비슷한 기사
+  decodeURI('%EA%B0%9C'), // 개
+  decodeURI('%EB%8D%94 %EB%B3%B4%EA%B8%B0%0D%0A'), // 더 보기
+];
+
+
+
+
 export {
-  utils
+  utils,
+  krStr,
+  autobind
 }

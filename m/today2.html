@@ -14,10 +14,11 @@
   
   <link type="text/css" rel="stylesheet" href="//nimg.nate.com/ui/uidev/m/release/css/common.css?202009021336">
   <link href="./src/css/today.css" rel="stylesheet" type="text/css" />
-  
-  <script type="text/javascript" src="//m.news.nate.com/js/flickLib/plast-low-min.js"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/menu.js"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/media.js"></script>
+  <link href="./test/test.css" rel="stylesheet" type="text/css" />
+
+  <!--<script type="text/javascript" async src="//m.news.nate.com/js/flickLib/plast-low-min.js"></script>
+  <script type="text/javascript" async src="//m.news.nate.com/js/menu.js"></script>
+  <script type="text/javascript" async src="//m.news.nate.com/js/media.js"></script>-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
   <script src="./src/js/gsap.min.js"></script>
@@ -35,7 +36,7 @@
   <!-- <script type="text/javascript" src="//testdb-m-comm.news.nate.com/userJS?oj=1&r=690550026"></script>
   <script type="text/javascript" src="//m.news.nate.com/js/stat.js?202007291034"></script>
   <script type="text/javascript" src="//m.news.nate.com/js/common.js?202007291034"></script> -->
-</head>
+  </head>
 
 <body>
   <style>
@@ -47,7 +48,47 @@
   <div id="wrap">
 
 
-
+    <header id="header" role="banner" >
+      <div class="gnbWrap">
+        <h1 class="gnb">
+          <a href="../" class="nate"><span class="hd-img">네이트</span></a>
+          <a href="../" class="service">뉴스</a>
+        </h1>
+        <div class="relsvc">
+          <a href="../sports/">스포츠</a>
+          <a href="../ent/">연예</a>
+        </div>
+        <div class="searchWrap">
+          <form id="search-field" role="search" aria-labelledby="search-keyword">
+            <fieldset>
+              <legend id="search-keyword">뉴스 기사 검색</legend>
+              <input type="search" type="text">
+              <button class="delete hd-img" type="button"><span class="hd-img">검색어 삭제</span></button>
+              <button class="srchbtn" type="submit"><span class="hd-img">검색하기</span></button>
+            </fieldset>
+          </form>
+        </div>
+        <!-- SNB 2depth  -->
+        <!-- 기사뷰일때 data-floating="true" -->
+        <div class="lnbContainer" data-floating="false">
+          <h2 class="hide">뉴스 메인 메뉴</h2>
+          <nav class="lnb flick sisa" role="navigation">
+            <ul style="min-width: 600px">
+              <li role="menuitem"><a href="home.html#0" class="on">홈</a></li>
+              <li role="menuitem"><a href="ranking.html#1">랭킹뉴스</a></li>
+              <li role="menuitem"><a href="issuepick.html#2">이슈픽</a></li>
+              <li role="menuitem"><a href="section.html#3">정치</a></li>
+              <li role="menuitem"><a href="section.html#4">경제</a></li>
+              <li role="menuitem"><a href="section.html#5">사회</a></li>
+              <li role="menuitem"><a href="section.html#6">세계</a></li>
+              <li role="menuitem"><a href="section.html#7">IT</a></li>
+              <li role="menuitem"><a href="photo.html#8">포토</a></li>
+              <li role="menuitem"><a href="live.html#9">TV</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
 
 
 
@@ -134,7 +175,13 @@
 
 
 
-
+    <footer id="footer" role="contentinfo">
+      <!-- 로그인 전 -->
+      <div class="foot_wrap">
+        <p class="privacy"><a href="http://news.nate.com/enews/editguide">기사배열기본방침(책임:김종훈)</a> <span class="bar">|</span>청소년보호책임:김종훈</p>
+        <p class="copyright">&copy; SK Communications <span class="bar">|</span> <a class="cscenter" href="#">고객센터</a></p>
+      </div>
+    </footer>
 
 
 
@@ -143,8 +190,9 @@
 
 
     <script>
-      var KEYWORD_URL = 'https://m.news.nate.com/today/keywordList';
-      var ARTICLE_URL = 'https://m.news.nate.com/today/articleList';
+      //var KEYWORD_URL = '../json/keywordList.json';
+      var KEYWORD_URL = '//m.news.nate.com/today/keywordList';
+      var ARTICLE_URL = '//m.news.nate.com/today/articleList';
       // var KEYWORD_URL = '//testdb-news.nate.com/today/keywordList';
       // var ARTICLE_URL = '//testdb-news.nate.com/today/articleList';
       //<![CDATA[
@@ -159,6 +207,7 @@
     </script>
 
     <script src="./app.js"></script>
+
   </div>
 </body>
 

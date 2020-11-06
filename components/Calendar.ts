@@ -1,12 +1,9 @@
-import { krStr } from "./Util";
+import { krStr, autobind } from "./utils";
 import Controller from "./Controller";
-interface sizzle {
-    [key: string]: HTMLElement
-}
 
 const g:any = global;
-const selector: sizzle = {};
 
+@autobind
 export default class Calendar<S> extends Controller<S>{
     [index: string]: any;
 
@@ -14,21 +11,21 @@ export default class Calendar<S> extends Controller<S>{
         super(d);
     }
 
-    prev() {
+    protected prev(): void {
         this.update(this._getDate('subtract'))
     }
 
-    next() {
+    protected next(): void {
         this.update(this._getDate('add'))
     }
 
-    today() {
+    protected today(): void {
         this.update(g.KEYWORD_URL);
     }
 
-    render() {
+    protected _init(): void {
         let { service_dtm, min_dtm, server_dtm, update_dtm } = this.binder.data.time,
-            { prev, next, today } = selector;
+            [prev, next, today] = ['.prev', '.next', '.today'].map(t => document.querySelector(`.btnTravel${t}`));
         const timeLog = <HTMLElement> document.querySelector('.timeLog');
 
         try {
@@ -46,14 +43,14 @@ export default class Calendar<S> extends Controller<S>{
             next.setAttribute('disabled', 'true');
             today.style.display = 'none';
             // 안내문구 노출
-            timeLog.style.display = 'block';
+            timeLog.setAttribute('class','timeLog active');
         } else if(service_dtm <= min_dtm) {
             prev.setAttribute('disabled', 'true');
         } else {
             next.removeAttribute('disabled');
             prev.removeAttribute('disabled');
             today.style.display = 'inline-block';
-            timeLog.style.display = 'none';
+            timeLog.setAttribute('class','timeLog');
         }
 
         // 날짜 변경
@@ -63,7 +60,7 @@ export default class Calendar<S> extends Controller<S>{
         (<HTMLElement> document.querySelector('.timeline .date')).innerText = t[2];
     }
 
-    _getDate(type: string) {
+    private _getDate(type: string): string {
         if (!type) {
             throw Error('_getDate: empty parameter');
         }
@@ -82,16 +79,21 @@ export default class Calendar<S> extends Controller<S>{
         }
         return g.KEYWORD_URL
     }
-    _update() {
-        this.render()
-        this.binder.items.get('Progress').render();
+
+    protected _update(): void {
+        // 캘린더 리렌더
+        this._init();
+        this.updateProcess.forEach((callback) => callback());
     }
 
+    protected _removeEvent<V>(p: V): void {
+    }
 
-    _addEvent(p: sizzle) {
-        Object.entries(p).forEach(([key,el]: [string, HTMLElement]) => {
-            selector[key] = el;
-            el.addEventListener('click', this[key].bind(this));
-        })
+    protected _addEvent<V>(p: V): void {
+        if(Array.isArray(p)) {
+            p.forEach((i: string) => {
+                this.eventListner.set(`.btnTravel.${i}`, this[i])
+            })
+        }
     }
 }
