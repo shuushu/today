@@ -14,7 +14,7 @@ let nodeList: any = []; // d3 bubble nodeList
 let forceList: any = []; // d3.forceSimulation List
 let timeLine: any; // 버블 클릭 시 타임라인 이벤트
 
-
+let ww: number; // 리사이징 width 메모리
 interface circleData extends items {
     radius: number;
     x: number;
@@ -119,6 +119,7 @@ export default class KeywordList<S> extends ViewModel<S>{
     public updateBubble(): void {
         const data = this._updatePosition();
         const svg = document.getElementById('newsEdgeBubbles');
+        ww = window.innerWidth;
         svg.setAttribute('width', this.checkLimit[0]);
         svg.setAttribute('height', this.checkLimit[1]);
         svg.setAttribute('viewBox', `0 0 ${this.checkLimit[0]} ${this.checkLimit[1]}`);
@@ -345,6 +346,8 @@ export default class KeywordList<S> extends ViewModel<S>{
     }
 
     private _resize(): void {
+        // 가로값이 변화가 없다면 실행하지 않음;
+        if(window.innerWidth === ww) return;
         // 팝업이 열려있지 않은 상태에서만
         if(document.getElementById('wrap').className.indexOf('clicked') < 0) {
             if(resizeTime) clearTimeout(resizeTime)

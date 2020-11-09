@@ -3,11 +3,12 @@ import Calendar from "../../../components/Calendar";
 import ViewModel from "../../../components/ViewModel";
 import Progress from "../../../components/Progress";
 import KeywordList from "../../../components/KeywordList";
+import { History } from "../../../components/History";
 import Article from "./Article";
 
 const g:any = global;
 const DATA = new Model();
-
+const query = new History(window.location.hash, '$');
 const calendar = createInstance(Calendar);
 const progress = createInstance(Progress);
 const keyword = createInstance(KeywordList);
@@ -25,7 +26,7 @@ g.cc = calendar;
 g.pp = progress;
 g.kk = keyword;
 g.a = article;
-
+g.q = query
 
 /* update process */
 calendar.updateProcess.set('progress', function() {
@@ -78,6 +79,8 @@ article.init();
 // 카드리스트 팝업닫기
 article.addEvent(['.btnTodayClose']);
 
+
+const l = window.location.hash;
 
 document.addEventListener('DOMContentLoaded', () => {
     // 초기화

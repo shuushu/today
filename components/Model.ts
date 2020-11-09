@@ -78,8 +78,9 @@ class Model {
         try {
             const isToday = path.indexOf('?'); // 키워드 요청: 쿼리스트링이 없으면 달력의 오늘로 간주
             const isAticle = path.indexOf('articleList'); //  카드리스트 요청;
-            //`${'https://cors-anywhere.herokuapp.com/'}${path}`
-            return fetch(path).then(response => response.json()).catch(error => console.log('[tfech]',error)).then(res => {
+            const t = `${'https://cors-anywhere.herokuapp.com/'}${path}`
+
+            return fetch(t).then(response => response.json()).catch(error => console.log('[tfech]',error)).then(res => {
                 if (isAticle < 0) {
                     const random = res[Math.floor(Math.random()*3)]
                     // const { server_dtm, service_dtm, update_dtm, data } = random;

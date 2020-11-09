@@ -128,12 +128,13 @@ export default class Progress<S> extends ViewModel<S> {
         timeTooltip.setAttribute('height', `${height * 0.8333333333333334}`);
         timeTooltip.setAttribute('viebox', `0, 0, ${width * 0.36}, ${height * 0.8333333333333334}`)
 
-        const tooltipRect = g.d3.select('.timeTooltip rect');
-        tooltipRect.attr('width', `${width * 0.36}`);
-        tooltipRect.attr('height', `${height * 0.8333333333333334}`);
-        tooltipRect.attr('x', `${(percent * 100 > 84) ? -(((width * .36) / 2) - (84 - percent * 100)) : -((width * .36) / 2)}`);
-        tooltipRect.attr('y', `${-(height + r + 4)}`);
-        tooltipRect.attr('rx', ` ${r * 2}`);
+        const tooltipRect = timeTooltip.querySelector('rect');
+        tooltipRect.setAttribute('width', `${width * 0.36}`);
+        tooltipRect.setAttribute('height', `${height * 0.8333333333333334}`);
+        tooltipRect.setAttribute('x', `${(percent * 100 > 84) ? -(((width * .36) / 2) - (84 - percent * 100)) : -((width * .36) / 2)}`);
+        tooltipRect.setAttribute('y', `${-(height + r + 4)}`);
+        tooltipRect.setAttribute('rx', `${r * 2}`)
+        tooltipRect.setAttribute('ry', `${r * 2}`)
 
         timeTooltip.querySelector('#filter2Path').setAttribute('transform', `translate(-${r+2} -${r*2})`)
 
