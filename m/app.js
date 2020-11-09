@@ -86,76 +86,6 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./components/Binder.ts":
-/*!******************************!*\
-  !*** ./components/Binder.ts ***!
-  \******************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Binder; });
-class Binder {
-    constructor(v) {
-        this.data = v;
-        this.rank = 0;
-    }
-    get items() {
-        return this.data.keywordList;
-    }
-    get time() {
-        return this.data.time;
-    }
-    // 프로그래스 날짜가 서버시간보다 지났는지 판단
-    get isOverflow() {
-        const { server_dtm, progress_dtm } = this.data.time;
-        const s = server_dtm.split(' ').pop();
-        const p = progress_dtm.split(' ').pop();
-        return this.isToday && p >= s;
-    }
-    get isToday() {
-        const { server_dtm, service_dtm } = this.data.time;
-        return server_dtm.split(' ').shift() === service_dtm.split(' ').shift();
-    }
-    update(path) {
-        try {
-            const isToday = path.indexOf('?'); // 키워드 요청: 쿼리스트링이 없으면 달력의 오늘로 간주
-            const isAticle = path.indexOf('articleList'); //  카드리스트 요청;
-            return fetch(`${'https://cors-anywhere.herokuapp.com/'}${path}`).then(response => response.json()).catch(error => console.log('[tfech]', error)).then(res => {
-                console.log(res);
-                if (isAticle < 0) {
-                    const random = res[Math.floor(Math.random() * 3)];
-                    // const { server_dtm, service_dtm, update_dtm, data } = random;
-                    const { server_dtm, service_dtm, update_dtm, data } = res;
-                    let p = this.data.time.progress_dtm || server_dtm;
-                    this.data.keywordList = Object.entries(data).map(([k, v]) => v);
-                    this.data.time.server_dtm = server_dtm;
-                    this.data.time.service_dtm = service_dtm;
-                    this.data.time.update_dtm = update_dtm;
-                    this.data.time.progress_dtm = `${service_dtm.split(' ').shift()} ${p.split(' ').pop()}`;
-                    if (this.isToday && this.isOverflow || isToday < 0) {
-                        this.data.time.progress_dtm = server_dtm;
-                    }
-                }
-                else {
-                    this.data.article = Object.entries(res.data).map(([k, v]) => v);
-                    this.data.title = res.search_link;
-                }
-            });
-        }
-        catch (e) {
-            console.log(e);
-        }
-    }
-    updateProgress(v) {
-        this.data.time.progress_dtm = v || this.data.time.server_dtm;
-    }
-}
-
-
-/***/ }),
-
 /***/ "./components/Calendar.ts":
 /*!********************************!*\
   !*** ./components/Calendar.ts ***!
@@ -166,7 +96,7 @@ class Binder {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./components/utils.js");
-/* harmony import */ var _Controller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Controller */ "./components/Controller.ts");
+/* harmony import */ var _ViewModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ViewModel */ "./components/ViewModel.ts");
 var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -176,7 +106,7 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 
 
 const g = global;
-let Calendar = class Calendar extends _Controller__WEBPACK_IMPORTED_MODULE_1__["default"] {
+let Calendar = class Calendar extends _ViewModel__WEBPACK_IMPORTED_MODULE_1__["default"] {
     constructor(d) {
         super(d);
     }
@@ -190,7 +120,7 @@ let Calendar = class Calendar extends _Controller__WEBPACK_IMPORTED_MODULE_1__["
         this.update(g.KEYWORD_URL);
     }
     _init() {
-        let { service_dtm, min_dtm, server_dtm, update_dtm } = this.binder.data.time, [prev, next, today] = ['.prev', '.next', '.today'].map(t => document.querySelector(`.btnTravel${t}`));
+        let { service_dtm, min_dtm, server_dtm, update_dtm } = this.model.time, [prev, next, today] = ['.prev', '.next', '.today'].map(t => document.querySelector(`.btnTravel${t}`));
         const timeLog = document.querySelector('.timeLog');
         try {
             timeLog.innerText = `${g.moment(update_dtm).format('YYYY.MM.DD HH:mm')} ${_utils__WEBPACK_IMPORTED_MODULE_0__["krStr"][0]}`;
@@ -230,7 +160,7 @@ let Calendar = class Calendar extends _Controller__WEBPACK_IMPORTED_MODULE_1__["
         if (!g.KEYWORD_URL || !g.moment) {
             throw Error('KEYWORD_URL undefined or moment undefined');
         }
-        let { service_dtm, min_dtm, server_dtm } = this.binder.data.time, date = (service_dtm).split(' ');
+        let { service_dtm, min_dtm, server_dtm } = this.model.time, date = (service_dtm).split(' ');
         date[0] = g.moment(service_dtm)[type](1, 'days').format('YYYY-MM-DD');
         /**
          * 제약 사항: 최소, 최대 날짜에 해당 할 경우 핸들링 불가 설정
@@ -264,80 +194,6 @@ Calendar = __decorate([
 
 /***/ }),
 
-/***/ "./components/Controller.ts":
-/*!**********************************!*\
-  !*** ./components/Controller.ts ***!
-  \**********************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Controller; });
-const g = global;
-const s = Symbol();
-class Controller {
-    constructor(data) {
-        this[s] = data;
-        this.eventListner = new Map();
-        this.updateProcess = new Map();
-    }
-    get binder() {
-        return this[s];
-    }
-    update(path) {
-        this.binder.update(path).then(() => {
-            this._update();
-        });
-    }
-    addEvent(f) {
-        this._addEvent(f);
-        for (let [t, v] of this.eventListner) {
-            document.querySelector(t).addEventListener('click', v);
-        }
-    }
-    removeEvent(f) {
-        for (let [t, v] of this.eventListner) {
-            document.querySelector(t).removeEventListener('click', v);
-        }
-        this._removeEvent(f);
-    }
-    init() {
-        this._init();
-    }
-}
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
-
-/***/ }),
-
-/***/ "./components/Data.ts":
-/*!****************************!*\
-  !*** ./components/Data.ts ***!
-  \****************************/
-/*! exports provided: Data */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Data", function() { return Data; });
-class Data {
-    constructor() {
-        this.time = {
-            min_dtm: '2020-08-20 09:00:00',
-            progress_dtm: '',
-            server_dtm: '',
-            service_dtm: '',
-            update_dtm: ''
-        };
-        this.keywordList = {};
-    }
-}
-
-
-
-/***/ }),
-
 /***/ "./components/KeywordList.ts":
 /*!***********************************!*\
   !*** ./components/KeywordList.ts ***!
@@ -348,7 +204,7 @@ class Data {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return KeywordList; });
-/* harmony import */ var _Controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Controller */ "./components/Controller.ts");
+/* harmony import */ var _ViewModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ViewModel */ "./components/ViewModel.ts");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils */ "./components/utils.js");
 
 
@@ -362,7 +218,7 @@ let flag = false;
 let nodeList = []; // d3 bubble nodeList
 let forceList = []; // d3.forceSimulation List
 let timeLine; // 버블 클릭 시 타임라인 이벤트
-class KeywordList extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
+class KeywordList extends _ViewModel__WEBPACK_IMPORTED_MODULE_0__["default"] {
     constructor(d) {
         super(d);
         this.options = {
@@ -555,7 +411,7 @@ class KeywordList extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
             }
             // 타임라인
             //g.gsap.timeline({ defaults: { overwrite: 'auto', ease: 'none' }, paused: true });
-            //console.log(this.binder.data.keywordList[d.index])
+            //console.log(this.model.items[d.index])
         });
         group.append('circle')
             .attr('r', (d) => d.radius)
@@ -570,7 +426,7 @@ class KeywordList extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
             return g.d3.scaleLinear().domain([0, 100]).range([0, this.checkLimit[1]])(v) + 'px';
         })
             .selectAll('.lineBreak')
-            .data((d, i) => this.binder.data.keywordList[i].keyword_service.split('<br />').map((self) => self).slice(0, 3))
+            .data((d, i) => this.model.items[i].keyword_service.split('<br />').map((self) => self).slice(0, 3))
             .enter()
             .append('tspan')
             .attr('class', 'lineBreak')
@@ -643,7 +499,7 @@ class KeywordList extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
                 y: Math.floor(this.checkLimit[1] * positions[i].y) + r,
             };
         });
-        return this.binder.data.keywordList.map((d, i) => {
+        return this.model.items.map((d, i) => {
             return {
                 radius: parseInt(radiusScale(temp[i] / 2)),
                 x: xy[i].x,
@@ -684,6 +540,89 @@ class KeywordList extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
 
 /***/ }),
 
+/***/ "./components/Model.ts":
+/*!*****************************!*\
+  !*** ./components/Model.ts ***!
+  \*****************************/
+/*! exports provided: Model */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Model", function() { return Model; });
+class Model {
+    constructor() {
+        this.d = {
+            min_dtm: '2020-08-20 09:00:00',
+            progress_dtm: '',
+            server_dtm: '',
+            service_dtm: '',
+            update_dtm: ''
+        };
+        this.k = {};
+        this.a = {};
+        this.rank = 0;
+        this.title = '';
+    }
+    get items() {
+        return this.k;
+    }
+    get time() {
+        return this.d;
+    }
+    get article() {
+        return this.a;
+    }
+    // 프로그래스 날짜가 서버시간보다 지났는지 판단
+    get isOverflow() {
+        const { server_dtm, progress_dtm } = this.d;
+        const s = server_dtm.split(' ').pop();
+        const p = progress_dtm.split(' ').pop();
+        return this.isToday && p >= s;
+    }
+    get isToday() {
+        const { server_dtm, service_dtm } = this.d;
+        return server_dtm.split(' ').shift() === service_dtm.split(' ').shift();
+    }
+    update(path) {
+        try {
+            const isToday = path.indexOf('?'); // 키워드 요청: 쿼리스트링이 없으면 달력의 오늘로 간주
+            const isAticle = path.indexOf('articleList'); //  카드리스트 요청;
+            const t = `${'https://cors-anywhere.herokuapp.com/'}${path}`;
+            return fetch(t).then(response => response.json()).catch(error => console.log('[tfech]', error)).then(res => {
+                if (isAticle < 0) {
+                    const random = res[Math.floor(Math.random() * 3)];
+                    // const { server_dtm, service_dtm, update_dtm, data } = random;
+                    const { server_dtm, service_dtm, update_dtm, data } = res;
+                    let p = this.d.progress_dtm || server_dtm;
+                    this.k = Object.entries(data).map(([k, v]) => v);
+                    this.d.server_dtm = server_dtm;
+                    this.d.service_dtm = service_dtm;
+                    this.d.update_dtm = update_dtm;
+                    this.d.progress_dtm = `${service_dtm.split(' ').shift()} ${p.split(' ').pop()}`;
+                    if (this.isToday && this.isOverflow || isToday < 0) {
+                        this.d.progress_dtm = server_dtm;
+                    }
+                }
+                else {
+                    this.a = Object.entries(res.data).map(([k, v]) => v);
+                    this.title = res.search_link;
+                }
+            });
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+    updateProgress(v) {
+        this.d.progress_dtm = v || this.d.server_dtm;
+    }
+}
+
+
+
+/***/ }),
+
 /***/ "./components/Progress.ts":
 /*!********************************!*\
   !*** ./components/Progress.ts ***!
@@ -694,7 +633,7 @@ class KeywordList extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Progress; });
-/* harmony import */ var _Controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Controller */ "./components/Controller.ts");
+/* harmony import */ var _ViewModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ViewModel */ "./components/ViewModel.ts");
 /* harmony import */ var _tmp_TMP_PROGRESS__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../tmp/TMP_PROGRESS */ "./tmp/TMP_PROGRESS.js");
 
 
@@ -702,7 +641,7 @@ const g = global, ss = (1000 * 60 * 60 * 24); // 24시간 > ms 변환
 let drag; // gsap dragable plugin
 let resizeTime;
 let flag = false; // 리사이징와 타임라인 관련
-class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
+class Progress extends _ViewModel__WEBPACK_IMPORTED_MODULE_0__["default"] {
     constructor(d) {
         super(d);
         this.axisX = 0;
@@ -716,15 +655,15 @@ class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
         };
     }
     get isOverflow() {
-        return this.binder.isOverflow;
+        return this.model.isOverflow;
     }
     get isToday() {
-        return this.binder.isToday;
+        return this.model.isToday;
     }
     // pathBack 리밋트
     get limit() {
         if (this.isToday) {
-            return Number(this.options.width) * (g.moment(this.binder.data.time.server_dtm).valueOf() - g.moment(this.binder.data.time.server_dtm).startOf('day').valueOf()) / ss;
+            return Number(this.options.width) * (g.moment(this.model.time.server_dtm).valueOf() - g.moment(this.model.time.server_dtm).startOf('day').valueOf()) / ss;
         }
         else {
             return Number(this.options.width);
@@ -771,8 +710,8 @@ class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
             target.innerHTML = _tmp_TMP_PROGRESS__WEBPACK_IMPORTED_MODULE_1__["default"];
         }
         const cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        const now = g.moment(this.binder.data.time.progress_dtm).valueOf();
-        const start = g.moment(this.binder.data.time.progress_dtm).startOf('day').valueOf();
+        const now = g.moment(this.model.time.progress_dtm).valueOf();
+        const start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
         const percent = (now - start) / 86400000;
         const data = {
             front: `M0 ${height / 2} l ${cx} .001`,
@@ -802,12 +741,12 @@ class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
         timeTooltip.setAttribute('width', `${width * 0.36}`);
         timeTooltip.setAttribute('height', `${height * 0.8333333333333334}`);
         timeTooltip.setAttribute('viebox', `0, 0, ${width * 0.36}, ${height * 0.8333333333333334}`);
-        const tooltipRect = timeTooltip.querySelector('rect');
-        tooltipRect.setAttribute('width', `${width * 0.36}`);
-        tooltipRect.setAttribute('height', `${height * 0.8333333333333334}`);
-        tooltipRect.setAttribute('x', `${(percent * 100 > 84) ? -(((width * .36) / 2) - (84 - percent * 100)) : -((width * .36) / 2)}`);
-        tooltipRect.setAttribute('y', `${-(height + r + 4)}`);
-        tooltipRect.setAttribute('rx', ` ${r * 2}`);
+        const tooltipRect = g.d3.select('.timeTooltip rect');
+        tooltipRect.attr('width', `${width * 0.36}`);
+        tooltipRect.attr('height', `${height * 0.8333333333333334}`);
+        tooltipRect.attr('x', `${(percent * 100 > 84) ? -(((width * .36) / 2) - (84 - percent * 100)) : -((width * .36) / 2)}`);
+        tooltipRect.attr('y', `${-(height + r + 4)}`);
+        tooltipRect.attr('rx', ` ${r * 2}`);
         timeTooltip.querySelector('#filter2Path').setAttribute('transform', `translate(-${r + 2} -${r * 2})`);
         const timeText = timeTooltip.querySelector('.timeText');
         timeText.setAttribute('x', `${(84 < percent * 100) ? (84 - percent * 100) : 0}`);
@@ -828,10 +767,10 @@ class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
             onDrag: function () {
                 const gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
                 const dt = Math.abs(ss / Number(_this.options.width)); // this.x 이동 값 > 시간(타임스탬프) 변환값
-                const yyymmdd = new Date((_this.binder.data.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
+                const yyymmdd = new Date((_this.model.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
                 let X = _this.axisX = this.x;
                 d[3] = String(X);
-                _this.binder.updateProgress(g.moment((yyymmdd + dt * X) - gmt).format(`YYYY-MM-DD HH:mm:ss`));
+                _this.model.updateProgress(g.moment((yyymmdd + dt * X) - gmt).format(`YYYY-MM-DD HH:mm:ss`));
                 document.querySelector('.newsEdgeProgress').setAttribute('class', 'newsEdgeProgress');
                 document.querySelector('.pathFront').setAttribute('d', `${d.join(' ')}`);
                 _this._updateTooltip();
@@ -859,7 +798,7 @@ class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
     }
     /* 툴팁업데이트 */
     _updateTooltip() {
-        const { progress_dtm } = this.binder.data.time;
+        const { progress_dtm } = this.model.time;
         let hm = new Map(['.hh', '.mm'].map(i => [i, document.querySelector(`.timeText ${i}`)]));
         // 툴팁 시간 표시
         hm.get('.hh').textContent = g.moment(progress_dtm).format('HH');
@@ -875,6 +814,53 @@ class Progress extends _Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
         else {
             return `${a1}${n}`;
         }
+    }
+}
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./components/ViewModel.ts":
+/*!*********************************!*\
+  !*** ./components/ViewModel.ts ***!
+  \*********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ViewModel; });
+const g = global;
+const s = Symbol();
+class ViewModel {
+    constructor(data) {
+        this[s] = data;
+        this.eventListner = new Map();
+        this.updateProcess = new Map();
+    }
+    get model() {
+        return this[s];
+    }
+    update(path) {
+        this.model.update(path).then(() => {
+            this._update();
+        });
+    }
+    addEvent(f) {
+        this._addEvent(f);
+        for (let [t, v] of this.eventListner) {
+            document.querySelector(t).addEventListener('click', v);
+        }
+    }
+    removeEvent(f) {
+        for (let [t, v] of this.eventListner) {
+            document.querySelector(t).removeEventListener('click', v);
+        }
+        this._removeEvent(f);
+    }
+    init() {
+        this._init();
     }
 }
 
@@ -1204,7 +1190,7 @@ decodeURI('%EB%8D%94 %EB%B3%B4%EA%B8%B0%0D%0A') // 더 보기
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Article; });
-/* harmony import */ var _components_Controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../components/Controller */ "./components/Controller.ts");
+/* harmony import */ var _components_ViewModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../components/ViewModel */ "./components/ViewModel.ts");
 /* harmony import */ var _components_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
 /* harmony import */ var _tmp_TMP_ARTICLE__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../tmp/TMP_ARTICLE */ "./tmp/TMP_ARTICLE.js");
 
@@ -1212,7 +1198,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const g = global;
 let timeLine;
-class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["default"] {
+class Article extends _components_ViewModel__WEBPACK_IMPORTED_MODULE_0__["default"] {
     constructor(d) {
         super(d);
         // 카드 옵션
@@ -1248,7 +1234,7 @@ class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["defau
         timeLine = g.gsap.timeline({
             onComplete: () => {
                 document.getElementById('wrap').setAttribute('class', '');
-                svg[this.binder.rank].setAttribute('class', 'item');
+                svg[this.model.rank].setAttribute('class', 'item');
             }
         });
         // highScore, lowScore 삭제
@@ -1276,8 +1262,8 @@ class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["defau
         }
     }
     _update() {
-        document.querySelector('.todayListTitle').innerText = this.binder.data.title.split('?q=').pop();
-        document.getElementById('todayListWrap').setAttribute('class', (this.binder.rank < 5) ? 'highScore' : 'lowScore');
+        document.querySelector('.todayListTitle').innerText = this.model.title.split('?q=').pop();
+        document.getElementById('todayListWrap').setAttribute('class', (this.model.rank < 5) ? 'highScore' : 'lowScore');
         // disable scroll
         document.body.style.overflow = 'hidden';
         this._createList();
@@ -1341,7 +1327,7 @@ class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["defau
     }
     _createNav() {
         const nav = document.querySelector('.todayListItemCounts');
-        const size = this.binder.data.article.length;
+        const size = this.model.article.length;
         for (let i = 0; i < size + 1; i++) {
             const span = document.createElement('span');
             if (i === size) {
@@ -1358,7 +1344,7 @@ class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["defau
     }
     _createList() {
         const listItemWrap = document.querySelector('.listItemWrap');
-        this.binder.data.article.forEach((d, i) => {
+        this.model.a.forEach((d, i) => {
             let { link_url, artc_title, cp_nm, img_url, insert_dtm } = d;
             const li = document.createElement('li');
             li.setAttribute('class', 'item');
@@ -1382,7 +1368,7 @@ class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["defau
         const more = document.createElement('li');
         more.setAttribute('class', 'more');
         more.setAttribute('role', 'link');
-        more.setAttribute('data-link', this.binder.data.article.title);
+        more.setAttribute('data-link', this.model.title);
         more.setAttribute('onClick', `olapclick('TOM00')`);
         more.innerHTML = `
             <div class="face frontFace">
@@ -1505,24 +1491,22 @@ class Article extends _components_Controller__WEBPACK_IMPORTED_MODULE_0__["defau
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _components_Data__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../components/Data */ "./components/Data.ts");
-/* harmony import */ var _components_Binder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../components/Binder */ "./components/Binder.ts");
-/* harmony import */ var _components_Calendar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../components/Calendar */ "./components/Calendar.ts");
-/* harmony import */ var _components_Progress__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
-/* harmony import */ var _components_KeywordList__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
-/* harmony import */ var _Article__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Article */ "./m/src/js/Article.ts");
-
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _components_Model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../components/Model */ "./components/Model.ts");
+/* harmony import */ var _components_Calendar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../components/Calendar */ "./components/Calendar.ts");
+/* harmony import */ var _components_Progress__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
+/* harmony import */ var _components_KeywordList__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
+/* harmony import */ var _Article__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Article */ "./m/src/js/Article.ts");
 
 
 
 
 
 const g = global;
-const DATA = new _components_Binder__WEBPACK_IMPORTED_MODULE_1__["default"](new _components_Data__WEBPACK_IMPORTED_MODULE_0__["Data"]());
-const calendar = createInstance(_components_Calendar__WEBPACK_IMPORTED_MODULE_2__["default"]);
-const progress = createInstance(_components_Progress__WEBPACK_IMPORTED_MODULE_3__["default"]);
-const keyword = createInstance(_components_KeywordList__WEBPACK_IMPORTED_MODULE_4__["default"]);
-const article = createInstance(_Article__WEBPACK_IMPORTED_MODULE_5__["default"]);
+const DATA = new _components_Model__WEBPACK_IMPORTED_MODULE_0__["Model"]();
+const calendar = createInstance(_components_Calendar__WEBPACK_IMPORTED_MODULE_1__["default"]);
+const progress = createInstance(_components_Progress__WEBPACK_IMPORTED_MODULE_2__["default"]);
+const keyword = createInstance(_components_KeywordList__WEBPACK_IMPORTED_MODULE_3__["default"]);
+const article = createInstance(_Article__WEBPACK_IMPORTED_MODULE_4__["default"]);
 function createInstance(c) {
     return new c(DATA);
 }
@@ -1552,7 +1536,7 @@ calendar.addEvent(['prev', 'next', 'today']);
 /* Progress process */
 progress.updateProcess.set('dragEnd', function () {
     keyword.hideEff();
-    keyword.update(`${g.KEYWORD_URL}?service_dtm=${this.binder.data.time.progress_dtm}`);
+    keyword.update(`${g.KEYWORD_URL}?service_dtm=${this.model.time.progress_dtm}`);
 });
 // 버블 클릭 통계 프로세스 바인딩
 keyword.eventListner.set('ndr', function (d) {

@@ -2,7 +2,7 @@ declare type cb = () => any;
 
 const g:any = global;
 const s = Symbol();
-export default abstract class Controller <D>{
+export default abstract class ViewModel <D>{
     private [s]: any;
     public eventListner: Map<string , any>; // 이벤트 핸들러 프로세스
     public updateProcess: Map<string , cb>; // 업데이트가 일어날때 프로세스
@@ -12,12 +12,12 @@ export default abstract class Controller <D>{
         this.eventListner = new Map();
         this.updateProcess = new Map();
     }
-    get binder() {
+    get model() {
         return this[s];
     }
 
     update(path: string): void {
-        this.binder.update(path).then(() => {
+        this.model.update(path).then(() => {
             this._update();
         })
     }

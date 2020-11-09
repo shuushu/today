@@ -1,5 +1,5 @@
-import {items, time} from "./Data";
-import Controller from "./Controller";
+import { items } from "./Model";
+import ViewModel from "./ViewModel";
 import {utils, krStr} from "./utils";
 const g:any = global;
 
@@ -32,7 +32,7 @@ interface options {
     fontY: string[] // 키워드 텍스트 y축
 }
 
-export default class KeywordList<S> extends Controller<S>{
+export default class KeywordList<S> extends ViewModel<S>{
     public options: any;
     constructor(d: S) {
         super(d);
@@ -239,7 +239,7 @@ export default class KeywordList<S> extends Controller<S>{
                 // 타임라인
                 //g.gsap.timeline({ defaults: { overwrite: 'auto', ease: 'none' }, paused: true });
 
-                //console.log(this.binder.data.keywordList[d.index])
+                //console.log(this.model.items[d.index])
             })
 
 
@@ -258,7 +258,7 @@ export default class KeywordList<S> extends Controller<S>{
                 return g.d3.scaleLinear().domain([0, 100]).range([0, this.checkLimit[1]])(v) + 'px'
             })
             .selectAll('.lineBreak')
-            .data((d:T, i: number) => this.binder.data.keywordList[i].keyword_service.split('<br />').map((self:string) => self).slice(0, 3))
+            .data((d:T, i: number) => this.model.items[i].keyword_service.split('<br />').map((self:string) => self).slice(0, 3))
             .enter()
             .append('tspan')
             .attr('class', 'lineBreak')
@@ -335,7 +335,7 @@ export default class KeywordList<S> extends Controller<S>{
             }
         });
 
-        return this.binder.data.keywordList.map((d:any, i:number) => {
+        return this.model.items.map((d:any, i:number) => {
             return {
                 radius: parseInt(radiusScale(temp[i] / 2)),
                 x: xy[i].x,

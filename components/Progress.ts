@@ -1,4 +1,4 @@
-import Controller from "./Controller";
+import ViewModel from "./ViewModel";
 import TMP_PROGRESS from "../tmp/TMP_PROGRESS";
 
 interface dy {
@@ -8,7 +8,7 @@ const g:any = global, ss = (1000 * 60 * 60 * 24); // 24시간 > ms 변환
 let drag: any; // gsap dragable plugin
 let resizeTime:ReturnType<typeof setTimeout>;
 let flag = false; // 리사이징와 타임라인 관련
-export default class Progress<S> extends Controller<S> {
+export default class Progress<S> extends ViewModel<S> {
     public axisX: number;
 
     constructor(d: S) {
@@ -26,16 +26,16 @@ export default class Progress<S> extends Controller<S> {
     }
 
     get isOverflow(): boolean {
-        return this.binder.isOverflow;
+        return this.model.isOverflow;
     }
 
     get isToday(): boolean {
-        return this.binder.isToday;
+        return this.model.isToday;
     }
     // pathBack 리밋트
     get limit(): number {
         if (this.isToday) {
-            return Number(this.options.width) * (g.moment(this.binder.data.time.server_dtm).valueOf()- g.moment(this.binder.data.time.server_dtm).startOf('day').valueOf())/ ss;
+            return Number(this.options.width) * (g.moment(this.model.time.server_dtm).valueOf()- g.moment(this.model.time.server_dtm).startOf('day').valueOf())/ ss;
         } else {
             return Number(this.options.width);
         }
@@ -88,8 +88,8 @@ export default class Progress<S> extends Controller<S> {
         }
 
         const cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        const now = g.moment(this.binder.data.time.progress_dtm).valueOf();
-        const start = g.moment(this.binder.data.time.progress_dtm).startOf('day').valueOf();
+        const now = g.moment(this.model.time.progress_dtm).valueOf();
+        const start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
         const percent = (now - start) / 86400000;
         const data = {
             front: `M0 ${height / 2} l ${cx} .001`,
@@ -128,12 +128,12 @@ export default class Progress<S> extends Controller<S> {
         timeTooltip.setAttribute('height', `${height * 0.8333333333333334}`);
         timeTooltip.setAttribute('viebox', `0, 0, ${width * 0.36}, ${height * 0.8333333333333334}`)
 
-        const tooltipRect = timeTooltip.querySelector('rect');
-        tooltipRect.setAttribute('width', `${width * 0.36}`);
-        tooltipRect.setAttribute('height', `${height * 0.8333333333333334}`);
-        tooltipRect.setAttribute('x', `${(percent * 100 > 84) ? -(((width * .36) / 2) - (84 - percent * 100)) : -((width * .36) / 2)}`);
-        tooltipRect.setAttribute('y', `${-(height + r + 4)}`);
-        tooltipRect.setAttribute('rx', ` ${r * 2}`)
+        const tooltipRect = g.d3.select('.timeTooltip rect');
+        tooltipRect.attr('width', `${width * 0.36}`);
+        tooltipRect.attr('height', `${height * 0.8333333333333334}`);
+        tooltipRect.attr('x', `${(percent * 100 > 84) ? -(((width * .36) / 2) - (84 - percent * 100)) : -((width * .36) / 2)}`);
+        tooltipRect.attr('y', `${-(height + r + 4)}`);
+        tooltipRect.attr('rx', ` ${r * 2}`);
 
         timeTooltip.querySelector('#filter2Path').setAttribute('transform', `translate(-${r+2} -${r*2})`)
 
@@ -158,11 +158,11 @@ export default class Progress<S> extends Controller<S> {
             onDrag: function () {
                 const gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
                 const dt = Math.abs(ss / Number(_this.options.width)); // this.x 이동 값 > 시간(타임스탬프) 변환값
-                const yyymmdd = new Date((_this.binder.data.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
+                const yyymmdd = new Date((_this.model.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
                 let X = _this.axisX = this.x;
                 d[3] = String(X);
 
-                _this.binder.updateProgress(g.moment((yyymmdd+dt*X)-gmt).format(`YYYY-MM-DD HH:mm:ss`))
+                _this.model.updateProgress(g.moment((yyymmdd+dt*X)-gmt).format(`YYYY-MM-DD HH:mm:ss`))
                 document.querySelector('.newsEdgeProgress').setAttribute('class','newsEdgeProgress');
                 document.querySelector('.pathFront').setAttribute('d', `${d.join(' ')}`);
                 _this._updateTooltip();
@@ -190,7 +190,7 @@ export default class Progress<S> extends Controller<S> {
     }
     /* 툴팁업데이트 */
     private _updateTooltip(): void {
-        const {progress_dtm} = this.binder.data.time;
+        const {progress_dtm} = this.model.time;
 
         let hm = new Map(['.hh', '.mm'].map( i => [i, document.querySelector(`.timeText ${i}`)]));
         // 툴팁 시간 표시

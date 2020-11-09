@@ -1,10 +1,10 @@
 import { krStr, autobind } from "./utils";
-import Controller from "./Controller";
+import ViewModel from "./ViewModel";
 
 const g:any = global;
 
 @autobind
-export default class Calendar<S> extends Controller<S>{
+export default class Calendar<S> extends ViewModel<S>{
     [index: string]: any;
 
     constructor(d: S) {
@@ -24,7 +24,7 @@ export default class Calendar<S> extends Controller<S>{
     }
 
     protected _init(): void {
-        let { service_dtm, min_dtm, server_dtm, update_dtm } = this.binder.data.time,
+        let { service_dtm, min_dtm, server_dtm, update_dtm } = this.model.time,
             [prev, next, today] = ['.prev', '.next', '.today'].map(t => document.querySelector(`.btnTravel${t}`));
         const timeLog = <HTMLElement> document.querySelector('.timeLog');
 
@@ -67,7 +67,7 @@ export default class Calendar<S> extends Controller<S>{
         if (!g.KEYWORD_URL || !g.moment) {
             throw Error('KEYWORD_URL undefined or moment undefined');
         }
-        let { service_dtm, min_dtm, server_dtm } = this.binder.data.time,
+        let { service_dtm, min_dtm, server_dtm } = this.model.time,
             date = (service_dtm).split(' ');
 
         date[0] = g.moment(service_dtm)[type](1, 'days').format('YYYY-MM-DD');
