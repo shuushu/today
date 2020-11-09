@@ -194,6 +194,44 @@ Calendar = __decorate([
 
 /***/ }),
 
+/***/ "./components/History.ts":
+/*!*******************************!*\
+  !*** ./components/History.ts ***!
+  \*******************************/
+/*! exports provided: History */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "History", function() { return History; });
+let History = (() => {
+    const s = Symbol();
+    const o = Symbol();
+    return class {
+        constructor(t, v) {
+            this[s] = v;
+            this[o] = t;
+            this.data = new Map();
+            this._init();
+        }
+        _init() {
+            if (this[o].length > 0) {
+                this[o].split(this[s]).forEach(v => {
+                    const t = v.split('=');
+                    this.data.set(t[0], t[1]);
+                });
+            }
+            else {
+                this.data = null;
+            }
+        }
+    };
+})();
+
+
+
+/***/ }),
+
 /***/ "./components/KeywordList.ts":
 /*!***********************************!*\
   !*** ./components/KeywordList.ts ***!
@@ -218,6 +256,7 @@ let flag = false;
 let nodeList = []; // d3 bubble nodeList
 let forceList = []; // d3.forceSimulation List
 let timeLine; // 버블 클릭 시 타임라인 이벤트
+let ww; // 리사이징 width 메모리
 class KeywordList extends _ViewModel__WEBPACK_IMPORTED_MODULE_0__["default"] {
     constructor(d) {
         super(d);
@@ -300,6 +339,7 @@ class KeywordList extends _ViewModel__WEBPACK_IMPORTED_MODULE_0__["default"] {
     updateBubble() {
         const data = this._updatePosition();
         const svg = document.getElementById('newsEdgeBubbles');
+        ww = window.innerWidth;
         svg.setAttribute('width', this.checkLimit[0]);
         svg.setAttribute('height', this.checkLimit[1]);
         svg.setAttribute('viewBox', `0 0 ${this.checkLimit[0]} ${this.checkLimit[1]}`);
@@ -508,6 +548,9 @@ class KeywordList extends _ViewModel__WEBPACK_IMPORTED_MODULE_0__["default"] {
         });
     }
     _resize() {
+        // 가로값이 변화가 없다면 실행하지 않음;
+        if (window.innerWidth === ww)
+            return;
         // 팝업이 열려있지 않은 상태에서만
         if (document.getElementById('wrap').className.indexOf('clicked') < 0) {
             if (resizeTime)
@@ -1495,7 +1538,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_Calendar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../components/Calendar */ "./components/Calendar.ts");
 /* harmony import */ var _components_Progress__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
 /* harmony import */ var _components_KeywordList__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
-/* harmony import */ var _Article__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Article */ "./m/src/js/Article.ts");
+/* harmony import */ var _components_History__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../components/History */ "./components/History.ts");
+/* harmony import */ var _Article__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Article */ "./m/src/js/Article.ts");
+
 
 
 
@@ -1503,10 +1548,11 @@ __webpack_require__.r(__webpack_exports__);
 
 const g = global;
 const DATA = new _components_Model__WEBPACK_IMPORTED_MODULE_0__["Model"]();
+const query = new _components_History__WEBPACK_IMPORTED_MODULE_4__["History"](window.location.hash, '$');
 const calendar = createInstance(_components_Calendar__WEBPACK_IMPORTED_MODULE_1__["default"]);
 const progress = createInstance(_components_Progress__WEBPACK_IMPORTED_MODULE_2__["default"]);
 const keyword = createInstance(_components_KeywordList__WEBPACK_IMPORTED_MODULE_3__["default"]);
-const article = createInstance(_Article__WEBPACK_IMPORTED_MODULE_4__["default"]);
+const article = createInstance(_Article__WEBPACK_IMPORTED_MODULE_5__["default"]);
 function createInstance(c) {
     return new c(DATA);
 }
@@ -1517,6 +1563,7 @@ g.cc = calendar;
 g.pp = progress;
 g.kk = keyword;
 g.a = article;
+g.q = query;
 /* update process */
 calendar.updateProcess.set('progress', function () {
     // 드래그 업데이트
@@ -1566,6 +1613,7 @@ keyword.eventListner.set('openArticle', function (d) {
 article.init();
 // 카드리스트 팝업닫기
 article.addEvent(['.btnTodayClose']);
+const l = window.location.hash;
 document.addEventListener('DOMContentLoaded', () => {
     // 초기화
     DATA.update(g.KEYWORD_URL).then(() => {
