@@ -21,7 +21,7 @@ module.exports = {
         ],
     },
     watch: true,
-    devtool: "source-map",
+    devtool: false,
     resolve: {
         extensions: [ '.tsx', '.ts', '.js' ],
     },

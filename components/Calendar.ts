@@ -25,13 +25,10 @@ export default class Calendar<S> extends ViewModel<S>{
 
     protected _init(): void {
         let { service_dtm, min_dtm, server_dtm, update_dtm } = this.model.time,
-            [prev, next, today] = ['.prev', '.next', '.today'].map(t => document.querySelector(`.btnTravel${t}`));
-        const timeLog = <HTMLElement> document.querySelector('.timeLog');
+            [prev, next, today, btnShare, timeLog] = ['.prev', '.next', '.today', '.btnShare', '.timeLog'].map(t => document.querySelector(t));
 
-        try {
+        if(timeLog) {
             timeLog.innerText = `${g.moment(update_dtm).format('YYYY.MM.DD HH:mm')} ${krStr[0]}`;
-        } catch (e) {
-            console.log('.timeLog not found', e)
         }
 
         service_dtm = service_dtm.split(' ')[0];
@@ -41,9 +38,13 @@ export default class Calendar<S> extends ViewModel<S>{
         // 최신 날짜 일때
         if (service_dtm >= server_dtm) {
             next.setAttribute('disabled', 'true');
-            today.style.display = 'none';
+            prev.removeAttribute('disabled');
             // 안내문구 노출
             timeLog.setAttribute('class','timeLog active');
+            today.style.display = 'none';
+            if(btnShare) {
+                btnShare.style.display = 'block';
+            }
         } else if(service_dtm <= min_dtm) {
             prev.setAttribute('disabled', 'true');
         } else {
@@ -51,6 +52,9 @@ export default class Calendar<S> extends ViewModel<S>{
             prev.removeAttribute('disabled');
             today.style.display = 'inline-block';
             timeLog.setAttribute('class','timeLog');
+            if(btnShare) {
+                btnShare.style.display = 'none';
+            }
         }
 
         // 날짜 변경

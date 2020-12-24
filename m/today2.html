@@ -11,26 +11,27 @@
   
   <link rel="shortcut icon" href="http://news.nate.com/icon/favicon.ico" />
   <link rel="apple-touch-icon-precomposed" href="http://news.nateimg.co.kr/etc/ui/images/mnews/common/nate_news_114.png?v=20140911" />
-
+  
   <link type="text/css" rel="stylesheet" href="//nimg.nate.com/ui/uidev/m/release/css/common.css?202009021336">
-  <link href="//nimg.nate.com/ui/etc/today/m/src/css/today.css?202011021022" rel="stylesheet" type="text/css" />
-  <link href="./m/test/test.css" rel="stylesheet" type="text/css" />
+  <link href="./src/css/today.css" rel="stylesheet" type="text/css" />
 
-  <script type="text/javascript" async src="//m.news.nate.com/js/flickLib/plast-low-min.js"></script>
-  <script type="text/javascript" async src="//m.news.nate.com/js/menu.js"></script>
-  <script type="text/javascript" async src="//m.news.nate.com/js/media.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/flickLib/plast-low-min.js"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/menu.js"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/media.js"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/stat.js"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/common.js"></script>
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
 
-  <script type="text/javascript" src="//m.news.nate.com/js/today/gsap.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/CustomEase.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/Draggable.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/DrawSVGPlugin.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/MotionPathPlugin.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/ScrollToPlugin.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/InertiaPlugin.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/d3.v5.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/moment-with-locale.min.js?202010141708"></script>
-  <script type="text/javascript" src="//m.news.nate.com/js/today/moment-timezone-with-data.min.js?202010141708"></script>
+  <script src="./src/js/gsap.min.js"></script>
+  <script src="./src/js/CustomEase.min.js"></script>
+  <script src="./src/js/Draggable.min.js"></script>
+  <script src="./src/js/DrawSVGPlugin.min.js"></script>
+  <script src="./src/js/MotionPathPlugin.min.js"></script>
+  <script src="./src/js/ScrollToPlugin.min.js"></script>
+  <script src="./src/js/InertiaPlugin.min.js"></script>
+  <script src="./src/js/d3.v5.min.js"></script>
+  <script src="./src/js/moment-with-locale.min.js"></script>
+  <script src="./src/js/moment-timezone-with-data.min.js"></script>
 
   <!-- CSM 통계 -->
   <!-- <script type="text/javascript" src="//testdb-m-comm.news.nate.com/userJS?oj=1&r=690550026"></script>
@@ -98,16 +99,13 @@
         <!-- 이전/다음/오늘 이동 및 날짜 표시 -->
         <div class="timeTravel">
           <p class="timeline">
-            <!-- <button type="button" class="btnTravel prev" data-travel="prev" onclick="olapclick('TOB01');">이전</button> -->
-            <button type="button" class="btnTravel prev" data-travel="prev">이전</button>
+            <button type="button" class="btnTravel prev" data-travel="prev" onclick="olapclick('TOB01')">이전</button>
             <span class="year"></span>
             <span class="month"></span>
             <span class="date"></span>
-            <!-- <button type="button" class="btnTravel next" data-travel="next" onclick="olapclick('TOB02');">다음</button> -->
-            <button type="button" class="btnTravel next" data-travel="next">다음</button>
+            <button type="button" class="btnTravel next" data-travel="next" onclick="olapclick('TOB02')">다음</button>
           </p>
-          <!-- <button type="button" class="btnTravel today" data-travel="today" onclick="olapclick('TOB00');">오늘</button> -->
-          <button type="button" class="btnTravel today" data-travel="today">오늘</button>
+          <button type="button" class="btnTravel today" data-travel="today" onclick="olapclick('TOB00')">오늘</button>
         </div>
         <!-- // 이전/다음/오늘 이동 및 날짜 표시 -->
         <!-- 공유하기 -->
@@ -190,7 +188,8 @@
 
 
     <script>
-      //var KEYWORD_URL = '../json/keywordList.json';
+      //var KEYWORD_URL = '../json/fake-key.json';
+      //var ARTICLE_URL = '../json/fake-articleList.json';
       var KEYWORD_URL = '//m.news.nate.com/today/keywordList';
       var ARTICLE_URL = '//m.news.nate.com/today/articleList';
       // var KEYWORD_URL = '//testdb-news.nate.com/today/keywordList';
@@ -206,7 +205,7 @@
       //]]>
     </script>
 
-    <script src="./m/app.js"></script>
+    <script src="./src/js/today-dev.js"></script>
 
   </div>
 </body>
