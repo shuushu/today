@@ -1,7 +1,7 @@
 import { Model } from "../../../components/Model";
 import Calendar from "../../../components/Calendar";
 import ViewModel from "../../../components/ViewModel";
-import Progress from "../../../components/Progress";
+import Progress from "../../../components/ProgressV2";
 import KeywordList from "../../../components/KeywordList";
 import {getURIparams, krStr, replaceHistory, MAIN_LINK} from "../../../components/utils";
 import Article from "./Article";

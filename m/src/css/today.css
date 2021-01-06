@@ -61,6 +61,13 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
 .progressWrap.active .newsEdgeProgress { opacity: 1; visibility: visible; }
 .progressWrap.active .timeTooltip { overflow: visible; }
 
+/** progress renewal */
+.progressWrap {display: none;}
+.progressWrap.thin{display: block;width: 100%;padding:8px 0;max-width: inherit; box-shadow: none;}
+.progressWrap.thin .btnProgress{display: none}
+.progressWrap.thin .newsEdgeProgress{position:relative;margin: 0 auto;left:0}
+
+
 #todayListWrap { display: none; overflow: hidden; position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 101; }
 #todayListWrap.highScore .btnTodayClose:before,
 #todayListWrap.highScore .btnTodayClose:after { background: #fff; }

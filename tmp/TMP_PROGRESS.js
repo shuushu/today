@@ -37,7 +37,44 @@ const TMP_PROGRESS = `
     </g>
 </svg>
 `;
-
+const TMP_PROGRESS_THIN = `
+<svg id="newsEdgeProgress" class="newsEdgeProgress">
+    <g class="progress">
+        <defs><linearGradient id="pathLinear"><stop offset="0%" stop-color="#639eff"></stop><stop offset="100%" stop-color="rgba(91, 108, 255, .98)"></stop></linearGradient></defs>        
+        <rect class="pathBackboard" x="0" y="0" width="100%" height="8" fill="#f2f2f2" rx="4" ry="4" />
+        <rect class="pathBack" x="0" y="0" width="60%" height="8" fill="#c8c8c8" rx="4" ry="4" />
+        <rect class="pathFront" x="0" y="0" width="60%" height="8" fill="url(#pathLinear)" rx="4" ry="4" />                
+        <g class="timeGroup" transform="matrix(1,0,0,1,0,24)">
+            
+            <rect class="timeKnobEmpty" x="-24" y="-24" width="48" height="48" fill="transparent"></rect>
+            <svg class="timeTooltip" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="91.44" height="40" viebox="0,0,91.44,40" style="overflow: visible">
+              <defs>
+                <filter id="filter1Back" width="128.9%" height="167.4%" x="-14.4%" y="-28.5%" filterUnits="objectBoundingBox">
+                    <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="2"></feOffset>
+                    <feGaussianBlur result="shadowBlurOuter1" in="shadowOffsetOuter1" stdDeviation="4"></feGaussianBlur>
+                    <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"></feColorMatrix>
+                    <rect id="filter1Rect" width="91.44" height="40" x="-45.72" y="-64"></rect>
+                </filter>
+                <filter id="filter2Back" width="356.7%" height="367.1%" x="-128.3%" y="-85%" filterUnits="objectBoundingBox">
+                    <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="4"></feOffset>
+                    <feGaussianBlur result="shadowBlurOuter1" in="shadowOffsetOuter1" stdDeviation="3"></feGaussianBlur>
+                    <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0"></feColorMatrix>
+                    <path id="filter2Path" transform="translate(-14 -24)" d="M 19.285 0 L 15 8.235 10.714 0 h 8.571z"></path>
+                </filter>
+              </defs>
+              <g>
+                  <use fill="#000" filter="url(#filter1Back)" xlink:href="#filter1Rect"></use>
+                  <use fill="#fff" xlink:href="#filter1Rect"></use>    
+                  <text class="timeText" alignment-baseline="middle" text-anchor="middle" x="0" y="-38" font-size="22.352px">
+                      <tspan class="hh" dx="0" dy=".1em" fill="#000">00</tspan><tspan class="dtm-div" dx="4" dy="-.1em" fill="#7c8aff">:</tspan><tspan class="mm" dx="5" dy=".1em" fill="#000">00</tspan>
+                  </text>
+              </g>
+          </svg>
+        </g>
+    </g>
+</svg>
+`;
 export {
     TMP_PROGRESS,
+    TMP_PROGRESS_THIN
 };
