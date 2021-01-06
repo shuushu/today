@@ -212,7 +212,7 @@ function _todayInit() {
 
     const blockevent = () => { g.stage.trigger('BLOCK_ON') };
     document.querySelector('.progressWrap').removeEventListener('touchstart', blockevent);
-    document.querySelector('.progressWrap').addEventListener('touchstart', blockevent);
+    document.querySelector('.progressWrap').addEventListener('touchstart', blockevent, {passive: false, capture:false});
 
 
     if (process.env.NODE_ENV === 'development') {

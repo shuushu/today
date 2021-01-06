@@ -79,11 +79,10 @@ export default class KeywordList<S> extends ViewModel<S>{
 
     // true일때 모바일 가로모드
     get isLandScape(): boolean {
-        const c2 = window.devicePixelRatio;
         if (g.window.navigator.userAgent.indexOf('Macintosh') > 0) {
             return false;
         } else {
-            return !g.window.matchMedia('(orientation: portrait)').matches && c2 >=2;
+            return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight  && g.window.devicePixelRatio > 1;
         }
     }
     get checkLimit(){

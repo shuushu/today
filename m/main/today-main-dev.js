@@ -255,6 +255,8 @@ var nodeList = []; // d3 bubble nodeList
 var forceList = []; // d3.forceSimulation List
 var timeLine; // 버블 클릭 시 타임라인 이벤트
 var ww = g.window.innerWidth; // 리사이징 width 메모리
+// 임의지정: 아이폰5 가로 최소 사이즈
+var IPHONE5 = 568;
 var KeywordList = /** @class */ (function (_super) {
     __extends(KeywordList, _super);
     function KeywordList(d) {
@@ -301,12 +303,11 @@ var KeywordList = /** @class */ (function (_super) {
     Object.defineProperty(KeywordList.prototype, "isLandScape", {
         // true일때 모바일 가로모드
         get: function () {
-            var c2 = window.devicePixelRatio;
             if (g.window.navigator.userAgent.indexOf('Macintosh') > 0) {
                 return false;
             }
             else {
-                return !g.window.matchMedia('(orientation: portrait)').matches && c2 >= 2;
+                return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight && g.window.devicePixelRatio === 1;
             }
         },
         enumerable: false,
@@ -315,10 +316,10 @@ var KeywordList = /** @class */ (function (_super) {
     Object.defineProperty(KeywordList.prototype, "checkLimit", {
         get: function () {
             if (this.isLandScape) {
-                return g.window.innerWidth >= 650 ? [650, 320] : [g.window.innerWidth, 250];
+                return g.window.innerWidth > IPHONE5 ? [640, 320] : [g.window.innerWidth, 320];
             }
             else {
-                return g.window.innerWidth >= 650 ? [650, 650] : [g.window.innerWidth, g.window.innerWidth];
+                return g.window.innerWidth >= 640 ? [640, 640] : [g.window.innerWidth, g.window.innerWidth];
             }
         },
         enumerable: false,
@@ -541,7 +542,11 @@ var KeywordList = /** @class */ (function (_super) {
             .attr('fill', function (d, i) { return (i < 5) ? fColor[0] : fColor[1]; })
             .attr('font-size', function (d, i) {
             var s = (_this_1.isLandScape && sizes[i] <= 4) ? 4 : sizes[i];
-            var v = (_this_1.isLandScape && g.window.innerWidth > 560 && i < 5) ? s * 1.3 : s;
+            var v = (_this_1.isLandScape && g.window.innerWidth > IPHONE5 && i < 5) ? s * 1.3 : s;
+            // iphone5 가로모드
+            if (g.window.innerWidth === IPHONE5) {
+                v = (i < 5) ? s * 1.1 : 3.6;
+            }
             return g.d3.scaleLinear().domain([0, 100]).range([0, _this_1.checkLimit[1]])(v) + 'px';
         })
             .selectAll('.lineBreak')
@@ -571,10 +576,13 @@ var KeywordList = /** @class */ (function (_super) {
         if (creatTimer)
             clearTimeout(creatTimer);
         creatTimer = setTimeout(function () {
+            // svg > g요소 중앙 정렬 하기
+            // let groupWrap = document.querySelector('.group-wrap');
+            // console.log(groupWrap.getBoundingClientRect())
+            // groupWrap.setAttribute('transform','translate(0,0)')
             svg.attr('class', 'group-wrap active');
             if (utils_1.UA.isIE) {
-                gg
-                    .transition()
+                gg.transition()
                     .delay(function (d, i) {
                     return i < 8 ? i * 100 : 300;
                 })
@@ -611,7 +619,7 @@ var KeywordList = /** @class */ (function (_super) {
             // 버블 크기 조정
             temp = __spreadArrays(pp.map(function (i) {
                 if (!utils_1.UA.isEdge) {
-                    if (g.window.innerWidth >= 650) {
+                    if (g.window.innerWidth >= 640) {
                         return i / (_this_1.checkLimit[1] / 200);
                     }
                     else {
@@ -632,7 +640,11 @@ var KeywordList = /** @class */ (function (_super) {
             positions = utils_1.utils.shuffleArray(forceXY[0]);
         }
         //console.clear()
-        //console.table(positions)
+        /* if(this.isLandScape) {
+             positions[0].x = 1.32;
+             positions[0].y = 0.3
+             console.table(positions)
+         }*/
         var radiusScale = g.d3.scaleLinear().domain([0, 100]).range([0, this.checkLimit[0]]);
         var xy = pp.map(function (percent, i) {
             var r = parseInt(radiusScale(temp[i] / 2));
@@ -653,6 +665,12 @@ var KeywordList = /** @class */ (function (_super) {
         return this.model.items.map(function (d, i) {
             var radius = parseInt(radiusScale(temp[i] / 2));
             //const radius = ww >= 500 ? parseInt(radiusScale(temp[i] / 2.5)) : parseInt(radiusScale(temp[i] / 2))
+            if (_this_1.isLandScape && i === 0) {
+                // 랜덤 true/false 만들기
+                var k = Boolean(Math.floor(Math.random() * 2));
+                xy[i].x = window.innerWidth / 2 + (k ? -(Math.floor(Math.random() * 20)) : Math.floor(Math.random() * 20));
+                xy[i].y = 160 + (k ? Math.floor(Math.random() * 20) : -(Math.floor(Math.random() * 20)));
+            }
             return {
                 radius: radius,
                 x: xy[i].x,
@@ -1946,7 +1964,7 @@ function _todayInit() {
     });
     var blockevent = function () { g.stage.trigger('BLOCK_ON'); };
     document.querySelector('.progressWrap').removeEventListener('touchstart', blockevent);
-    document.querySelector('.progressWrap').addEventListener('touchstart', blockevent);
+    document.querySelector('.progressWrap').addEventListener('touchstart', blockevent, { passive: false, capture: false });
     if (true) {
         g.dd = DATA;
         g.cc = calendar;
