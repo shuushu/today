@@ -255,6 +255,8 @@ var nodeList = []; // d3 bubble nodeList
 var forceList = []; // d3.forceSimulation List
 var timeLine; // 버블 클릭 시 타임라인 이벤트
 var ww = g.window.innerWidth; // 리사이징 width 메모리
+// 임의지정: 아이폰5 가로 최소 사이즈
+var IPHONE5 = 568;
 var KeywordList = /** @class */ (function (_super) {
     __extends(KeywordList, _super);
     function KeywordList(d) {
@@ -301,12 +303,11 @@ var KeywordList = /** @class */ (function (_super) {
     Object.defineProperty(KeywordList.prototype, "isLandScape", {
         // true일때 모바일 가로모드
         get: function () {
-            var c2 = window.devicePixelRatio;
             if (g.window.navigator.userAgent.indexOf('Macintosh') > 0) {
                 return false;
             }
             else {
-                return !g.window.matchMedia('(orientation: portrait)').matches && c2 >= 2;
+                return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight && g.window.devicePixelRatio > 1;
             }
         },
         enumerable: false,
@@ -315,10 +316,10 @@ var KeywordList = /** @class */ (function (_super) {
     Object.defineProperty(KeywordList.prototype, "checkLimit", {
         get: function () {
             if (this.isLandScape) {
-                return g.window.innerWidth >= 650 ? [650, 320] : [g.window.innerWidth, 250];
+                return g.window.innerWidth > IPHONE5 ? [640, 320] : [g.window.innerWidth, 320];
             }
             else {
-                return g.window.innerWidth >= 650 ? [650, 650] : [g.window.innerWidth, g.window.innerWidth];
+                return g.window.innerWidth >= 640 ? [640, 640] : [g.window.innerWidth, g.window.innerWidth];
             }
         },
         enumerable: false,
@@ -541,7 +542,11 @@ var KeywordList = /** @class */ (function (_super) {
             .attr('fill', function (d, i) { return (i < 5) ? fColor[0] : fColor[1]; })
             .attr('font-size', function (d, i) {
             var s = (_this_1.isLandScape && sizes[i] <= 4) ? 4 : sizes[i];
-            var v = (_this_1.isLandScape && g.window.innerWidth > 560 && i < 5) ? s * 1.3 : s;
+            var v = (_this_1.isLandScape && g.window.innerWidth > IPHONE5 && i < 5) ? s * 1.3 : s;
+            // iphone5 가로모드
+            if (g.window.innerWidth === IPHONE5) {
+                v = (i < 5) ? s * 1.1 : 3.6;
+            }
             return g.d3.scaleLinear().domain([0, 100]).range([0, _this_1.checkLimit[1]])(v) + 'px';
         })
             .selectAll('.lineBreak')
@@ -571,10 +576,13 @@ var KeywordList = /** @class */ (function (_super) {
         if (creatTimer)
             clearTimeout(creatTimer);
         creatTimer = setTimeout(function () {
+            // svg > g요소 중앙 정렬 하기
+            // let groupWrap = document.querySelector('.group-wrap');
+            // console.log(groupWrap.getBoundingClientRect())
+            // groupWrap.setAttribute('transform','translate(0,0)')
             svg.attr('class', 'group-wrap active');
             if (utils_1.UA.isIE) {
-                gg
-                    .transition()
+                gg.transition()
                     .delay(function (d, i) {
                     return i < 8 ? i * 100 : 300;
                 })
@@ -611,7 +619,7 @@ var KeywordList = /** @class */ (function (_super) {
             // 버블 크기 조정
             temp = __spreadArrays(pp.map(function (i) {
                 if (!utils_1.UA.isEdge) {
-                    if (g.window.innerWidth >= 650) {
+                    if (g.window.innerWidth >= 640) {
                         return i / (_this_1.checkLimit[1] / 200);
                     }
                     else {
@@ -632,7 +640,11 @@ var KeywordList = /** @class */ (function (_super) {
             positions = utils_1.utils.shuffleArray(forceXY[0]);
         }
         //console.clear()
-        //console.table(positions)
+        /* if(this.isLandScape) {
+             positions[0].x = 1.32;
+             positions[0].y = 0.3
+             console.table(positions)
+         }*/
         var radiusScale = g.d3.scaleLinear().domain([0, 100]).range([0, this.checkLimit[0]]);
         var xy = pp.map(function (percent, i) {
             var r = parseInt(radiusScale(temp[i] / 2));
@@ -653,6 +665,12 @@ var KeywordList = /** @class */ (function (_super) {
         return this.model.items.map(function (d, i) {
             var radius = parseInt(radiusScale(temp[i] / 2));
             //const radius = ww >= 500 ? parseInt(radiusScale(temp[i] / 2.5)) : parseInt(radiusScale(temp[i] / 2))
+            if (_this_1.isLandScape && i === 0) {
+                // 랜덤 true/false 만들기
+                var k = Boolean(Math.floor(Math.random() * 2));
+                xy[i].x = window.innerWidth / 2 + (k ? -(Math.floor(Math.random() * 20)) : Math.floor(Math.random() * 20));
+                xy[i].y = 160 + (k ? Math.floor(Math.random() * 20) : -(Math.floor(Math.random() * 20)));
+            }
             return {
                 radius: radius,
                 x: xy[i].x,
@@ -891,10 +909,10 @@ exports.Model = Model;
 
 /***/ }),
 
-/***/ "./components/Progress.ts":
-/*!********************************!*\
-  !*** ./components/Progress.ts ***!
-  \********************************/
+/***/ "./components/ProgressV2.ts":
+/*!**********************************!*\
+  !*** ./components/ProgressV2.ts ***!
+  \**********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -922,10 +940,12 @@ var g = global, ss = (1000 * 60 * 60 * 24); // 24시간 > ms 변환
 var drag; // gsap dragable plugin
 var resizeTime;
 var flag = false; // 리사이징와 타임라인 관련
-var opt = {
-    width: Math.min(window.innerWidth, 375) * (254 / 375),
-    height: Math.min(window.innerWidth, 375) * (48 / 375),
-    r: (Math.min(window.innerWidth, 375) * (24 / 375)) / 2
+var opt = function () {
+    return {
+        width: Math.min(window.innerWidth - 30, 450),
+        height: 8,
+        r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
+    };
 };
 var ww = 0; // 리사이징 컨텐츠 영역 가로값 저장
 var Progress = /** @class */ (function (_super) {
@@ -934,18 +954,9 @@ var Progress = /** @class */ (function (_super) {
         var _this_1 = _super.call(this, d) || this;
         _this_1.axisX = 0;
         _this_1._resize = _this_1._resize.bind(_this_1);
+        _this_1.options = opt();
         return _this_1;
     }
-    Object.defineProperty(Progress.prototype, "options", {
-        get: function () {
-            return opt;
-        },
-        set: function (v) {
-            opt = v;
-        },
-        enumerable: false,
-        configurable: true
-    });
     Object.defineProperty(Progress.prototype, "isOverflow", {
         get: function () {
             return this.model.isOverflow;
@@ -997,18 +1008,14 @@ var Progress = /** @class */ (function (_super) {
         resizeTime = setTimeout(function () {
             var bw = document.body.clientWidth;
             document.getElementById('newsEdgeProgress').innerHTML = '';
-            _this_1.options = {
-                width: Math.min(bw, 375) * (254 / 375),
-                height: Math.min(bw, 375) * (48 / 375),
-                r: (Math.min(bw, 375) * (24 / 375)) / 2
-            };
+            _this_1.options = opt();
             _this_1._drawPath();
             _this_1._updateTooltip();
             _this_1._addEvent(['.progressWrap']);
             // 드래그 위치 재 설정
             if (flag) {
                 document.querySelector('.timeGroup').setAttribute('transform', "matrix(1,0,0,1," + _this_1.limit + ", " + _this_1.options.height / 2 + ")");
-                document.querySelector('.pathFront').setAttribute('d', "M0 " + _this_1.options.height / 2 + " l " + _this_1.limit + " .001");
+                document.querySelector('.pathFront').setAttribute('width', "" + _this_1.limit);
                 g.TweenMax.set(".timeGroup", { x: _this_1.limit });
             }
         }, 300);
@@ -1017,60 +1024,48 @@ var Progress = /** @class */ (function (_super) {
     Progress.prototype._drawPath = function () {
         var _b = this.options, width = _b.width, height = _b.height, r = _b.r;
         var wrapping = document.querySelector('.progressWrap');
+        wrapping.classList.add('thin');
         wrapping.removeChild(document.getElementById('newsEdgeProgress'));
         var temp = document.createElement('div');
         temp.id = 'newsEdgeProgress';
-        temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS;
+        temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS_THIN;
         document.querySelector('.progressWrap').appendChild(temp);
         var target = g.d3.select('#newsEdgeProgress svg');
-        //target.innerHTML = TMP_PROGRESS_IE11;
-        //초기화
-        //if (target.textContent === ''|| target.innerHTML === '') {
-        //}
         var cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        var now = g.moment(this.model.time.progress_dtm).valueOf();
-        var start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
-        var percent = (now - start) / 86400000;
-        var data = {
-            front: "M0 " + height / 2 + " l " + cx + " .001",
-            back: "M0 " + height / 2 + " l " + this.limit + " .001",
-            backboard: (function () {
-                var time = width / (height * 0.08333333333333333);
-                var pathResult = '';
-                for (var i = 0; i < time; i++) {
-                    pathResult += 'M ' + (height * 0.08333333333333333) * i + ' ' + (height * 0.4166666666666667) + ' H ' + (height * 0.08333333333333333) * i + ' V ' + ((height * 0.4166666666666667) + (height * 0.16666666666666666));
-                }
-                return pathResult;
-            })()
-        };
+        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
+        var timeTooltip = g.d3.select('.timeTooltip');
+        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
+        var HH = isPC ? 58 : 32;
+        var WW = isPC ? 134 : 73;
+        var RR = isPC ? 27 : 15;
+        var tooltipRect = timeTooltip.select('rect');
         /* 프로퍼티 설정 */
         target.attr('width', "" + width);
         target.attr('height', "" + height);
-        target.attr('viewBox', "0,0," + width + "," + height);
-        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
-        pathBackboard.attr('d', data.backboard);
-        pathBack.attr('d', data.back);
-        pathFront.attr('d', data.front);
-        pathBack.attr('stroke-width', height * 0.20833333333333334);
-        pathFront.attr('stroke-width', height * 0.2916666666666667);
+        target.attr('viewBox', "0,0," + width + "," + 48);
+        pathBackboard.attr('width', width);
+        pathBack.attr('width', this.limit);
+        pathFront.attr('width', "" + cx);
+        pathBackboard.attr('height', "" + height);
+        pathBack.attr('height', "" + height);
+        pathFront.attr('height', "" + height);
+        if (isPC) {
+            [pathBackboard, pathBack, pathFront].forEach(function (elements) {
+                elements.attr('rx', 5);
+                elements.attr('ry', 5);
+            });
+            timeTooltip.attr('y', 62);
+        }
         timeGroup.attr('transform', "matrix(1,0,0,1, " + cx + ", " + height / 2 + ")");
-        g.d3.select('.timeKnob').attr('r', "" + r);
-        var timeTooltip = g.d3.select('.timeTooltip');
-        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
-        var HH = isPC ? 58 : height * 0.8333333333333334;
-        var WW = isPC ? 134 : width * 0.36;
-        var RR = isPC ? 15 : r;
         timeTooltip.attr('width', "" + WW);
         timeTooltip.attr('height', "" + HH);
         timeTooltip.attr('viebox', "0, 0, " + WW + ", " + HH);
-        var tooltipRect = timeTooltip.select('rect');
         tooltipRect.attr('width', "" + WW);
         tooltipRect.attr('height', "" + HH);
-        //-WW/2 - (84 - percent * 100)
         tooltipRect.attr('x', "" + -WW / 2);
-        tooltipRect.attr('y', "" + -((isPC ? 92 : height + r + 4)));
-        tooltipRect.attr('rx', "" + RR * 2);
-        tooltipRect.attr('ry', "" + RR * 2);
+        tooltipRect.attr('y', "" + -((isPC ? 92 : 30)));
+        tooltipRect.attr('rx', "" + RR);
+        tooltipRect.attr('ry', "" + RR);
         var arrow = timeTooltip.select('#filter2Path');
         if (isPC) {
             arrow.attr('d', 'M -9 0 l 9 18 l 9 -18 h -18z');
@@ -1080,10 +1075,9 @@ var Progress = /** @class */ (function (_super) {
             arrow.attr('transform', "translate(-" + (r + 2) + " -" + r * 2 + ")");
         }
         var timeText = timeTooltip.select('.timeText');
-        //`${(84 < percent * 100) ? (84 - percent * 100) : 0}`
         timeText.attr('x', '0');
-        timeText.attr('y', "" + (isPC ? -54 : -(r * 3 + 2)));
-        timeText.attr('font-size', width * 0.088 + "px");
+        timeText.attr('y', "" + (isPC ? -54 : -10));
+        timeText.attr('font-size', '19px');
         ww = document.body.clientWidth;
     };
     /* 이벤트리스너 바인딩 */
@@ -1120,10 +1114,9 @@ var Progress = /** @class */ (function (_super) {
                 var dt = Math.abs(ss / Number(_this.options.width)); // this.x 이동 값 > 시간(타임스탬프) 변환값
                 var yyymmdd = new Date((_this.model.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
                 _this.axisX = this.x;
-                var value = "M 0 " + _this.options.height / 2 + " l " + this.x + " 0.001";
                 _this.model.updateProgress(g.moment((yyymmdd + dt * this.x) - gmt).format('YYYY-MM-DD HH:mm:ss'));
                 document.querySelector('.newsEdgeProgress').setAttribute('class', 'newsEdgeProgress');
-                document.querySelector('.pathFront').setAttribute('d', value);
+                document.querySelector('.pathFront').setAttribute('width', this.x);
                 _this._updateTooltip();
             },
             onDragEnd: function () {
@@ -1921,7 +1914,7 @@ exports.default = Article;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Model_1 = __webpack_require__(/*! ../../../components/Model */ "./components/Model.ts");
 var Calendar_1 = __webpack_require__(/*! ../../../components/Calendar */ "./components/Calendar.ts");
-var Progress_1 = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
+var ProgressV2_1 = __webpack_require__(/*! ../../../components/ProgressV2 */ "./components/ProgressV2.ts");
 var KeywordList_1 = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
 var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
 var Article_1 = __webpack_require__(/*! ./Article */ "./pc/src/js/Article.ts");
@@ -1944,7 +1937,7 @@ if (utils_1.UA.isEdge || utils_1.UA.isIE) {
     document.querySelector('html').setAttribute('class', 'ie');
 }
 var calendar = createInstance(Calendar_1.default);
-var progress = createInstance(Progress_1.default);
+var progress = createInstance(ProgressV2_1.default);
 var keyword = createInstance(KeywordList_1.default);
 var triggerBubblClick = function (i) {
     var sq = DATA.items[i].keyword_sq;
@@ -2018,8 +2011,8 @@ calendar.updateProcess.set('progress', function () {
 calendar.addEvent(['prev', 'next', 'today']);
 // 프로그래스 크기 조정
 progress.options = {
-    width: Math.min(document.body.clientWidth, 650) * (531 / 650),
-    height: Math.min(document.body.clientWidth, 650) * (48 / 650),
+    width: 650,
+    height: 10,
     r: (Math.min(document.body.clientWidth, 650) * (24 / 650)) / 2
 };
 /* Progress process */
@@ -2129,13 +2122,15 @@ if (true) {
 /*!*****************************!*\
   !*** ./tmp/TMP_PROGRESS.js ***!
   \*****************************/
-/*! exports provided: TMP_PROGRESS */
+/*! exports provided: TMP_PROGRESS, TMP_PROGRESS_THIN */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS", function() { return TMP_PROGRESS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS_THIN", function() { return TMP_PROGRESS_THIN; });
 var TMP_PROGRESS = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>\n        <path class=\"pathBackboard\" d=\"M 0 20 H 0 V 28M 4 20 H 4 V 28M 8 20 H 8 V 28M 12 20 H 12 V 28M 16 20 H 16 V 28M 20 20 H 20 V 28M 24 20 H 24 V 28M 28 20 H 28 V 28M 32 20 H 32 V 28M 36 20 H 36 V 28M 40 20 H 40 V 28M 44 20 H 44 V 28M 48 20 H 48 V 28M 52 20 H 52 V 28M 56 20 H 56 V 28M 60 20 H 60 V 28M 64 20 H 64 V 28M 68 20 H 68 V 28M 72 20 H 72 V 28M 76 20 H 76 V 28M 80 20 H 80 V 28M 84 20 H 84 V 28M 88 20 H 88 V 28M 92 20 H 92 V 28M 96 20 H 96 V 28M 100 20 H 100 V 28M 104 20 H 104 V 28M 108 20 H 108 V 28M 112 20 H 112 V 28M 116 20 H 116 V 28M 120 20 H 120 V 28M 124 20 H 124 V 28M 128 20 H 128 V 28M 132 20 H 132 V 28M 136 20 H 136 V 28M 140 20 H 140 V 28M 144 20 H 144 V 28M 148 20 H 148 V 28M 152 20 H 152 V 28M 156 20 H 156 V 28M 160 20 H 160 V 28M 164 20 H 164 V 28M 168 20 H 168 V 28M 172 20 H 172 V 28M 176 20 H 176 V 28M 180 20 H 180 V 28M 184 20 H 184 V 28M 188 20 H 188 V 28M 192 20 H 192 V 28M 196 20 H 196 V 28M 200 20 H 200 V 28M 204 20 H 204 V 28M 208 20 H 208 V 28M 212 20 H 212 V 28M 216 20 H 216 V 28M 220 20 H 220 V 28M 224 20 H 224 V 28M 228 20 H 228 V 28M 232 20 H 232 V 28M 236 20 H 236 V 28M 240 20 H 240 V 28M 244 20 H 244 V 28M 248 20 H 248 V 28M 252 20 H 252 V 28\" stroke-width=\"1\" stroke=\"#c7ccd1\" fill=\"none\" shape-rendering=\"crispEdges\"></path>\n        <path class=\"pathBack\" d=\"M0 24 l 0 0\" stroke-linecap=\"round\" stroke-width=\"10\" stroke=\"#e6e8ea\"></path>\n        <path class=\"pathFront\" stroke=\"url(#pathLinear)\" d=\"M0 24 l 254 0.01\" stroke-width=\"14\" stroke-linecap=\"round\" fill=\"#5b6cff\"></path>\n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <circle class=\"timeKnob\" r=\"12\" stroke=\"#5b6cff\" stroke-width=\"1\" fill=\"#fff\"></circle>\n            <rect class=\"timeKnobEmpty\" x=\"-24\" y=\"-24\" width=\"48\" height=\"48\" fill=\"transparent\"></rect>\n            <svg class=\"timeTooltip\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"91.44\" height=\"40\" viebox=\"0,0,91.44,40\" style=\"overflow: visible\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#000\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-38\" font-size=\"22.352px\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
+var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\" height=\"48\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"20\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">            \n            <svg class=\"timeTooltip\" height=\"48\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"73\" y=\"23\" viebox=\"0,0,73,32\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"0\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
 
 
 /***/ })

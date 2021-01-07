@@ -943,8 +943,8 @@ var flag = false; // 리사이징와 타임라인 관련
 var opt = function () {
     return {
         width: Math.min(window.innerWidth - 30, 450),
-        height: Math.min(window.innerWidth - 30, 450) * (48 / 375),
-        r: (Math.min(window.innerWidth, 375) * (24 / 375)) / 2
+        height: 8,
+        r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
     };
 };
 var ww = 0; // 리사이징 컨텐츠 영역 가로값 저장
@@ -1031,38 +1031,41 @@ var Progress = /** @class */ (function (_super) {
         temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS_THIN;
         document.querySelector('.progressWrap').appendChild(temp);
         var target = g.d3.select('#newsEdgeProgress svg');
-        //target.innerHTML = TMP_PROGRESS_IE11;
-        //초기화
-        //if (target.textContent === ''|| target.innerHTML === '') {
-        //}
         var cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        var now = g.moment(this.model.time.progress_dtm).valueOf();
-        var start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
+        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
+        var timeTooltip = g.d3.select('.timeTooltip');
+        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
+        var HH = isPC ? 58 : 32;
+        var WW = isPC ? 134 : 73;
+        var RR = isPC ? 27 : 15;
+        var tooltipRect = timeTooltip.select('rect');
         /* 프로퍼티 설정 */
         target.attr('width', "" + width);
         target.attr('height', "" + height);
-        target.attr('viewBox', "0,0," + width + "," + height);
-        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
+        target.attr('viewBox', "0,0," + width + "," + 48);
         pathBackboard.attr('width', width);
         pathBack.attr('width', this.limit);
         pathFront.attr('width', "" + cx);
+        pathBackboard.attr('height', "" + height);
+        pathBack.attr('height', "" + height);
+        pathFront.attr('height', "" + height);
+        if (isPC) {
+            [pathBackboard, pathBack, pathFront].forEach(function (elements) {
+                elements.attr('rx', 5);
+                elements.attr('ry', 5);
+            });
+            timeTooltip.attr('y', 62);
+        }
         timeGroup.attr('transform', "matrix(1,0,0,1, " + cx + ", " + height / 2 + ")");
-        var timeTooltip = g.d3.select('.timeTooltip');
-        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
-        var HH = isPC ? 58 : height * 0.8333333333333334;
-        var WW = isPC ? 134 : width * 0.36;
-        var RR = isPC ? 15 : r;
         timeTooltip.attr('width', "" + WW);
         timeTooltip.attr('height', "" + HH);
         timeTooltip.attr('viebox', "0, 0, " + WW + ", " + HH);
-        var tooltipRect = timeTooltip.select('rect');
         tooltipRect.attr('width', "" + WW);
         tooltipRect.attr('height', "" + HH);
-        //-WW/2 - (84 - percent * 100)
         tooltipRect.attr('x', "" + -WW / 2);
-        tooltipRect.attr('y', "" + -((isPC ? 92 : height + r + 4)));
-        tooltipRect.attr('rx', "" + RR * 2);
-        tooltipRect.attr('ry', "" + RR * 2);
+        tooltipRect.attr('y', "" + -((isPC ? 92 : 30)));
+        tooltipRect.attr('rx', "" + RR);
+        tooltipRect.attr('ry', "" + RR);
         var arrow = timeTooltip.select('#filter2Path');
         if (isPC) {
             arrow.attr('d', 'M -9 0 l 9 18 l 9 -18 h -18z');
@@ -1072,10 +1075,9 @@ var Progress = /** @class */ (function (_super) {
             arrow.attr('transform', "translate(-" + (r + 2) + " -" + r * 2 + ")");
         }
         var timeText = timeTooltip.select('.timeText');
-        //`${(84 < percent * 100) ? (84 - percent * 100) : 0}`
         timeText.attr('x', '0');
-        timeText.attr('y', "" + (isPC ? -54 : -(r * 3 + 2)));
-        timeText.attr('font-size', width * 0.088 + "px");
+        timeText.attr('y', "" + (isPC ? -54 : -10));
+        timeText.attr('font-size', '19px');
         ww = document.body.clientWidth;
     };
     /* 이벤트리스너 바인딩 */
@@ -2525,7 +2527,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS", function() { return TMP_PROGRESS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS_THIN", function() { return TMP_PROGRESS_THIN; });
 var TMP_PROGRESS = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>\n        <path class=\"pathBackboard\" d=\"M 0 20 H 0 V 28M 4 20 H 4 V 28M 8 20 H 8 V 28M 12 20 H 12 V 28M 16 20 H 16 V 28M 20 20 H 20 V 28M 24 20 H 24 V 28M 28 20 H 28 V 28M 32 20 H 32 V 28M 36 20 H 36 V 28M 40 20 H 40 V 28M 44 20 H 44 V 28M 48 20 H 48 V 28M 52 20 H 52 V 28M 56 20 H 56 V 28M 60 20 H 60 V 28M 64 20 H 64 V 28M 68 20 H 68 V 28M 72 20 H 72 V 28M 76 20 H 76 V 28M 80 20 H 80 V 28M 84 20 H 84 V 28M 88 20 H 88 V 28M 92 20 H 92 V 28M 96 20 H 96 V 28M 100 20 H 100 V 28M 104 20 H 104 V 28M 108 20 H 108 V 28M 112 20 H 112 V 28M 116 20 H 116 V 28M 120 20 H 120 V 28M 124 20 H 124 V 28M 128 20 H 128 V 28M 132 20 H 132 V 28M 136 20 H 136 V 28M 140 20 H 140 V 28M 144 20 H 144 V 28M 148 20 H 148 V 28M 152 20 H 152 V 28M 156 20 H 156 V 28M 160 20 H 160 V 28M 164 20 H 164 V 28M 168 20 H 168 V 28M 172 20 H 172 V 28M 176 20 H 176 V 28M 180 20 H 180 V 28M 184 20 H 184 V 28M 188 20 H 188 V 28M 192 20 H 192 V 28M 196 20 H 196 V 28M 200 20 H 200 V 28M 204 20 H 204 V 28M 208 20 H 208 V 28M 212 20 H 212 V 28M 216 20 H 216 V 28M 220 20 H 220 V 28M 224 20 H 224 V 28M 228 20 H 228 V 28M 232 20 H 232 V 28M 236 20 H 236 V 28M 240 20 H 240 V 28M 244 20 H 244 V 28M 248 20 H 248 V 28M 252 20 H 252 V 28\" stroke-width=\"1\" stroke=\"#c7ccd1\" fill=\"none\" shape-rendering=\"crispEdges\"></path>\n        <path class=\"pathBack\" d=\"M0 24 l 0 0\" stroke-linecap=\"round\" stroke-width=\"10\" stroke=\"#e6e8ea\"></path>\n        <path class=\"pathFront\" stroke=\"url(#pathLinear)\" d=\"M0 24 l 254 0.01\" stroke-width=\"14\" stroke-linecap=\"round\" fill=\"#5b6cff\"></path>\n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <circle class=\"timeKnob\" r=\"12\" stroke=\"#5b6cff\" stroke-width=\"1\" fill=\"#fff\"></circle>\n            <rect class=\"timeKnobEmpty\" x=\"-24\" y=\"-24\" width=\"48\" height=\"48\" fill=\"transparent\"></rect>\n            <svg class=\"timeTooltip\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"91.44\" height=\"40\" viebox=\"0,0,91.44,40\" style=\"overflow: visible\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#000\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-38\" font-size=\"22.352px\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
-var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"0\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"0\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"0\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            \n            <rect class=\"timeKnobEmpty\" x=\"-24\" y=\"-24\" width=\"48\" height=\"48\" fill=\"transparent\"></rect>\n            <svg class=\"timeTooltip\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"91.44\" height=\"40\" viebox=\"0,0,91.44,40\" style=\"overflow: visible\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-38\" font-size=\"22.352px\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
+var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\" height=\"48\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"20\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">            \n            <svg class=\"timeTooltip\" height=\"48\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"73\" y=\"23\" viebox=\"0,0,73,32\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"0\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
 
 
 /***/ })

@@ -1,7 +1,7 @@
 import { Model } from "../../../components/Model";
 import Calendar from "../../../components/Calendar";
 import ViewModel from "../../../components/ViewModel";
-import Progress from "../../../components/Progress";
+import Progress from "../../../components/ProgressV2";
 import KeywordList from "../../../components/KeywordList";
 import {getURIparams, krStr, UA} from "../../../components/utils";
 import Article from "./Article";
@@ -117,8 +117,8 @@ calendar.updateProcess.set('progress', function() {
 calendar.addEvent(['prev','next','today']);
 // 프로그래스 크기 조정
 progress.options = {
-    width:  Math.min(document.body.clientWidth, 650) * (531 / 650),
-    height: Math.min(document.body.clientWidth, 650) * (48 / 650),
+    width:  650,
+    height: 10,
     r: (Math.min(document.body.clientWidth, 650) * (24 / 650)) / 2
 };
 /* Progress process */

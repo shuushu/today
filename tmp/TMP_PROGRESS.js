@@ -38,16 +38,14 @@ const TMP_PROGRESS = `
 </svg>
 `;
 const TMP_PROGRESS_THIN = `
-<svg id="newsEdgeProgress" class="newsEdgeProgress">
+<svg id="newsEdgeProgress" class="newsEdgeProgress" height="48">
     <g class="progress">
         <defs><linearGradient id="pathLinear"><stop offset="0%" stop-color="#639eff"></stop><stop offset="100%" stop-color="rgba(91, 108, 255, .98)"></stop></linearGradient></defs>        
-        <rect class="pathBackboard" x="0" y="0" width="100%" height="8" fill="#f2f2f2" rx="4" ry="4" />
-        <rect class="pathBack" x="0" y="0" width="60%" height="8" fill="#c8c8c8" rx="4" ry="4" />
-        <rect class="pathFront" x="0" y="0" width="60%" height="8" fill="url(#pathLinear)" rx="4" ry="4" />                
-        <g class="timeGroup" transform="matrix(1,0,0,1,0,24)">
-            
-            <rect class="timeKnobEmpty" x="-24" y="-24" width="48" height="48" fill="transparent"></rect>
-            <svg class="timeTooltip" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="91.44" height="40" viebox="0,0,91.44,40" style="overflow: visible">
+        <rect class="pathBackboard" x="0" y="20" width="100%" height="8" fill="#f2f2f2" rx="4" ry="4" />
+        <rect class="pathBack" x="0" y="20" width="60%" height="8" fill="#c8c8c8" rx="4" ry="4" />
+        <rect class="pathFront" x="0" y="20" width="60%" height="8" fill="url(#pathLinear)" rx="4" ry="4" />                
+        <g class="timeGroup" transform="matrix(1,0,0,1,0,24)">            
+            <svg class="timeTooltip" height="48" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="73" y="23" viebox="0,0,73,32">
               <defs>
                 <filter id="filter1Back" width="128.9%" height="167.4%" x="-14.4%" y="-28.5%" filterUnits="objectBoundingBox">
                     <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="2"></feOffset>
@@ -65,7 +63,7 @@ const TMP_PROGRESS_THIN = `
               <g>
                   <use fill="#000" filter="url(#filter1Back)" xlink:href="#filter1Rect"></use>
                   <use fill="#fff" xlink:href="#filter1Rect"></use>    
-                  <text class="timeText" alignment-baseline="middle" text-anchor="middle" x="0" y="-38" font-size="22.352px">
+                  <text class="timeText" alignment-baseline="middle" text-anchor="middle" x="0" y="0">
                       <tspan class="hh" dx="0" dy=".1em" fill="#000">00</tspan><tspan class="dtm-div" dx="4" dy="-.1em" fill="#7c8aff">:</tspan><tspan class="mm" dx="5" dy=".1em" fill="#000">00</tspan>
                   </text>
               </g>

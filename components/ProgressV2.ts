@@ -13,15 +13,15 @@ let flag = false; // 리사이징와 타임라인 관련
 let opt = (): options => {
     return  {
         width:  Math.min(window.innerWidth-30, 450),
-        height: Math.min(window.innerWidth-30, 450) * (48 / 375),
-        r: (Math.min(window.innerWidth, 375) * (24 / 375)) / 2
+        height: 8,
+        r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
     };
 }
 let ww: number = 0; // 리사이징 컨텐츠 영역 가로값 저장
 
 export default class Progress<S> extends ViewModel<S> {
     public axisX: number; // 드래그 x축
-    private options: options
+    public options: options
     constructor(d: S) {
         super(d);
 
@@ -98,49 +98,52 @@ export default class Progress<S> extends ViewModel<S> {
 
         document.querySelector('.progressWrap').appendChild(temp);
         const target = g.d3.select('#newsEdgeProgress svg');
-        //target.innerHTML = TMP_PROGRESS_IE11;
-        //초기화
-        //if (target.textContent === ''|| target.innerHTML === '') {
-
-        //}
-
         const cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        const now = g.moment(this.model.time.progress_dtm).valueOf();
-        const start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
      
+        let [ pathBackboard, pathBack, pathFront, timeGroup ] = [ '.pathBackboard', '.pathBack', '.pathFront', '.timeGroup' ].map(i => g.d3.select(i));
+        const timeTooltip = g.d3.select('.timeTooltip');
+        const isPC = UA.isPC && document.body.clientHeight > 1200;
+        const HH = isPC ? 58 : 32;
+        const WW = isPC ? 134 : 73;
+        const RR = isPC ? 27 : 15;
+        const tooltipRect = timeTooltip.select('rect');
+
         /* 프로퍼티 설정 */
         target.attr('width', `${width}`)
-        target.attr('height', `${height}`);
-        target.attr('viewBox', `0,0,${width},${height}`);
+        target.attr('height', `${height}`)
+        target.attr('viewBox', `0,0,${width},${48}`);
 
-
-        let [ pathBackboard, pathBack, pathFront, timeGroup ] = [ '.pathBackboard', '.pathBack', '.pathFront', '.timeGroup' ].map(i => g.d3.select(i));
         pathBackboard.attr('width', width);
-        pathBack.attr('width', this.limit);
+        pathBack.attr('width', this.limit);      
         pathFront.attr('width', `${cx}`);
+
+        pathBackboard.attr('height', `${height}`)
+        pathBack.attr('height', `${height}`)
+        pathFront.attr('height', `${height}`)
+
+        if(isPC) {
+            [pathBackboard, pathBack, pathFront].forEach(elements => {
+                elements.attr('rx', 5);
+                elements.attr('ry', 5);
+            })
+            timeTooltip.attr('y', 62)
+        }
 
         timeGroup.attr('transform', `matrix(1,0,0,1, ${cx}, ${height / 2})`);
 
 
-
-        const timeTooltip = g.d3.select('.timeTooltip');
-        const isPC = UA.isPC && document.body.clientHeight > 1200;
-        const HH = isPC ? 58 : height * 0.8333333333333334;
-        const WW = isPC ? 134 : width * 0.36 ;
-        const RR = isPC ? 15 : r;
-
         timeTooltip.attr('width', `${WW}`);
         timeTooltip.attr('height', `${HH}`);
-        timeTooltip.attr('viebox', `0, 0, ${WW}, ${HH}`);
+        timeTooltip.attr('viebox', `0, 0, ${WW}, ${HH}`);        
 
-        const tooltipRect = timeTooltip.select('rect');
+
         tooltipRect.attr('width', `${WW}`);
         tooltipRect.attr('height', `${HH}`);
-        //-WW/2 - (84 - percent * 100)
+
         tooltipRect.attr('x', `${-WW/2}`);
-        tooltipRect.attr('y', `${-((isPC ? 92 : height + r + 4))}`);
-        tooltipRect.attr('rx', `${RR * 2}`);
-        tooltipRect.attr('ry', `${RR * 2}`);
+        tooltipRect.attr('y', `${-((isPC ? 92 : 30))}`);
+        tooltipRect.attr('rx', `${RR}`);
+        tooltipRect.attr('ry', `${RR}`);
 
         const arrow = timeTooltip.select('#filter2Path');
         if(isPC) {
@@ -152,10 +155,9 @@ export default class Progress<S> extends ViewModel<S> {
 
 
         const timeText = timeTooltip.select('.timeText');
-        //`${(84 < percent * 100) ? (84 - percent * 100) : 0}`
         timeText.attr('x', '0');
-        timeText.attr('y', `${isPC ? -54 : -(r * 3 + 2)}`);
-        timeText.attr('font-size', `${width * 0.088}px`);
+        timeText.attr('y', `${isPC ? -54 : -10}`);
+        timeText.attr('font-size', '19px');
         ww = document.body.clientWidth;
     }
 
