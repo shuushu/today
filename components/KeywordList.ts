@@ -82,7 +82,8 @@ export default class KeywordList<S> extends ViewModel<S>{
         if (g.window.navigator.userAgent.indexOf('Macintosh') > 0) {
             return false;
         } else {
-            return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight  && g.window.devicePixelRatio > 1;
+            //return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight  && g.window.devicePixelRatio > 1;
+            return g.window.innerWidth > g.window.innerHeight  && g.window.devicePixelRatio > 1;
         }
     }
     get checkLimit(){

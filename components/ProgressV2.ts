@@ -18,7 +18,7 @@ let opt = (): options => {
     };
 }
 let ww: number = 0; // 리사이징 컨텐츠 영역 가로값 저장
-
+let timeLine: any;
 export default class Progress<S> extends ViewModel<S> {
     public axisX: number; // 드래그 x축
     public options: options
@@ -54,23 +54,19 @@ export default class Progress<S> extends ViewModel<S> {
             currentTarget.classList.toggle(_a);
         }
     }
-    protected _update(): void {
-    }
-
+    protected _update(): void {}
     protected _init(): void {
         this._drawPath();
         this._updateTooltip();
         if (!UA.isPC) {
             window.addEventListener('resize', this._resize)
-        }
-    }
+        }        
+    }    
 
     private _resize(): void {
         if(resizeTime) clearTimeout(resizeTime);
         this._removeEvent();
         resizeTime = setTimeout(() => {
-            const bw = document.body.clientWidth;
-
             document.getElementById('newsEdgeProgress').innerHTML = '';
             this.options = opt();
             this._drawPath();
@@ -82,6 +78,7 @@ export default class Progress<S> extends ViewModel<S> {
                 document.querySelector('.pathFront').setAttribute('width', `${this.limit}`);
                 g.TweenMax.set(".timeGroup", {x: this.limit});
             }
+            timeLine.play();
         }, 300);
 
     }
@@ -126,9 +123,8 @@ export default class Progress<S> extends ViewModel<S> {
                 elements.attr('rx', 5);
                 elements.attr('ry', 5);
             })
-            timeTooltip.attr('y', 62)
-        }
-
+            timeTooltip.attr('y', 64)
+        }        
         timeGroup.attr('transform', `matrix(1,0,0,1, ${cx}, ${height / 2})`);
 
 
@@ -159,6 +155,22 @@ export default class Progress<S> extends ViewModel<S> {
         timeText.attr('y', `${isPC ? -54 : -10}`);
         timeText.attr('font-size', '19px');
         ww = document.body.clientWidth;
+
+        // 시간 툴팁 사라지기
+        timeLine = g.gsap.timeline({
+            onComplete: () => {}
+        });
+        
+        timeLine
+            .to('.timeText', { opacity: 0, delay: 5 })
+            .to('.timeTooltip rect', {
+                width: (UA.isPC) ? '60px' : '34px',
+                x: (UA.isPC) ? '30px' : '17px',
+                duration: 0.2, 
+                delay: -0.15
+            })
+            .to('.timeTooltip g', { scale: (UA.isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration: 0.1, delay: (UA.isPC) ? 0 : -0.1})
+            .to('.timeTooltip rect', { stroke: '#cccccc' })
     }
 
     /* 이벤트리스너 바인딩 */
@@ -167,6 +179,11 @@ export default class Progress<S> extends ViewModel<S> {
         const end = this.updateProcess.get('dragEnd').bind(this) || function() {};
         //let d = document.querySelector('.pathFront').getAttribute('d').split(' ');
         const body = document.body;
+        const cache: any = {
+            win: 0,
+            svg: 0,
+            t: null
+        }
 
         drag = g.Draggable.create('.timeGroup', {
             type: 'x, y',
@@ -189,6 +206,13 @@ export default class Progress<S> extends ViewModel<S> {
                 if (_this.eventListner.has('dragStart')) {
                     _this.eventListner.get('dragStart').call(this);
                 }
+                timeLine.pause();
+                timeLine.reverse();
+                clearTimeout(timeLine.timer);
+                // 캐쉬 기록
+                cache.win = document.body.clientHeight;
+                cache.svg = document.querySelector('.newsEdgeProgress').clientWidth;
+                cache.t = g.d3.select('.timeTooltip');
             },
             onDrag: function () {
                 const gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
@@ -199,6 +223,19 @@ export default class Progress<S> extends ViewModel<S> {
                 document.querySelector('.newsEdgeProgress').setAttribute('class','newsEdgeProgress');
                 document.querySelector('.pathFront').setAttribute('width', this.x);
                 _this._updateTooltip();
+                // [portrait view] 시간표시 가려지는 영역에 도달 할 경우 위치 변경
+                let margin = 20;
+                /* if (!(UA.isPC && cache.win > 1200) && cache.svg < 450) {
+                    // 가장 왼쪽
+                    if (this.x < margin) {
+                        cache.t.attr('x', 20-this.x)
+                    } else if(this.x > cache.svg - margin) {
+                        cache.t.attr('x', (cache.svg - margin) -this.x)
+                    } else {
+                        cache.t.attr('x', null)
+                    }                    
+                } */
+                
             },
             onDragEnd: function() {
                 // 마지막 지점에 도달할대
@@ -207,6 +244,9 @@ export default class Progress<S> extends ViewModel<S> {
                     end();
                 }
                 body.removeAttribute('class');
+                timeLine.timer = setTimeout(() => {
+                    timeLine.play();
+                }, 2000)
             }
         });
         // 접기

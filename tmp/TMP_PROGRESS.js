@@ -51,7 +51,7 @@ const TMP_PROGRESS_THIN = `
                     <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="2"></feOffset>
                     <feGaussianBlur result="shadowBlurOuter1" in="shadowOffsetOuter1" stdDeviation="4"></feGaussianBlur>
                     <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"></feColorMatrix>
-                    <rect id="filter1Rect" width="91.44" height="40" x="-45.72" y="-64"></rect>
+                    <rect id="filter1Rect" width="91.44" height="40" x="-45.72" y="-62"></rect>
                 </filter>
                 <filter id="filter2Back" width="356.7%" height="367.1%" x="-128.3%" y="-85%" filterUnits="objectBoundingBox">
                     <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="4"></feOffset>
