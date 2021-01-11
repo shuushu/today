@@ -12,7 +12,7 @@ let resizeTime:ReturnType<typeof setTimeout>;
 let flag = false; // 리사이징와 타임라인 관련
 let opt = (): options => {
     return  {
-        width:  Math.min(window.innerWidth-30, 450),
+        width:  Math.min(window.innerWidth-60, 450),
         height: 8,
         r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
     };
@@ -97,13 +97,14 @@ export default class Progress<S> extends ViewModel<S> {
         const target = g.d3.select('#newsEdgeProgress svg');
         const cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
      
-        let [ pathBackboard, pathBack, pathFront, timeGroup ] = [ '.pathBackboard', '.pathBack', '.pathFront', '.timeGroup' ].map(i => g.d3.select(i));
+        let [ pathBackboard, pathBack, pathFront, timeGroup, timeGroup2 ] = [ '.pathBackboard', '.pathBack', '.pathFront', '.timeGroup', '.timeGroup2' ].map(i => g.d3.select(i));
         const timeTooltip = g.d3.select('.timeTooltip');
         const isPC = UA.isPC && document.body.clientHeight > 1200;
         const HH = isPC ? 58 : 32;
         const WW = isPC ? 134 : 73;
         const RR = isPC ? 27 : 15;
-        const tooltipRect = timeTooltip.select('rect');
+        const tooltipRect = timeTooltip.select('#filter1Rect');
+        const tooltipRect2 = timeTooltip.select('#filter2Rect');
 
         /* 프로퍼티 설정 */
         target.attr('width', `${width}`)
@@ -127,24 +128,35 @@ export default class Progress<S> extends ViewModel<S> {
         }        
         timeGroup.attr('transform', `matrix(1,0,0,1, ${cx}, ${height / 2})`);
 
-
         timeTooltip.attr('width', `${WW}`);
         timeTooltip.attr('height', `${HH}`);
         timeTooltip.attr('viebox', `0, 0, ${WW}, ${HH}`);        
 
-
         tooltipRect.attr('width', `${WW}`);
         tooltipRect.attr('height', `${HH}`);
+
 
         tooltipRect.attr('x', `${-WW/2}`);
         tooltipRect.attr('y', `${-((isPC ? 92 : 30))}`);
         tooltipRect.attr('rx', `${RR}`);
         tooltipRect.attr('ry', `${RR}`);
 
+        tooltipRect2.attr('width', `${WW}`);
+        tooltipRect2.attr('height', `${HH}`);
+
+
+        tooltipRect2.attr('x', `${-WW/2}`);
+        tooltipRect2.attr('y', `${-((isPC ? 92 : 30))}`);
+        tooltipRect2.attr('rx', `${RR}`);
+        tooltipRect2.attr('ry', `${RR}`);
+
+
         const arrow = timeTooltip.select('#filter2Path');
         if(isPC) {
             arrow.attr('d', 'M -9 0 l 9 18 l 9 -18 h -18z');
-            arrow.attr('transform', 'translate(0 -34)');
+            arrow.attr('transform', UA.isIE ? 'translate(8 -50)' : 'translate(4 -50)');
+            g.d3.select('.copy').attr('transform', 'matrix(1,0,0,1, -2, -60)')
+            g.d3.select('.copy .timeText').attr('y', '-52');
         } else {
             arrow.attr('transform', `translate(-${r+2} -${r*2})`);
         }
@@ -154,23 +166,12 @@ export default class Progress<S> extends ViewModel<S> {
         timeText.attr('x', '0');
         timeText.attr('y', `${isPC ? -54 : -10}`);
         timeText.attr('font-size', '19px');
-        ww = document.body.clientWidth;
-
-        // 시간 툴팁 사라지기
-        timeLine = g.gsap.timeline({
-            onComplete: () => {}
-        });
         
-        timeLine
-            .to('.timeText', { opacity: 0, delay: 5 })
-            .to('.timeTooltip rect', {
-                width: (UA.isPC) ? '60px' : '34px',
-                x: (UA.isPC) ? '30px' : '17px',
-                duration: 0.2, 
-                delay: -0.15
-            })
-            .to('.timeTooltip g', { scale: (UA.isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration: 0.1, delay: (UA.isPC) ? 0 : -0.1})
-            .to('.timeTooltip rect', { stroke: '#cccccc' })
+        const timeText2 = timeTooltip.select('.timeText2');
+        timeText2.attr('x', '0');
+        timeText2.attr('y', `${isPC ? -54 : -8}`);
+        timeText2.attr('font-size', '19px');
+        ww = document.body.clientWidth;
     }
 
     /* 이벤트리스너 바인딩 */
@@ -182,8 +183,43 @@ export default class Progress<S> extends ViewModel<S> {
         const cache: any = {
             win: 0,
             svg: 0,
-            t: null
+            t: null,
+            f: false
         }
+        const isPC = UA.isPC && document.body.clientHeight > 1200;
+        timeLine = g.gsap.timeline({
+            onComplete: ()=>timeLine.pause()
+        });
+        if (!UA.isIE) {
+            timeLine.set('.copy', { scale: '0', opacity: 0, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' })
+        }
+        // IE11에서 프로퍼티 애니매이션이 상이하게 표현
+        const zoomOut1 = (() => {
+            if (UA.isIE) {
+                return {
+                    transform: `matrix(0.4,0,0,1,0,0)`,
+                    transformOrigin: '50% 50%', 
+                    duration: 0.2, 
+                    delay: -0.15
+                }
+            } else {
+                return {
+                    width: (isPC) ? '60px' : '34px',
+                    x: (isPC) ? '30px' : '17px',
+                    duration: 0.3, 
+                    delay: -0.15
+                }
+            }
+        })();
+
+        timeLine.pause();
+        timeLine
+            .to('.origin .timeText', { opacity: 0 })
+            .to('.timeTooltip #filter1Rect', zoomOut1)
+            .to('.timeTooltip .origin', { scale: (isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration:  0.2, delay: (isPC) ? 0 : -0.1})
+            .to('.timeTooltip .origin .rec', { stroke: '#7c8aff' , delay: -0.1})
+            // 사라지기
+            .to('.copy', { scale: '1', opacity: 1,  duration: (isPC) ? 0.8 : 0.6, delay: -0.6, ease: 'power3.inOut' });
 
         drag = g.Draggable.create('.timeGroup', {
             type: 'x, y',
@@ -199,20 +235,32 @@ export default class Progress<S> extends ViewModel<S> {
                     return Math.round(y);
                 }
             },
-            onDragStart: function() {
+            onDragStart: function() {                
                 if (body.className.indexOf('scroll-block') < 0) {
                     body.className = 'scroll-block';
                 }
                 if (_this.eventListner.has('dragStart')) {
                     _this.eventListner.get('dragStart').call(this);
                 }
-                timeLine.pause();
-                timeLine.reverse();
+
+                // timeLine.pause();
+                // timeLine.reverse();
                 clearTimeout(timeLine.timer);
+      
                 // 캐쉬 기록
                 cache.win = document.body.clientHeight;
                 cache.svg = document.querySelector('.newsEdgeProgress').clientWidth;
-                cache.t = g.d3.select('.timeTooltip');
+                cache.t = g.d3.select('.timeTooltip');           
+                                
+                // 시간 툴팁 사라지기 init                
+                if(cache.f === false) {
+                    cache.f = true;
+                    timeLine.play()
+                } else {
+                    if (!UA.isIE) {
+                        timeLine.set('.copy', { scale: '1', opacity: 1, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' })            
+                    }                    
+                }
             },
             onDrag: function () {
                 const gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
@@ -222,20 +270,8 @@ export default class Progress<S> extends ViewModel<S> {
                 _this.model.updateProgress(g.moment((yyymmdd+dt*this.x)-gmt).format('YYYY-MM-DD HH:mm:ss'));
                 document.querySelector('.newsEdgeProgress').setAttribute('class','newsEdgeProgress');
                 document.querySelector('.pathFront').setAttribute('width', this.x);
-                _this._updateTooltip();
-                // [portrait view] 시간표시 가려지는 영역에 도달 할 경우 위치 변경
-                let margin = 20;
-                /* if (!(UA.isPC && cache.win > 1200) && cache.svg < 450) {
-                    // 가장 왼쪽
-                    if (this.x < margin) {
-                        cache.t.attr('x', 20-this.x)
-                    } else if(this.x > cache.svg - margin) {
-                        cache.t.attr('x', (cache.svg - margin) -this.x)
-                    } else {
-                        cache.t.attr('x', null)
-                    }                    
-                } */
                 
+                _this._updateTooltip();                
             },
             onDragEnd: function() {
                 // 마지막 지점에 도달할대
@@ -245,7 +281,8 @@ export default class Progress<S> extends ViewModel<S> {
                 }
                 body.removeAttribute('class');
                 timeLine.timer = setTimeout(() => {
-                    timeLine.play();
+                    cache.f = false;                                    
+                    timeLine.reverse();
                 }, 2000)
             }
         });
@@ -271,10 +308,13 @@ export default class Progress<S> extends ViewModel<S> {
     private _updateTooltip(): void {
         const {progress_dtm} = this.model.time;
 
-        let [ hh, mm ] = ['.hh', '.mm'].map( i => g.d3.select(`.timeText ${i}`));
+        let [ hh, mm, hh2, mm2 ] = ['.hh', '.mm', '.hh2', '.mm2'].map( i => g.d3.select(`.timeText ${i}`));
         // 툴팁 시간 표시
         hh.text(g.moment(progress_dtm).format('HH'));
         mm.text(this._mm(progress_dtm));
+
+        hh2.text(g.moment(progress_dtm).format('HH'));
+        mm2.text(this._mm(progress_dtm));
     }
     /* n분 단위 표시 */
     private _mm(d?: string): string {

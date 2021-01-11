@@ -44,14 +44,15 @@ const TMP_PROGRESS_THIN = `
         <rect class="pathBackboard" x="0" y="20" width="100%" height="8" fill="#f2f2f2" rx="4" ry="4" />
         <rect class="pathBack" x="0" y="20" width="60%" height="8" fill="#c8c8c8" rx="4" ry="4" />
         <rect class="pathFront" x="0" y="20" width="60%" height="8" fill="url(#pathLinear)" rx="4" ry="4" />                
-        <g class="timeGroup" transform="matrix(1,0,0,1,0,24)">            
-            <svg class="timeTooltip" height="48" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="73" y="23" viebox="0,0,73,32">
+        <g class="timeGroup" transform="matrix(1,0,0,1,0,24)">
+            <svg class="timeTooltip" height="48" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="73" y="25" viebox="0,0,73,32">
               <defs>
                 <filter id="filter1Back" width="128.9%" height="167.4%" x="-14.4%" y="-28.5%" filterUnits="objectBoundingBox">
                     <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="2"></feOffset>
                     <feGaussianBlur result="shadowBlurOuter1" in="shadowOffsetOuter1" stdDeviation="4"></feGaussianBlur>
                     <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0"></feColorMatrix>
                     <rect id="filter1Rect" width="91.44" height="40" x="-45.72" y="-62"></rect>
+                    <rect id="filter2Rect" width="91.44" height="40" x="-45.72" y="-62"></rect>
                 </filter>
                 <filter id="filter2Back" width="356.7%" height="367.1%" x="-128.3%" y="-85%" filterUnits="objectBoundingBox">
                     <feOffset result="shadowOffsetOuter1" in="SourceAlpha" dy="4"></feOffset>
@@ -60,15 +61,27 @@ const TMP_PROGRESS_THIN = `
                     <path id="filter2Path" transform="translate(-14 -24)" d="M 19.285 0 L 15 8.235 10.714 0 h 8.571z"></path>
                 </filter>
               </defs>
-              <g>
-                  <use fill="#000" filter="url(#filter1Back)" xlink:href="#filter1Rect"></use>
-                  <use fill="#fff" xlink:href="#filter1Rect"></use>    
+              <g class="origin">
+                  <use class="shadow" fill="#000" filter="url(#filter1Back)" xlink:href="#filter1Rect"></use>
+                  <use class="rec" fill="#fff" xlink:href="#filter1Rect"></use>    
                   <text class="timeText" alignment-baseline="middle" text-anchor="middle" x="0" y="0">
                       <tspan class="hh" dx="0" dy=".1em" fill="#000">00</tspan><tspan class="dtm-div" dx="4" dy="-.1em" fill="#7c8aff">:</tspan><tspan class="mm" dx="5" dy=".1em" fill="#000">00</tspan>
                   </text>
               </g>
+              <g class="copy" transform="matrix(1,0,0,1, -2, -36)">
+                  <use fill="#000" filter="url(#filter1Back)" xlink:href="#filter2Rect"></use>
+                  <use fill="#fff" xlink:href="#filter2Rect"></use>
+                  <use fill="#000" class="arr" transform="matrix(1,0,0,1,-5, 14)" filter="url(#filter2Back)" xlink:href="#filter2Path"></use>
+                  <use fill="#fff" class="arr" transform="matrix(1,0,0,1,-5, 14)" xlink:href="#filter2Path"></use>
+                  <text class="timeText" alignment-baseline="middle" text-anchor="middle" x="0" y="-8">
+                      <tspan class="hh2" dx="0" dy=".1em" fill="#000">00</tspan><tspan class="dtm-div" dx="4" dy="-.1em" fill="#7c8aff">:</tspan><tspan class="mm2" dx="5" dy=".1em" fill="#000">00</tspan>
+                  </text>
+              </g>
           </svg>
         </g>
+
+
+
     </g>
 </svg>
 `;

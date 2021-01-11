@@ -943,7 +943,7 @@ var resizeTime;
 var flag = false; // 리사이징와 타임라인 관련
 var opt = function () {
     return {
-        width: Math.min(window.innerWidth - 30, 450),
+        width: Math.min(window.innerWidth - 60, 450),
         height: 8,
         r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
     };
@@ -1033,13 +1033,14 @@ var Progress = /** @class */ (function (_super) {
         document.querySelector('.progressWrap').appendChild(temp);
         var target = g.d3.select('#newsEdgeProgress svg');
         var cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
+        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup', '.timeGroup2'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3], timeGroup2 = _c[4];
         var timeTooltip = g.d3.select('.timeTooltip');
         var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
         var HH = isPC ? 58 : 32;
         var WW = isPC ? 134 : 73;
         var RR = isPC ? 27 : 15;
-        var tooltipRect = timeTooltip.select('rect');
+        var tooltipRect = timeTooltip.select('#filter1Rect');
+        var tooltipRect2 = timeTooltip.select('#filter2Rect');
         /* 프로퍼티 설정 */
         target.attr('width', "" + width);
         target.attr('height', "" + height);
@@ -1067,10 +1068,18 @@ var Progress = /** @class */ (function (_super) {
         tooltipRect.attr('y', "" + -((isPC ? 92 : 30)));
         tooltipRect.attr('rx', "" + RR);
         tooltipRect.attr('ry', "" + RR);
+        tooltipRect2.attr('width', "" + WW);
+        tooltipRect2.attr('height', "" + HH);
+        tooltipRect2.attr('x', "" + -WW / 2);
+        tooltipRect2.attr('y', "" + -((isPC ? 92 : 30)));
+        tooltipRect2.attr('rx', "" + RR);
+        tooltipRect2.attr('ry', "" + RR);
         var arrow = timeTooltip.select('#filter2Path');
         if (isPC) {
             arrow.attr('d', 'M -9 0 l 9 18 l 9 -18 h -18z');
-            arrow.attr('transform', 'translate(0 -34)');
+            arrow.attr('transform', utils_1.UA.isIE ? 'translate(8 -50)' : 'translate(4 -50)');
+            g.d3.select('.copy').attr('transform', 'matrix(1,0,0,1, -2, -60)');
+            g.d3.select('.copy .timeText').attr('y', '-52');
         }
         else {
             arrow.attr('transform', "translate(-" + (r + 2) + " -" + r * 2 + ")");
@@ -1079,21 +1088,11 @@ var Progress = /** @class */ (function (_super) {
         timeText.attr('x', '0');
         timeText.attr('y', "" + (isPC ? -54 : -10));
         timeText.attr('font-size', '19px');
+        var timeText2 = timeTooltip.select('.timeText2');
+        timeText2.attr('x', '0');
+        timeText2.attr('y', "" + (isPC ? -54 : -8));
+        timeText2.attr('font-size', '19px');
         ww = document.body.clientWidth;
-        // 시간 툴팁 사라지기
-        timeLine = g.gsap.timeline({
-            onComplete: function () { }
-        });
-        timeLine
-            .to('.timeText', { opacity: 0, delay: 5 })
-            .to('.timeTooltip rect', {
-            width: (utils_1.UA.isPC) ? '60px' : '34px',
-            x: (utils_1.UA.isPC) ? '30px' : '17px',
-            duration: 0.2,
-            delay: -0.15
-        })
-            .to('.timeTooltip g', { scale: (utils_1.UA.isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration: 0.1, delay: (utils_1.UA.isPC) ? 0 : -0.1 })
-            .to('.timeTooltip rect', { stroke: '#cccccc' });
     };
     /* 이벤트리스너 바인딩 */
     Progress.prototype._addEvent = function (p) {
@@ -1105,8 +1104,43 @@ var Progress = /** @class */ (function (_super) {
         var cache = {
             win: 0,
             svg: 0,
-            t: null
+            t: null,
+            f: false
         };
+        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
+        timeLine = g.gsap.timeline({
+            onComplete: function () { return timeLine.pause(); }
+        });
+        if (!utils_1.UA.isIE) {
+            timeLine.set('.copy', { scale: '0', opacity: 0, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' });
+        }
+        // IE11에서 프로퍼티 애니매이션이 상이하게 표현
+        var zoomOut1 = (function () {
+            if (utils_1.UA.isIE) {
+                return {
+                    transform: "matrix(0.4,0,0,1,0,0)",
+                    transformOrigin: '50% 50%',
+                    duration: 0.2,
+                    delay: -0.15
+                };
+            }
+            else {
+                return {
+                    width: (isPC) ? '60px' : '34px',
+                    x: (isPC) ? '30px' : '17px',
+                    duration: 0.3,
+                    delay: -0.15
+                };
+            }
+        })();
+        timeLine.pause();
+        timeLine
+            .to('.origin .timeText', { opacity: 0 })
+            .to('.timeTooltip #filter1Rect', zoomOut1)
+            .to('.timeTooltip .origin', { scale: (isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration: 0.2, delay: (isPC) ? 0 : -0.1 })
+            .to('.timeTooltip .origin .rec', { stroke: '#7c8aff', delay: -0.1 })
+            // 사라지기
+            .to('.copy', { scale: '1', opacity: 1, duration: (isPC) ? 0.8 : 0.6, delay: -0.6, ease: 'power3.inOut' });
         drag = g.Draggable.create('.timeGroup', {
             type: 'x, y',
             bounds: {
@@ -1128,13 +1162,23 @@ var Progress = /** @class */ (function (_super) {
                 if (_this.eventListner.has('dragStart')) {
                     _this.eventListner.get('dragStart').call(this);
                 }
-                timeLine.pause();
-                timeLine.reverse();
+                // timeLine.pause();
+                // timeLine.reverse();
                 clearTimeout(timeLine.timer);
                 // 캐쉬 기록
                 cache.win = document.body.clientHeight;
                 cache.svg = document.querySelector('.newsEdgeProgress').clientWidth;
                 cache.t = g.d3.select('.timeTooltip');
+                // 시간 툴팁 사라지기 init                
+                if (cache.f === false) {
+                    cache.f = true;
+                    timeLine.play();
+                }
+                else {
+                    if (!utils_1.UA.isIE) {
+                        timeLine.set('.copy', { scale: '1', opacity: 1, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' });
+                    }
+                }
             },
             onDrag: function () {
                 var gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
@@ -1145,18 +1189,6 @@ var Progress = /** @class */ (function (_super) {
                 document.querySelector('.newsEdgeProgress').setAttribute('class', 'newsEdgeProgress');
                 document.querySelector('.pathFront').setAttribute('width', this.x);
                 _this._updateTooltip();
-                // [portrait view] 시간표시 가려지는 영역에 도달 할 경우 위치 변경
-                var margin = 20;
-                /* if (!(UA.isPC && cache.win > 1200) && cache.svg < 450) {
-                    // 가장 왼쪽
-                    if (this.x < margin) {
-                        cache.t.attr('x', 20-this.x)
-                    } else if(this.x > cache.svg - margin) {
-                        cache.t.attr('x', (cache.svg - margin) -this.x)
-                    } else {
-                        cache.t.attr('x', null)
-                    }
-                } */
             },
             onDragEnd: function () {
                 // 마지막 지점에 도달할대
@@ -1166,7 +1198,8 @@ var Progress = /** @class */ (function (_super) {
                 }
                 body.removeAttribute('class');
                 timeLine.timer = setTimeout(function () {
-                    timeLine.play();
+                    cache.f = false;
+                    timeLine.reverse();
                 }, 2000);
             }
         });
@@ -1191,10 +1224,12 @@ var Progress = /** @class */ (function (_super) {
     /* 툴팁업데이트 */
     Progress.prototype._updateTooltip = function () {
         var progress_dtm = this.model.time.progress_dtm;
-        var _b = ['.hh', '.mm'].map(function (i) { return g.d3.select(".timeText " + i); }), hh = _b[0], mm = _b[1];
+        var _b = ['.hh', '.mm', '.hh2', '.mm2'].map(function (i) { return g.d3.select(".timeText " + i); }), hh = _b[0], mm = _b[1], hh2 = _b[2], mm2 = _b[3];
         // 툴팁 시간 표시
         hh.text(g.moment(progress_dtm).format('HH'));
         mm.text(this._mm(progress_dtm));
+        hh2.text(g.moment(progress_dtm).format('HH'));
+        mm2.text(this._mm(progress_dtm));
     };
     /* n분 단위 표시 */
     Progress.prototype._mm = function (d) {
@@ -2569,7 +2604,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS", function() { return TMP_PROGRESS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS_THIN", function() { return TMP_PROGRESS_THIN; });
 var TMP_PROGRESS = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>\n        <path class=\"pathBackboard\" d=\"M 0 20 H 0 V 28M 4 20 H 4 V 28M 8 20 H 8 V 28M 12 20 H 12 V 28M 16 20 H 16 V 28M 20 20 H 20 V 28M 24 20 H 24 V 28M 28 20 H 28 V 28M 32 20 H 32 V 28M 36 20 H 36 V 28M 40 20 H 40 V 28M 44 20 H 44 V 28M 48 20 H 48 V 28M 52 20 H 52 V 28M 56 20 H 56 V 28M 60 20 H 60 V 28M 64 20 H 64 V 28M 68 20 H 68 V 28M 72 20 H 72 V 28M 76 20 H 76 V 28M 80 20 H 80 V 28M 84 20 H 84 V 28M 88 20 H 88 V 28M 92 20 H 92 V 28M 96 20 H 96 V 28M 100 20 H 100 V 28M 104 20 H 104 V 28M 108 20 H 108 V 28M 112 20 H 112 V 28M 116 20 H 116 V 28M 120 20 H 120 V 28M 124 20 H 124 V 28M 128 20 H 128 V 28M 132 20 H 132 V 28M 136 20 H 136 V 28M 140 20 H 140 V 28M 144 20 H 144 V 28M 148 20 H 148 V 28M 152 20 H 152 V 28M 156 20 H 156 V 28M 160 20 H 160 V 28M 164 20 H 164 V 28M 168 20 H 168 V 28M 172 20 H 172 V 28M 176 20 H 176 V 28M 180 20 H 180 V 28M 184 20 H 184 V 28M 188 20 H 188 V 28M 192 20 H 192 V 28M 196 20 H 196 V 28M 200 20 H 200 V 28M 204 20 H 204 V 28M 208 20 H 208 V 28M 212 20 H 212 V 28M 216 20 H 216 V 28M 220 20 H 220 V 28M 224 20 H 224 V 28M 228 20 H 228 V 28M 232 20 H 232 V 28M 236 20 H 236 V 28M 240 20 H 240 V 28M 244 20 H 244 V 28M 248 20 H 248 V 28M 252 20 H 252 V 28\" stroke-width=\"1\" stroke=\"#c7ccd1\" fill=\"none\" shape-rendering=\"crispEdges\"></path>\n        <path class=\"pathBack\" d=\"M0 24 l 0 0\" stroke-linecap=\"round\" stroke-width=\"10\" stroke=\"#e6e8ea\"></path>\n        <path class=\"pathFront\" stroke=\"url(#pathLinear)\" d=\"M0 24 l 254 0.01\" stroke-width=\"14\" stroke-linecap=\"round\" fill=\"#5b6cff\"></path>\n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <circle class=\"timeKnob\" r=\"12\" stroke=\"#5b6cff\" stroke-width=\"1\" fill=\"#fff\"></circle>\n            <rect class=\"timeKnobEmpty\" x=\"-24\" y=\"-24\" width=\"48\" height=\"48\" fill=\"transparent\"></rect>\n            <svg class=\"timeTooltip\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"91.44\" height=\"40\" viebox=\"0,0,91.44,40\" style=\"overflow: visible\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#000\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-38\" font-size=\"22.352px\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
-var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\" height=\"48\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"20\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">            \n            <svg class=\"timeTooltip\" height=\"48\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"73\" y=\"23\" viebox=\"0,0,73,32\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"0\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
+var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\" height=\"48\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"20\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <svg class=\"timeTooltip\" height=\"48\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"73\" y=\"25\" viebox=\"0,0,73,32\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                    <rect id=\"filter2Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g class=\"origin\">\n                  <use class=\"shadow\" fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use class=\"rec\" fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"0\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n              <g class=\"copy\" transform=\"matrix(1,0,0,1, -2, -36)\">\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter2Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Rect\"></use>\n                  <use fill=\"#000\" class=\"arr\" transform=\"matrix(1,0,0,1,-5, 14)\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" class=\"arr\" transform=\"matrix(1,0,0,1,-5, 14)\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-8\">\n                      <tspan class=\"hh2\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm2\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n\n\n\n    </g>\n</svg>\n";
 
 
 /***/ })

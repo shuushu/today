@@ -53,7 +53,7 @@ svg text tspan { font-family: inherit; }
 .progressWrap.thin{display: block;width: 100%;padding: 0;max-width: inherit; box-shadow: none;}
 .progressWrap.thin .btnProgress{display: none}
 .progressWrap.thin .newsEdgeProgress{position:relative;margin: 0 auto;left:0;}
-
+.progressWrap.thin .copy{opacity: 0;}
 
 .todayListWrap { position: relative; width: 100%; height: 100%; min-height: 1122px; margin: 84px 0 0; background: #f8f8f8; box-sizing: border-box; font-family: 'Malgun Gothic', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, helvetica, 'Apple SD Gothic Neo', sans-serif; }
 .todayListWrap .todayListTop { position: relative; width:970px; margin: 0 auto; padding: 46px 0 0; }
