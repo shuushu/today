@@ -70,7 +70,7 @@ a:hover, a:active { text-decoration: inherit; color: inherit; }
 #todayListWrap.lowScore .todayListTitle { color: #000; }
 
 .todayList { position: relative; left: 0; top: 50%; right: 0; width: 100%; margin: 0 auto; -webkit-transform: translateY(calc(-50% + 30px)); transform: translateY(calc(-50% + 30px)); }
-.todayList .btnTodayClose { display:block; position: absolute; left: 16px; top: -40px; z-index: 101; width: 33px; height: 33px; font-size:0; line-height: 0; opacity: 0; visibility: hidden; }
+.todayList .btnTodayClose { display:none; position: absolute; left: 16px; top: -40px; z-index: 101; width: 33px; height: 33px; font-size:0; line-height: 0; opacity: 0; visibility: hidden; }
 .todayList .btnTodayClose:before,
 .todayList .btnTodayClose:after { content: ''; display: block; position: absolute; left: calc(50% - 12px); top: calc(50% - .5px); width: 24px; height: 1px; }
 .todayList .btnTodayClose:before { -webkit-transform: rotate(45deg); transform: rotate(45deg); }
@@ -429,4 +429,30 @@ html,body{
   0% { transform: scale(1) }
   50% { transform: scale(1.1) }
   100% { transform: scale(1) }
+}
+
+/* [inApp] T-call */
+#tcall #header{
+  padding: 20px 0;
+  height: auto;
+  border-bottom: 1px solid #ececec;
+}
+#tcall #contents{
+  padding-top: 62px;
+  padding-bottom: 0;
+}
+#tcall .logo{
+  display: block;
+  width: 70px;
+  height: 21px;
+  margin: 0 auto;
+  background: url('https://m1.nateimg.co.kr/n3main/newBI/nate_170x50.png') no-repeat;
+  background-size: cover;
+}
+#tcall #footer{
+  margin:0;
+  padding: 20px 0;
+  font-size: 10px;
+  text-align: center;
+  background: #fff;
 }

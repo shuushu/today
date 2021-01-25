@@ -10,10 +10,12 @@
     "NEWS_MOBILE_DEV": "webpack --watch --mode=development m/src/js/app.ts -o m/src/js/today-dev.js",
     "MAIN_DEV": "webpack --mode=development m/src/js/main.ts -o m/main/today-main-dev.js",
     "PC_DEV": "webpack --watch --mode=development pc/src/js/app.ts -o pc/src/js/today-dev.js",
+    "TCALL_DEV": "webpack --watch --mode=development m/src/js/tcall-app.ts -o m/src/js/today-tcall-dev.js",
     "---------------------------": "echo \"Error: no test specified\" && exit 1",
     "NEWS_MOBILE_PRODUCTION": "webpack --mode=production m/src/js/app.ts -o m/src/js/today.js",
     "MAIN_PRODUCTION": "webpack --mode=production m/src/js/main.ts -o m/main/today-main.js",
     "PC_PRODUCTION": "webpack --mode=production pc/src/js/app.ts -o pc/src/js/today.js",
+    "TCALL_PRODUCTION": "webpack --watch --mode=development m/src/js/tcall-app.ts -o m/src/js/today-tcall.js",
     "server": "webpack-dev-server"
   },
   "resolutions": {

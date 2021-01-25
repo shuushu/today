@@ -307,7 +307,8 @@ var KeywordList = /** @class */ (function (_super) {
                 return false;
             }
             else {
-                return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight && g.window.devicePixelRatio === 1;
+                //return g.screen.orientation.type.match(/\w+/)[0] === 'landscape' && g.window.innerWidth > g.window.innerHeight  && g.window.devicePixelRatio > 1;
+                return g.window.innerWidth > g.window.innerHeight && g.window.devicePixelRatio > 1;
             }
         },
         enumerable: false,
@@ -680,7 +681,7 @@ var KeywordList = /** @class */ (function (_super) {
     };
     KeywordList.prototype._resize = function () {
         var _this_1 = this;
-        if (document.body.clientWidth === ww)
+        if (document.body.clientWidth === ww || !document.getElementById('newsEdgeBubbles'))
             return;
         var wrap = document.getElementById('wrap');
         var mainWrap = document.querySelector('.mainContainer');
@@ -1013,6 +1014,8 @@ var Progress = /** @class */ (function (_super) {
             clearTimeout(resizeTime);
         this._removeEvent();
         resizeTime = setTimeout(function () {
+            if (!document.getElementById('newsEdgeProgress'))
+                return;
             var bw = document.body.clientWidth;
             document.getElementById('newsEdgeProgress').innerHTML = '';
             _this_1.options = {

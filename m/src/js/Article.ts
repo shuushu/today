@@ -275,8 +275,16 @@ export default class Article<S> extends ViewModel<S>{
             // 통계
             if(g.olapclick) {
                 let v = `TOR0${t.getAttribute('data-idx')}`
-                if (t.getAttribute('data-idx') === '0') {
-                  v = 'TOM00';
+                if ('tcall' in g) {
+                    // 티전화용 통계
+                    v = `TTC${15+Number(t.getAttribute('data-idx'))}`
+                    if (t.getAttribute('data-idx') === '0') {
+                        v = 'TTC15'
+                    }
+                } else {
+                    if (t.getAttribute('data-idx') === '0') {
+                        v = 'TOM00';
+                    }
                 }
                 g.olapclick(`${v}`);
             }

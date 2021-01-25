@@ -72,6 +72,7 @@ export default class Progress<S> extends ViewModel<S> {
         if(resizeTime) clearTimeout(resizeTime);
         this._removeEvent();
         resizeTime = setTimeout(() => {
+            if (!document.getElementById('newsEdgeProgress')) return;
             const bw = document.body.clientWidth;
 
             document.getElementById('newsEdgeProgress').innerHTML = '';

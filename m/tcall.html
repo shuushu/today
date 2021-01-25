@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>한눈에 보는 오늘</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width" />
+  <meta property="og:url" content="">
+  <meta property="og:title" content="한눈에 보는 오늘">
+  <meta property="og:image" content="./src/images/og_nate_today.png">
+  <meta property="og:description" content="#한눈에 보는 오늘">
+  
+  <link rel="shortcut icon" href="http://news.nate.com/icon/favicon.ico" />
+  <link rel="apple-touch-icon-precomposed" href="http://news.nateimg.co.kr/etc/ui/images/mnews/common/nate_news_114.png?v=20140911" />
+
+  <link type="text/css" rel="stylesheet" href="//nimg.nate.com/ui/uidev/m/release/css/common.css?202009021336">
+  <link href="./src/css/today-tcall.css" rel="stylesheet" type="text/css" />
+
+<!--  <script type="text/javascript" src="//m.news.nate.com/js/flickLib/plast-low-min.js"></script>-->
+<!--  <script type="text/javascript" src="//m.news.nate.com/js/menu.js"></script>-->
+<!--  <script type="text/javascript" src="//m.news.nate.com/js/media.js"></script>-->
+  <script type="text/javascript" src="//m.news.nate.com/js/stat.js"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/common.js"></script>
+<!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
+
+  <script src="./src/js/gsap.min.js"></script>
+  <script src="./src/js/CustomEase.min.js"></script>
+  <script src="./src/js/Draggable.min.js"></script>
+  <script src="./src/js/DrawSVGPlugin.min.js"></script>
+  <script src="./src/js/MotionPathPlugin.min.js"></script>
+  <script src="./src/js/ScrollToPlugin.min.js"></script>
+  <script src="./src/js/InertiaPlugin.min.js"></script>
+  <script src="./src/js/d3.v5.min.js"></script>
+  <script src="./src/js/moment-with-locale.min.js"></script>
+  <script src="./src/js/moment-timezone-with-data.min.js"></script>
+
+  <!-- CSM 통계 -->
+  <!-- <script type="text/javascript" src="//testdb-m-comm.news.nate.com/userJS?oj=1&r=690550026"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/stat.js?202007291034"></script>
+  <script type="text/javascript" src="//m.news.nate.com/js/common.js?202007291034"></script> -->
+  </head>
+
+<!-- TCALL -->
+<body id="tcall">
+  <div id="wrap">
+    <!-- TCALL -->
+    <header id="header"><span class="logo"></span></header>
+
+
+    <div id="contents">
+      <!-- 뉴스엣지 컨테이너-->
+      <div class="newsEdge">
+        <!-- 이전/다음/오늘 이동 및 날짜 표시 -->
+        <div class="timeTravel">
+          <p class="timeline">
+            <button type="button" class="btnTravel prev" data-travel="prev" onclick="olapclick('TTC01')">이전</button>
+            <span class="year"></span>
+            <span class="month"></span>
+            <span class="date"></span>
+            <button type="button" class="btnTravel next" data-travel="next" onclick="olapclick('TTC02')">다음</button>
+          </p>
+          <button type="button" class="btnTravel today" data-travel="today" onclick="olapclick('TTC03')">오늘</button>
+        </div>
+        <!-- // 이전/다음/오늘 이동 및 날짜 표시 -->
+
+        <!-- 버블 -->
+        <div class="bubblesWrap">
+          <svg id="newsEdgeBubbles"></svg>
+        </div>
+        <!-- // 버블 -->
+        <!-- 버블 컨트롤러 -->
+        <div class="progressWrap active">
+          <button type="button" class="btnProgress">타임라인</button>
+          <svg id="newsEdgeProgress" class="newsEdgeProgress"></svg>
+        </div>
+        <!-- //버블 컨트롤러 -->
+        <!-- 뉴스 리스트 -->
+        <div id="todayListWrap"></div>
+        <!-- // 뉴스 리스트 -->
+      </div>
+      <!-- // 뉴스엣지 컨테이너-->
+
+      <!-- 로그 -->
+      <div class="timeLog"></div>
+      <!-- // 로그 -->
+
+      <!-- 공유하기 레이어 팝업-->
+      <div class="layerPopup share">
+        <div class="inner">
+          <button type="button" class="btnClosePopup">닫기</button>
+          <div class="content">
+            <strong class="title">공유하기</strong>
+            <ul class="shareList">
+              <li>
+                <a class="shareNateon" href="javascript:;" title="새창으로 이동" id="sns-no" onclick="checkMobileAgent('네이트온 쪽지') ? shareSNS('no') : false; olapclick('TOS01'); return false;">네이트온</a>
+              </li>
+              <li>
+                <a class="shareFacebook" href="javascript:;" title="새창으로 이동" id="sns-fb" onclick="shareSNS('fb'); olapclick('TOS02'); return false;">페이스북</a>
+              </li>
+              <li>
+                <a class="shareTwetter" href="javascript:;" title="새창으로 이동" id="sns-tw" onclick="shareSNS('tw'); olapclick('TOS03'); return false;">트위터</a>
+              </li>
+            </ul>
+            <div class="shareInput">
+              <input type="text" value="" class="shareLinkUrl" readonly />
+            </div>
+          </div>
+          <button type="button" class="btnCopyURL" onclick="utils.CopyUrlToClipboard('.shareLinkUrl')">URL 복사</button>
+        </div>
+        <div class="dimm"></div>
+      </div>
+      <!-- //공유하기 레이어 팝업-->
+    </div>
+
+
+
+    <!-- TCALL -->
+    <div id="footer">&copy; SK Communications</div>
+
+    <script>
+      var KEYWORD_URL = '//m.news.nate.com/today/keywordList';
+      //var KEYWORD_URL = '//m.news.nate.com/today/tcallKeywordList';
+      var ARTICLE_URL = '//m.news.nate.com/today/articleList';
+    </script>
+    <!-- TCALL -->
+    <script src="./src/js/today-tcall.js"></script>
+  </div>
+</body>
+</html>

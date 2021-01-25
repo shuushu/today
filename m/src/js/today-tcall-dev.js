@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./m/src/js/app.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./m/src/js/tcall-app.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -2133,10 +2133,10 @@ exports.default = Article;
 
 /***/ }),
 
-/***/ "./m/src/js/app.ts":
-/*!*************************!*\
-  !*** ./m/src/js/app.ts ***!
-  \*************************/
+/***/ "./m/src/js/tcall-app.ts":
+/*!*******************************!*\
+  !*** ./m/src/js/tcall-app.ts ***!
+  \*******************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2150,6 +2150,7 @@ var KeywordList_1 = __webpack_require__(/*! ../../../components/KeywordList */ "
 var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
 var Article_1 = __webpack_require__(/*! ./Article */ "./m/src/js/Article.ts");
 var g = global;
+g.tcall = true;
 var params = utils_1.getURIparams(window.location.hash, '$') || {
     MM: '',
     index: '',
@@ -2274,13 +2275,14 @@ var triggerBubblClick = function (i) {
     }
     article.update(g.ARTICLE_URL + "?keyword_dtm=" + t + "&keyword_sq=" + sq);
     // 버블 클릭 통계 프로세스 바인딩
-    var N = i + 1;
+    var N = i + 5;
     if (typeof g.draw_ndr === 'function') {
         var sRef2 = '';
-        g.draw_mndr('m_ndr.nate.com/news/today/keyword' + (N), g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
+        g.draw_mndr('m_ndr.nate.com/news/today/tcall//keyword' + (i + 1), g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
     }
     if (typeof g.olapclick === 'function') {
-        g.olapclick("TOK" + ((N < 10) ? '0' + (N) : N));
+        // 키워드0 TTC05
+        g.olapclick(N < 10 ? "TTC0" + N : "TTC" + N);
     }
     // 세션체크: 앱 종료 후 다시 앱을 실행할 경우 대응
     //replaceHistory();
@@ -2304,7 +2306,7 @@ progress.updateProcess.set('dragEnd', function () {
     keyword.hideEff();
     keyword.update(g.KEYWORD_URL + "?service_dtm=" + this.model.time.progress_dtm);
     if ('olapclick' in window) {
-        g.olapclick('TOT00');
+        g.olapclick('TTC04');
     }
 });
 // 버블 클릭 후 실행되는 프로세스
@@ -2362,7 +2364,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // 페이지 진입 통계
             if (typeof g.draw_ndr === 'function') {
                 var sRef2 = '';
-                g.draw_mndr('m_ndr.nate.com/news/today', g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
+                g.draw_mndr('m_ndr.nate.com/news/today/tcall/', g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
             }
         }
     });
@@ -2371,8 +2373,8 @@ document.addEventListener('DOMContentLoaded', function () {
         utils_1.replaceHistory();
     }
     // SNS
-    document.querySelector('.btnShare ').addEventListener('click', shareSNS);
-    document.querySelector('.btnClosePopup ').addEventListener('click', closeSNS);
+    //document.querySelector('.btnShare ').addEventListener('click', shareSNS);
+    //document.querySelector('.btnClosePopup ').addEventListener('click', closeSNS);
 });
 // ios에서 히스토리백: 1) pageshow 호출 이후 2)popstate 호출
 window.addEventListener('pageshow', ff2);
@@ -2459,7 +2461,7 @@ function cardClick(e) {
     }
     sessionStorage.setItem('pageshow', 'true');
     sessionStorage.setItem('cardshow', 'true');
-    window.location.href = e.getAttribute('data-link');
+    window.location.href = "skt-marketing-api://outerbrowser?url=" + e.getAttribute('data-link');
 }
 // share SNS
 function shareSNS(e) {
