@@ -133,9 +133,12 @@ export default class Article<S> extends ViewModel<S>{
             this.cards.activeIndex = history.state.startSlide;
             r = history.state.rank;
         }
-        (<HTMLElement> document.querySelector('html')).setAttribute('style', `background-color:${this.color[r]}`);
+        if (!('tcall' in g)) {
+            (<HTMLElement> document.querySelector('html')).setAttribute('style', `background-color:${this.color[r]}`);
+            document.body.style.cssText = `background-color:${this.color[r]}`;
+        }
+
         document.body.className = 'body-show-cardview';
-        document.body.style.cssText = `background-color:${this.color[r]}`;
 
         (<HTMLElement> document.querySelector('.todayListTitle')).innerText = this.model.title.split('?q=').pop();
         (<HTMLElement> document.getElementById('todayListWrap')).setAttribute('class', (r < 5) ? 'highScore' : 'lowScore');
@@ -289,29 +292,36 @@ export default class Article<S> extends ViewModel<S>{
                 g.olapclick(`${v}`);
             }
 
-            if (btimer) clearTimeout(btimer);
 
-            btimer = setTimeout(() => {
-                g.gsap.set('.todayListEffect', {
-                    x: t.getBoundingClientRect().left,
-                    y: t.getBoundingClientRect().top,
-                    width: t.clientWidth,
-                    height: t.clientHeight,
-                    autoAlpha : 1,
-                    className: 'todayListEffect',
-                    borderRadius: (t.className.indexOf('more') < 0) ? 20 : '100%',
-                })
-            }, 200);
 
-            // 뒷판
-            const ani = g.gsap.timeline({
-                onComplete: () => {
-                    if (_this.eventListner.has('cardClick')) {
-                        _this.eventListner.get('cardClick')(t)
+            if (!('tcall' in g)) {
+                if (btimer) clearTimeout(btimer);
+
+                btimer = setTimeout(() => {
+                    g.gsap.set('.todayListEffect', {
+                        x: t.getBoundingClientRect().left,
+                        y: t.getBoundingClientRect().top,
+                        width: t.clientWidth,
+                        height: t.clientHeight,
+                        autoAlpha : 1,
+                        className: 'todayListEffect',
+                        borderRadius: (t.className.indexOf('more') < 0) ? 20 : '100%',
+                    })
+                }, 200);
+                // 뒷판
+                const ani = g.gsap.timeline({
+                    onComplete: () => {
+                        if (_this.eventListner.has('cardClick')) {
+                            _this.eventListner.get('cardClick')(t)
+                        }
                     }
+                });
+                ani.delay(0.3).set('.todayListEffect', { className: 'todayListEffect active' })
+            } else {
+                if (_this.eventListner.has('cardClick')) {
+                    _this.eventListner.get('cardClick')(t)
                 }
-            });
-            ani.delay(0.3).set('.todayListEffect', { className: 'todayListEffect active' })
+            }
         }
 
         function onDragStart() {

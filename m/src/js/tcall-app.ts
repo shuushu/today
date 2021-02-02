@@ -357,7 +357,7 @@ function cardClick(e: Element): void {
     }
     sessionStorage.setItem('pageshow', 'true');
     sessionStorage.setItem('cardshow', 'true');
-    window.location.href = `skt-marketing-api://outerbrowser?url=${e.getAttribute('data-link')}`;
+    window.location.href = `skt-marketing-api://outerbrowser?url=https:${e.getAttribute('data-link')}`;
 }
 
 // share SNS
