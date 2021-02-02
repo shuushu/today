@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./m/src/js/main.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./m/src/js/tcall-app.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -1775,10 +1775,377 @@ if (true) {
 
 /***/ }),
 
-/***/ "./m/src/js/main.ts":
-/*!**************************!*\
-  !*** ./m/src/js/main.ts ***!
-  \**************************/
+/***/ "./m/src/js/Article.ts":
+/*!*****************************!*\
+  !*** ./m/src/js/Article.ts ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var ViewModel_1 = __webpack_require__(/*! ../../../components/ViewModel */ "./components/ViewModel.ts");
+var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
+var TMP_ARTICLE_1 = __webpack_require__(/*! ../../../tmp/TMP_ARTICLE */ "./tmp/TMP_ARTICLE.js");
+var g = global;
+/**
+ * * Moment 글로벌 설정
+ */
+g.moment.locale('ko');
+g.moment.updateLocale('ko', { relativeTime: { h: "" + utils_1.krStr[12] } });
+var timeLine;
+var Article = /** @class */ (function (_super) {
+    __extends(Article, _super);
+    function Article(d) {
+        var _this_1 = _super.call(this, d) || this;
+        // 카드 옵션
+        _this_1.cards = {
+            width: 335,
+            x: 0,
+            initX: 0,
+            prevIndex: 0,
+            activeIndex: 0,
+            distance: 0,
+            minDistance: 10,
+            gap: 20,
+            margin: 10,
+            duration: .3,
+            offsets: [],
+            leng: 6,
+            direction: null,
+            move: 335 / 2,
+            movePercent: 0,
+            moveLimit: .10,
+            minScale: .92 // 카드 스케일 최소값
+        };
+        // 아티클 상태 저장 객체
+        _this_1.webview = false; // 웹뷰 인가? 애니메이션 없이 바로 보여줄건지
+        _this_1.isClose = true; // 카드뷰가 완전히 닫혔는지 체크
+        _this_1.out = _this_1.out.bind(_this_1);
+        return _this_1;
+    }
+    Article.prototype.out = function () {
+        var _this_1 = this;
+        var listItemWrap = document.querySelector('.listItemWrap');
+        var svg = document.querySelectorAll('.group-wrap .item');
+        g.gsap.killTweensOf(timeLine);
+        // enable scroll
+        document.querySelector('body').removeAttribute('style');
+        document.querySelector('html').removeAttribute('style');
+        timeLine = g.gsap.timeline({
+            onComplete: function () {
+                document.getElementById('wrap').setAttribute('class', '');
+                var v = (history.state && history.state !== '') ? history.state.rank : _this_1.model.rank;
+                svg[v].setAttribute('class', 'item');
+                _this_1.isClose = true;
+            }
+        });
+        // highScore, lowScore 삭제
+        document.getElementById('todayListWrap').removeAttribute('class');
+        document.getElementById('todayListWrap').removeAttribute('style');
+        // delete navi
+        document.querySelector('.todayListItemCounts').innerHTML = '';
+        // delete article list
+        listItemWrap.innerHTML = '';
+        // 카드 위치 비우기
+        this.cards.offsets = [];
+        // 카드 위치 초기화
+        this.cards.activeIndex = 0;
+        timeLine.set('body', { clearProps: 'all', duration: 0, className: '' })
+            .to(['.btnTodayClose', '.todayListTitle', '.todayListItem'], { autoAlpha: 0, ease: 'power3.inOut', duration: 0 })
+            .to(['.todayListItem', listItemWrap], { clearProps: 'all', duration: 0.1 })
+            .to('.group-wrap .item.active circle', { scale: 0.8, ease: 'power3.inOut' })
+            .to('#wrap', { className: '', duration: 0 })
+            .to('.group-wrap .item.active circle', { scale: 1, duration: 0.5 });
+    };
+    // 카드를 바로 보여줄때
+    Article.prototype.quickShow = function () {
+        var _a = history.state, rank = _a.rank, keyword_dtm = _a.keyword_dtm, keyword_sq = _a.keyword_sq;
+        document.getElementById('wrap').setAttribute('class', 'clicked');
+        //(<HTMLElement> document.querySelector('#todayListWrap')).style.cssText = `overflow: hidden;background-color:${this.color[rank]};`;
+        this.update(g.ARTICLE_URL + "?keyword_dtm=" + keyword_dtm + "&keyword_sq=" + keyword_sq);
+        if (this.webview === false) {
+            setTimeout(function () {
+                var c = document.querySelectorAll('.group-wrap .item')[rank];
+                c.setAttribute('class', 'item active');
+                g.gsap.timeline().to(c.querySelector('circle'), 0, { scale: 20, transformOrigin: '50% 50%' });
+            }, 400);
+        }
+        //window.addEventListener('popstate', this.out)
+    };
+    Article.prototype._init = function () {
+        // 템플릿 추가
+        var todayListWrap = document.getElementById('todayListWrap');
+        if (todayListWrap.innerHTML.length === 0) {
+            todayListWrap.innerHTML = TMP_ARTICLE_1.mobile;
+        }
+        if (history.state && history.state !== '') {
+            this.quickShow();
+        }
+    };
+    Article.prototype._update = function () {
+        this.isClose = false;
+        var r = this.model.rank;
+        if (history.state && history.state !== '') {
+            this.cards.activeIndex = history.state.startSlide;
+            r = history.state.rank;
+        }
+        if (!('tcall' in g)) {
+            document.querySelector('html').setAttribute('style', "background-color:" + this.color[r]);
+            document.body.style.cssText = "background-color:" + this.color[r];
+        }
+        document.body.className = 'body-show-cardview';
+        document.querySelector('.todayListTitle').innerText = this.model.title.split('?q=').pop();
+        document.getElementById('todayListWrap').setAttribute('class', (r < 5) ? 'highScore' : 'lowScore');
+        // offset
+        var cards = this.cards;
+        // 카드 포지션 설정
+        for (var i = 0; i < cards.leng; i++) {
+            cards.offsets.push(-((cards.width + cards.margin) * i));
+        }
+        this._createList();
+        this._createNav();
+        //window.scrollTo(0, (document.querySelector('.btnTodayClose').getBoundingClientRect()).y-15);
+        var t = 0.3;
+        timeLine = g.gsap.timeline({
+            onComplete: this._bindDrag.bind(this)
+        });
+        g.gsap.set('.todayListItem', { clearProps: 'all', duration: 0 });
+        timeLine
+            .to('.btnTodayClose', t, { autoAlpha: 1, delay: 0.5 })
+            .fromTo('.todayListTitle', t, { autoAlpha: 0, x: -100, }, { autoAlpha: 1, x: 0 })
+            .to('.todayListItem', (function () {
+            if (history.state && history.state !== '') {
+                return 0;
+            }
+            else {
+                return t;
+            }
+        })(), { autoAlpha: 1, x: 0, delay: 0 });
+    };
+    Article.prototype._addEvent = function (p) {
+        var _this_1 = this;
+        // 팝업 닫기
+        if (Array.isArray(p)) {
+            p.forEach(function (i) {
+                _this_1.eventListner.set("" + i, _this_1.out);
+            });
+        }
+    };
+    Article.prototype._removeEvent = function () { };
+    Article.prototype._createNav = function () {
+        var nav = document.querySelector('.todayListItemCounts');
+        var size = this.model.article.length;
+        var temp = document.createDocumentFragment();
+        for (var i = 0; i < size + 1; i++) {
+            var span = temp.appendChild(document.createElement('span'));
+            if (i === size) {
+                span.setAttribute('class', "count-more");
+            }
+            else {
+                span.setAttribute('class', "nav-item");
+            }
+        }
+        nav.appendChild(temp);
+        nav.querySelectorAll('span')[this.cards.activeIndex].setAttribute('class', "nav-item active");
+    };
+    Article.prototype._createList = function () {
+        var listItemWrap = document.querySelector('.listItemWrap');
+        var empty = document.createDocumentFragment();
+        var server_dtm = this.model.time.server_dtm;
+        this.model.a.forEach(function (d, i) {
+            var link_url = d.link_url, artc_title = d.artc_title, cp_nm = d.cp_nm, img_url = d.img_url, insert_dtm = d.insert_dtm;
+            var li = empty.appendChild(document.createElement('li'));
+            li.setAttribute('class', 'item');
+            li.setAttribute('role', 'link');
+            li.setAttribute('data-link', String(link_url));
+            li.setAttribute('data-idx', "" + (i + 1));
+            var ttt = utils_1.utils.isToday(server_dtm, insert_dtm) ? g.moment(insert_dtm).startOf('min').fromNow() : insert_dtm;
+            var temp = "\n                <div class=\"face frontFace\">\n                    <h5 class=\"subject\">" + artc_title + "</h5>\n                    <div class=\"info\">\n                        <div class=\"state\"><span class=\"provider\">" + cp_nm + "</span><span class=\"time\">" + ttt + "</span></div>\n                        <div class=\"thumb-nail\"><img src=\"" + img_url + "\" alt=\"\"></div>\n                    </div>\n                </div>\n                <div class=\"face backFace\"></div>                \n            ";
+            li.innerHTML = temp;
+        });
+        listItemWrap.appendChild(empty);
+        var more = document.createElement('li');
+        more.setAttribute('class', 'more');
+        more.setAttribute('role', 'link');
+        more.setAttribute('data-link', this.model.title);
+        more.setAttribute('data-idx', "0");
+        more.innerHTML = "\n            <div class=\"face frontFace\">\n                <div class=\"innerWrap\">" + utils_1.krStr[4] + "<div>\n                    <span class=\"size\">" + utils_1.utils.withCommas(this.model.cnt) + "</span>\n                    <span>" + utils_1.krStr[5] + "</span>\n                </div>" + utils_1.krStr[6] + "\n            </div>\n            <div class=\"face backFace\"></div>\n        ";
+        listItemWrap.appendChild(more);
+    };
+    Article.prototype._bindDrag = function () {
+        var cards = this.cards;
+        var items = document.querySelectorAll('.listItemWrap .item');
+        var btimer;
+        var ASP, LP, RP, _this = this;
+        items.forEach(function (self, j) {
+            if (j < cards.activeIndex && j < 4)
+                g.gsap.set(self, { autoAlpha: 0, x: cards.width / 2, scale: .92 });
+        });
+        g.gsap.to('.listItemWrap', cards.duration, { x: cards.offsets[cards.activeIndex] });
+        g.Draggable.create('.listItemWrap', {
+            type: 'x',
+            throwProps: false,
+            edgeResistance: .85,
+            onDrag: onDrag,
+            onDragStart: onDragStart,
+            onDragEnd: onDragEnd,
+            onClick: onClick
+        });
+        function onClick(e) {
+            var t = e.target.closest('li');
+            var duration = 0.3;
+            t.className = t.getAttribute('class') + " active";
+            // 통계
+            if (g.olapclick) {
+                var v = "TOR0" + t.getAttribute('data-idx');
+                if ('tcall' in g) {
+                    // 티전화용 통계
+                    v = "TTC" + (15 + Number(t.getAttribute('data-idx')));
+                    if (t.getAttribute('data-idx') === '0') {
+                        v = 'TTC15';
+                    }
+                }
+                else {
+                    if (t.getAttribute('data-idx') === '0') {
+                        v = 'TOM00';
+                    }
+                }
+                g.olapclick("" + v);
+            }
+            if (!('tcall' in g)) {
+                if (btimer)
+                    clearTimeout(btimer);
+                btimer = setTimeout(function () {
+                    g.gsap.set('.todayListEffect', {
+                        x: t.getBoundingClientRect().left,
+                        y: t.getBoundingClientRect().top,
+                        width: t.clientWidth,
+                        height: t.clientHeight,
+                        autoAlpha: 1,
+                        className: 'todayListEffect',
+                        borderRadius: (t.className.indexOf('more') < 0) ? 20 : '100%',
+                    });
+                }, 200);
+                // 뒷판
+                var ani = g.gsap.timeline({
+                    onComplete: function () {
+                        if (_this.eventListner.has('cardClick')) {
+                            _this.eventListner.get('cardClick')(t);
+                        }
+                    }
+                });
+                ani.delay(0.3).set('.todayListEffect', { className: 'todayListEffect active' });
+            }
+            else {
+                if (_this.eventListner.has('cardClick')) {
+                    _this.eventListner.get('cardClick')(t);
+                }
+            }
+        }
+        function onDragStart() {
+            cards.initX = this.x;
+        }
+        function onDrag() {
+            cards.distance = this.x - cards.initX;
+            cards.x = cards.initX + cards.distance;
+            cards.direction = cards.distance > -1 ? 'right' : 'left'; // 터치 방향
+            cards.movePercent = Math.abs(cards.distance / cards.width); // 이동한 범위 (%)
+            if (cards.direction === 'left') {
+                ASP = cards.movePercent <= cards.moveLimit; // 모션 시작 지점
+                LP = cards.movePercent - cards.moveLimit; // 왼쪽 이동 범위
+                if (cards.activeIndex < cards.leng - 2) {
+                    g.gsap.set(items[cards.activeIndex], {
+                        autoAlpha: ASP ? 1 : 1 - (LP + cards.moveLimit * 1.1),
+                        x: ASP ? 0 : ((LP * 200) <= cards.move) ? (LP * 200) : cards.move,
+                        scale: ASP ? 1 : (1 - LP) >= cards.minScale ? (1 - LP) : cards.minScale
+                    });
+                }
+            }
+            else {
+                ASP = cards.movePercent >= (cards.moveLimit / 2); // 모션 시작 지점
+                RP = cards.movePercent - cards.moveLimit; // 오른쪽 이동 범위
+                if (cards.activeIndex >= 0 && cards.activeIndex !== 5 && cards.activeIndex - 1 !== -1) {
+                    g.gsap.set(items[cards.activeIndex - 1], {
+                        autoAlpha: ASP ? (RP + cards.moveLimit * 1.1) : 0,
+                        x: ASP ? (cards.move - (RP * 200) >= 0 ? (cards.move - (RP * 200)) : 0) : cards.move,
+                        scale: ASP ? ((RP + cards.moveLimit * 2) <= cards.minScale ? cards.minScale : (RP + cards.moveLimit * 2) <= 1 ? (0 + RP + cards.moveLimit * 2) : 1) : cards.minScale
+                    });
+                }
+            }
+        }
+        function onDragEnd() {
+            if (cards.direction === 'left') {
+                if (Math.abs(cards.distance) > (cards.minDistance * (cards.width / 100))) {
+                    cards.prevIndex = cards.activeIndex;
+                    cards.activeIndex = Math.min(cards.activeIndex + 1, cards.leng - 1);
+                    if (cards.activeIndex < cards.leng - 1 && cards.activeIndex !== cards.leng - 1) {
+                        g.gsap.to(items[cards.activeIndex - 1], cards.duration, {
+                            autoAlpha: 0,
+                            x: cards.move,
+                            scale: cards.minScale
+                        });
+                    }
+                }
+            }
+            else {
+                if (Math.abs(cards.distance) > (cards.minDistance * (cards.width / 100))) {
+                    cards.prevIndex = cards.activeIndex;
+                    cards.activeIndex = Math.max(0, cards.activeIndex - 1);
+                    if (cards.activeIndex >= 0 && cards.activeIndex !== 5) {
+                        g.gsap.to(items[cards.activeIndex], cards.duration, {
+                            autoAlpha: 1,
+                            x: 0,
+                            scale: 1
+                        });
+                    }
+                }
+            }
+            var nav = document.querySelectorAll('.todayListItemCounts span');
+            nav.forEach(function (e) {
+                var getClassName = e.getAttribute('class');
+                if (getClassName.indexOf('active') > 0) {
+                    e.setAttribute('class', getClassName.split('active').shift());
+                }
+            });
+            nav[cards.activeIndex].setAttribute('class', nav[cards.activeIndex].getAttribute('class') + " active");
+            if (cards.activeIndex >= 0 && cards.activeIndex !== 5 && cards.activeIndex - 1 !== -1) {
+                g.gsap.to(items[cards.activeIndex - 1], cards.duration, { autoAlpha: 0 });
+            }
+            g.gsap.to('.listItemWrap', cards.duration, { x: cards.offsets[cards.activeIndex] });
+            history.state.startSlide = cards.activeIndex;
+            history.state.title = _this.model.title.split('?q=').pop();
+            history.replaceState(history.state, history.state.title);
+            // 세션체크: 앱 종료 후 다시 앱을 실행할 경우 대응
+            utils_1.replaceHistory();
+        }
+    };
+    return Article;
+}(ViewModel_1.default));
+exports.default = Article;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./m/src/js/tcall-app.ts":
+/*!*******************************!*\
+  !*** ./m/src/js/tcall-app.ts ***!
+  \*******************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1790,190 +2157,360 @@ var Calendar_1 = __webpack_require__(/*! ../../../components/Calendar */ "./comp
 var Progress_1 = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
 var KeywordList_1 = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
 var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
+var Article_1 = __webpack_require__(/*! ./Article */ "./m/src/js/Article.ts");
 var g = global;
+g.tcall = true;
+var params = utils_1.getURIparams(window.location.hash, '$') || {
+    MM: '',
+    index: '',
+    keyword_dtm: '',
+    keyword_sq: '',
+    keyword_idx: '',
+    progress_dtm: '',
+    target: '',
+    v: '',
+};
 var DATA = new Model_1.Model();
-var KEYWORD_URL = "//m.news.nate.com/api/today/keywordList";
-g.KEYWORD_URL = KEYWORD_URL;
-function mndr(v) {
-    if (g.MM_GLOBAL && typeof g.MM_GLOBAL.ndrclick === 'function') {
-        g.MM_GLOBAL.ndrclick(v);
-    }
-}
-g.stage.addEvent('newsToday', _todayInit);
-g.stage.addEvent('newsTodayStop', function () {
-    if (g.bubbles) {
-        reset();
-        g.bubbles.hideEff();
-    }
-});
-function reset() {
-    var newsEdgeBubbles = document.querySelector('#newsEdgeBubbles');
-    var todayLoader = document.querySelector('.today-loader');
-    var bubblesWrap = document.querySelector('.bubblesWrap');
-    var clickArea = document.getElementById('a-trigger');
-    if (todayLoader && bubblesWrap) {
-        bubblesWrap.removeChild(todayLoader);
-    }
-    // 링크 영역 삭제
-    if (clickArea) {
-        document.body.removeChild(clickArea);
-    }
-    if (newsEdgeBubbles) {
-        newsEdgeBubbles.innerHTML = '';
-    }
-}
-function _todayInit() {
-    // 초기화
-    reset();
-    /**
-     ** Moment 글로벌 설정
-     */
-    g.moment.locale('ko');
-    g.moment.updateLocale('ko', { relativeTime: { h: "" + decodeURI('1%EC%8B%9C%EA%B0%84') } });
-    /**
-     ** Gsap 플러그인 등록 (필수)
-     */
-    g.gsap.registerPlugin(g.Draggable, g.DrawSVGPlugin, g.MotionPathPlugin, g.ScrollToPlugin, g.InertiaPlugin);
-    // 로딩바 만들기
-    DATA.attachHandleError = (function () {
-        var obj = {
-            name: 'loading',
-            parent: '.bubblesWrap',
-            target: '.today-loader',
-            f: function () {
-                console.log('attachHandleError');
-                var bubblesWrap = document.querySelector(obj.parent);
-                var todayLoading = document.createElement('div');
-                todayLoading.className = 'today-loader';
-                todayLoading.innerHTML = "\n                    <!-- \uB85C\uB529 -->\n                    <div class=\"logoimg\">\n                        <div class=\"circle step1\"></div>\n                        <div class=\"circle step2\"></div>\n                    </div>\n                </div>\n            ";
-                bubblesWrap.appendChild(todayLoading);
-            }
-        };
-        return obj;
-    })();
-    DATA.attachHandleError = (function () {
-        var obj = {
-            name: 'error',
-            parent: '.bubblesWrap',
-            target: '.error',
-            f: function () {
-                var error = document.createElement('div');
-                error.className = 'error';
-                error.innerHTML = "\n                    <div class=\"eBox\">\n                        <p>" + utils_1.krStr[8] + "<br>" + utils_1.krStr[9] + "</p>\n                        <p>" + utils_1.krStr[10] + "</p>\n                        <a href=\"" + g.window.location.origin + "\" onclick=\"MM_GLOBAL.resetTab(); return MM_GLOBAL.ndrclick('ERR01');\" class=\"restart\">" + utils_1.krStr[11] + "</a>\n                    </div>\n                ";
-                document.querySelector(obj.parent).appendChild(error);
-                document.querySelector('#newsEdgeBubbles').removeChild(document.querySelector('.group-wrap'));
-                keyword.removeEvent();
-            }
-        };
-        return obj;
-    })();
-    function createInstance(c) {
-        return new c(DATA);
-    }
-    var calendar = createInstance(Calendar_1.default);
-    var progress = createInstance(Progress_1.default);
-    var keyword = createInstance(KeywordList_1.default);
-    var triggerBubblClick = function (i) {
-        var _a = this.model.items[i], keyword_dtm = _a.keyword_dtm, keyword_sq = _a.keyword_sq;
-        var progress_dtm = this.model.time.progress_dtm;
-        mndr("NNT2" + (function (n) { return (n < 10) ? "0" + n : n; })(i + 1));
-        var t = document.getElementById('a-trigger');
-        t.setAttribute('href', utils_1.CARD_LINK + "/#$keyword_dtm=" + keyword_dtm + "$keyword_sq=" + keyword_sq + "$index=" + i + "$MM=" + g.moment(progress_dtm).format('mm') + "$target=MAIN$v=" + g.MM_PARAMS.ref);
-        if (t) {
-            t.click();
+// 로딩바 만들기
+DATA.attachHandleError = (function () {
+    var obj = {
+        name: 'loading',
+        parent: '.bubblesWrap',
+        target: '.today-loader',
+        f: function () {
+            var bubblesWrap = document.querySelector(obj.parent);
+            var todayLoading = document.createElement('div');
+            todayLoading.className = 'today-loader';
+            todayLoading.innerHTML = "\n                    <!-- \uB85C\uB529 -->\n                <div class=\"logoimg\">\n                    <div class=\"circle step1\"></div>\n                    <div class=\"circle step2\"></div>\n                </div>\n            ";
+            bubblesWrap.appendChild(todayLoading);
         }
     };
-    // 세션
-    var ss = sessionStorage.getItem('ss');
-    var ss_x = sessionStorage.getItem('ss-x');
-    /* update process */
-    calendar.updateProcess.set('progress', function () {
-        // 드래그 업데이트
-        // css animation 시간 갭차로 인해 update 메소드 안이아니라 밖에서 실헹
-        keyword.hideEff();
-        // 프로그래스
-        progress.removeEvent();
-        progress.init();
-        progress.addEvent(['.progressWrap']);
-        // 드래그 위치 재 설정
-        var axisX = (progress.isOverflow && progress.isToday) ? progress.limit : progress.axisX;
-        g.TweenMax.set(".timeGroup", { x: axisX });
-        keyword.updateBubble();
-        // 세션저장
-        sessionStorage.setItem('ss', JSON.stringify(progress.model.time));
-        sessionStorage.setItem('ss-x', "" + progress.axisX);
-    });
-    // 이전/내일/오늘
-    calendar.addEvent(['prev', 'next', 'today']);
-    /* Progress process */
-    progress.updateProcess.set('dragEnd', function () {
-        keyword.hideEff();
-        keyword.update(KEYWORD_URL + "?service_dtm=" + this.model.time.progress_dtm);
-        mndr('NNT104');
-        // 세션저장
-        sessionStorage.setItem('ss', JSON.stringify(this.model.time));
-        sessionStorage.setItem('ss-x', "" + progress.axisX);
-    });
-    // 버블 클릭 후 실행되는 프로세스
-    keyword.eventListner.set('b-click', triggerBubblClick);
-    // 버블 업데이트 된 후 실행
-    keyword.eventListner.set('b-update', function () {
-        // 타임로그
-        /*const timeLog = document.querySelector('.timeLog');
-        if (timeLog) {
-            (<HTMLElement> timeLog).innerText = `${g.moment(DATA.time.service_dtm).format('YYYY.MM.DD HH:mm')} ${krStr[0]}`;
-        }*/
-    });
-    var INIT_PATH = ss ? KEYWORD_URL + "?service_dtm=" + (JSON.parse(sessionStorage.getItem('ss'))).progress_dtm : KEYWORD_URL;
-    DATA.update(INIT_PATH, function () {
-        var todayLoader = document.querySelector('.today-loader');
-        var bubblesWrap = document.querySelector('.bubblesWrap');
-        if (todayLoader) {
-            bubblesWrap.removeChild(todayLoader);
+    return obj;
+})();
+DATA.attachHandleError = (function () {
+    var obj = {
+        name: 'error',
+        parent: '.bubblesWrap',
+        target: '.error',
+        f: function () {
+            var error = document.createElement('div');
+            error.className = 'error';
+            error.innerHTML = "\n            <div class=\"eBox\">\n                <p>" + utils_1.krStr[8] + "<br>" + utils_1.krStr[9] + "</p>\n                <p>" + utils_1.krStr[10] + "</p>\n                <a href=\"//" + g.window.location.host + "\" onclick=\"MM_GLOBAL.resetTab(); return MM_GLOBAL.ndrclick('ERR01');\" class=\"restart\">" + utils_1.krStr[11] + "</a>\n            </div>\n        ";
+            document.querySelector(obj.parent).appendChild(error);
+            document.querySelector('#newsEdgeBubbles').removeChild(document.querySelector('.group-wrap'));
+            keyword.removeEvent();
         }
-        if (ss_x && typeof Number(ss_x) === 'number') {
-            progress.axisX = Number(ss_x);
+    };
+    return obj;
+})();
+var article = createInstance(Article_1.default);
+function createInstance(c) {
+    return new c(DATA);
+}
+/**
+ * ios캐쉬 예상하지 못한 예외 처리
+ * 카드리스트가 좀느리게 뜨는감이 없지 않아 있다. 카드리스트 모듈을 호출루틴을 빠르게 당길경우
+ * ios에서 bf캐쉬의 영향으로 여러 이슈가 발생하는것을 확인할수 있다 자세한건 QA항목 참조
+ * http://its.skcomms.co.kr/browse/KSTEST-1665
+ * http://its.skcomms.co.kr/browse/KSTEST-1666
+**/
+//alert(`init/ cardshow:${sessionStorage.getItem('cardshow')}, pageshow: ${sessionStorage.getItem('pageshow')}`)
+if (g.navigator.platform.indexOf('Win') < 0 && g.navigator.userAgent.indexOf('iPhone') > 0 && sessionStorage.getItem('cardshow') === 'true' && sessionStorage.getItem('pageshow') === 'true') {
+    sessionStorage.setItem('cardshow', 'false');
+    sessionStorage.setItem('pageshow', 'false');
+    window.location.reload();
+}
+/*
+** 메인에서 유입 할 때 카드리스트를 바로 보여준다.
+ */
+if (params && params.target === 'MAIN') {
+    var keyword_dtm = params.keyword_dtm, keyword_sq = params.keyword_sq, rank = params.index;
+    article.webview = (params.v === 'nate_app') ? params.v : true; // 웹뷰모드
+    var startSlide = (function () {
+        if (history.state && history.state !== '') {
+            return history.state.startSlide;
         }
-        if (ss) {
-            var _a = JSON.parse(ss), progress_dtm = _a.progress_dtm, server_dtm = _a.server_dtm;
-            if (typeof progress_dtm === 'string' && typeof server_dtm === 'string' && progress_dtm.split(' ')[0] !== server_dtm.split(' ')[0]) {
-                DATA.time.progress_dtm = (JSON.parse(ss)).progress_dtm;
+        else {
+            return 0;
+        }
+    })();
+    history.pushState({
+        keyword_dtm: keyword_dtm,
+        keyword_sq: keyword_sq,
+        rank: rank,
+        startSlide: startSlide,
+        title: ''
+    }, 'home');
+    if (sessionStorage.getItem('pageshow') !== 'true' && sessionStorage.getItem('cardshow') !== 'true') {
+        utils_1.replaceHistory();
+    }
+}
+if (history.state && history.state !== '') {
+    document.body.style.cssText = "background-color:" + article.color[Number(history.state.rank)];
+    document.body.className = 'session';
+    document.querySelector('#todayListWrap').setAttribute('style', "\n        display: block;\n        background-color:" + article.color[Number(history.state.rank)] + "\n    ");
+}
+//article.init();
+var calendar = createInstance(Calendar_1.default);
+var progress = createInstance(Progress_1.default);
+var keyword = createInstance(KeywordList_1.default);
+var triggerBubblClick = function (i) {
+    // 팝업이 완전히 닫히지 않은 상태면 버블 클릭안됨
+    if (article.isClose === false) {
+        return;
+    }
+    keyword.clickEff(i);
+    var sq = DATA.items[i].keyword_sq;
+    var t = DATA.time.service_dtm;
+    var historyData = {
+        keyword_dtm: t,
+        keyword_sq: sq,
+        rank: i,
+        startSlide: 0,
+        title: '',
+        progress_dtm: DATA.time.progress_dtm,
+        x: progress.axisX
+    };
+    DATA.rank = i;
+    if (history.state && history.state !== '') {
+        setTimeout(function () {
+            history.replaceState(historyData, utils_1.krStr[2] + "-" + DATA.items[i].keyword_service.split('<br />').join(' '));
+        }, 0);
+    }
+    else {
+        setTimeout(function () {
+            history.pushState(historyData, utils_1.krStr[2] + "-" + DATA.items[i].keyword_service.split('<br />').join(' '));
+        }, 0);
+    }
+    article.update(g.ARTICLE_URL + "?keyword_dtm=" + t + "&keyword_sq=" + sq);
+    // 버블 클릭 통계 프로세스 바인딩
+    var N = i + 5;
+    if (typeof g.draw_ndr === 'function') {
+        var sRef2 = '';
+        g.draw_mndr('m_ndr.nate.com/news/today/tcall//keyword' + (i + 1), g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
+    }
+    if (typeof g.olapclick === 'function') {
+        // 키워드0 TTC05
+        g.olapclick(N < 10 ? "TTC0" + N : "TTC" + N);
+    }
+    // 세션체크: 앱 종료 후 다시 앱을 실행할 경우 대응
+    //replaceHistory();
+};
+/* update process */
+calendar.updateProcess.set('progress', function () {
+    // 드래그 업데이트
+    // css animation 시간 갭차로 인해 update 메소드 안이아니라 밖에서 실헹
+    keyword.hideEff();
+    // 프로그래스
+    progress.removeEvent();
+    progress.init();
+    progress.addEvent(['.progressWrap']);
+    // 드래그 위치 재 설정
+    var axisX = (progress.isOverflow && progress.isToday) ? progress.limit : progress.axisX;
+    g.TweenMax.set(".timeGroup", { x: axisX });
+    keyword.updateBubble();
+});
+/* Progress process */
+progress.updateProcess.set('dragEnd', function () {
+    keyword.hideEff();
+    keyword.update(g.KEYWORD_URL + "?service_dtm=" + this.model.time.progress_dtm);
+    if ('olapclick' in window) {
+        g.olapclick('TTC04');
+    }
+});
+// 버블 클릭 후 실행되는 프로세스
+keyword.eventListner.set('b-click', triggerBubblClick);
+// 버블 업데이트 된 후 실행
+keyword.eventListner.set('b-update', function () {
+    // 타임로그
+    /*const timeLog = document.querySelector('.timeLog');
+    if (timeLog) {
+        (<HTMLElement> timeLog).innerText = `${g.moment(DATA.time.update_dtm).format('YYYY.MM.DD HH:mm')} ${krStr[0]}`;
+    }*/
+});
+document.addEventListener('DOMContentLoaded', function () {
+    // 초기화
+    var path = g.KEYWORD_URL;
+    if (history.state && history.state !== '') {
+        path = path + "?service_dtm=" + history.state.keyword_dtm;
+    }
+    DATA.update(path, function () {
+        if (params.target !== 'MAIN' && history.state && history.state !== '') {
+            if (history.state.progress_dtm) {
+                DATA.time.progress_dtm = history.state.progress_dtm;
             }
+            // 세션데이터 x > 프로그래스바 x축 설정
+            progress.axisX = history.state.x;
         }
         calendar.init();
         progress.init();
         keyword.init();
+        article.init();
+        // 이전/내일/오늘
+        calendar.addEvent(['prev', 'next', 'today']);
         // 타임라인 접기
         progress.addEvent(['.progressWrap']);
-        // 세션생성
-        if (!ss && !ss_x) {
-            sessionStorage.setItem('ss', JSON.stringify(DATA.time));
-            sessionStorage.setItem('ss-x', "" + progress.axisX);
+        // 카드 바로 보여주기 트리거 바인딩
+        article.eventListner.set('trigger', triggerBubblClick);
+        // 카드 클릭
+        article.eventListner.set('cardClick', cardClick);
+        //setTimeout(article.init.bind(article), 4000);
+        if (params && params.target === 'MAIN') {
+            document.querySelector('.btnTodayClose').addEventListener('click', closeCardMain);
+            // 페이지 진입 통계
+            if (typeof g.draw_ndr === 'function') {
+                g.draw_mndr('m_ndr.nate.com/news/today/keyword' + (Number(params.index) + 1), g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, '');
+            }
         }
-        // 페이지 진입 통계
-        if (typeof g.draw_ndr === 'function') {
-            var sRef2 = '';
-            g.draw_mndr('m_ndr.nate.com/news/today', g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
+        else {
+            // 카드리스트 팝업닫기
+            article.addEvent(['.btnTodayClose']);
+            // 요소가 나타났다 사라지는 효과이기 때문에 팝업이 완전히 닫힌후 버블을 재업데이트 한다.
+            document.querySelector('.btnTodayClose').addEventListener('click', function () {
+                closeCardView();
+                history.pushState(null, null, '');
+            });
+            // 페이지 진입 통계
+            if (typeof g.draw_ndr === 'function') {
+                var sRef2 = '';
+                g.draw_mndr('m_ndr.nate.com/news/today/tcall/', g.gUserJS_sAppFrom, '', g.gUserJS_sAppSkai, g.gUserJS_sAppNdruk, sRef2);
+            }
         }
-        // 링크 트리거(앱에서 window.open 메소드 제한 걸어둠, 임시 트리거로 페이지 이동 시킨다)
-        (function () {
-            var aa = document.createElement('a');
-            aa.id = "a-trigger";
-            aa.target = '_blank';
-            aa.style.cssText = 'position: absolute;left: -999em;top: -999em;';
-            aa.href = '#';
-            document.body.appendChild(aa);
-        })();
     });
-    var blockevent = function () { g.stage.trigger('BLOCK_ON'); };
-    document.querySelector('.progressWrap').removeEventListener('touchstart', blockevent);
-    document.querySelector('.progressWrap').addEventListener('touchstart', blockevent, { passive: false, capture: false });
-    if (true) {
-        g.dd = DATA;
-        g.cc = calendar;
-        g.pp = progress;
+    // 세션체크: 앱 종료 후 다시 앱을 실행할 경우 대응
+    if (!params && params.target !== 'MAIN' && sessionStorage.getItem('cardshow') !== 'true') {
+        utils_1.replaceHistory();
     }
-    g.bubbles = keyword;
+    // SNS
+    //document.querySelector('.btnShare ').addEventListener('click', shareSNS);
+    //document.querySelector('.btnClosePopup ').addEventListener('click', closeSNS);
+});
+// ios에서 히스토리백: 1) pageshow 호출 이후 2)popstate 호출
+window.addEventListener('pageshow', ff2);
+window.addEventListener('popstate', ff);
+function clearCardEff() {
+    var todayListEffect = document.querySelector('.todayListEffect');
+    var check = todayListEffect.getAttribute('style');
+    var li = document.querySelectorAll('.listItemWrap li');
+    if (check !== null) {
+        todayListEffect.className = 'todayListEffect';
+        todayListEffect.removeAttribute('style');
+        li.forEach(function (n) {
+            n.className = n.className.indexOf('more') >= 0 ? 'more' : 'item';
+        });
+    }
+}
+function ff2(e) {
+    if (g.navigator.platform.indexOf('Win') < 0 && g.navigator.userAgent.indexOf('iPhone') > 0) {
+        clearCardEff();
+        if (e.persisted) {
+            sessionStorage.setItem('pageshow', 'true');
+        }
+        /**
+         * 환경: ios인앱(사파리,크롬)
+         * 재연스텝: 프라이빗모드에서 카드리스트 열린 상태에서 앱 강제종료 후 다시 실행할때 backfoard캐쉬로 인한 이슈
+         * 이슈내용: 키워드가 커진 상태로 열려져 있음
+         * */
+        //alert(document.getElementById('wrap').className)
+        /*if(document.getElementById('wrap').className !== 'clicked') {
+            setTimeout(()=>{
+                keyword.hideEff();
+                keyword.updateBubble();
+            }, 2000);
+        }*/
+        //alert(`ff2/ cardshow:${sessionStorage.getItem('cardshow')}, pageshow: ${sessionStorage.getItem('pageshow')}`)
+    }
+}
+function ff() {
+    clearCardEff();
+    //alert(`ff/ cardshow:${sessionStorage.getItem('cardshow')}, pageshow: ${sessionStorage.getItem('pageshow')}`)
+    if (params && params.target === 'MAIN') {
+        closeCardMain();
+    }
+    else {
+        var wrap = document.querySelector('#wrap');
+        var pageshow = sessionStorage.getItem('pageshow');
+        if (g.navigator.userAgent.indexOf('iPhone') < 0) {
+            if (wrap.className === 'clicked') {
+                closeCardView();
+            }
+        }
+        else {
+            if (pageshow !== 'true' && wrap.className === 'clicked') {
+                closeCardView();
+            }
+            sessionStorage.setItem('cardshow', 'false');
+        }
+        //updateToResize();
+        sessionStorage.setItem('pageshow', 'false');
+    }
+}
+// 메인용 닫기&히스토리백
+function closeCardMain() {
+    if (article.webview === 'nate_app') {
+        var pageshow = sessionStorage.getItem('pageshow');
+        if (pageshow === 'true') {
+            sessionStorage.setItem('pageshow', 'false');
+        }
+        else {
+            g.window.location.href = utils_1.MAIN_LINK;
+        }
+    }
+    else if (article.webview) {
+        window.close();
+        setTimeout(function () {
+            g.window.location.href = utils_1.MAIN_LINK;
+        }, 300);
+    }
+}
+// 5개의 주요뉴스 클릭함수
+function cardClick(e) {
+    if (sessionStorage.getItem('pageshow') === 'true') {
+        sessionStorage.setItem('pageshow', 'error');
+    }
+    sessionStorage.setItem('pageshow', 'true');
+    sessionStorage.setItem('cardshow', 'true');
+    window.location.href = "skt-marketing-api://outerbrowser?url=https:" + e.getAttribute('data-link');
+}
+// share SNS
+function shareSNS(e) {
+    e.preventDefault();
+    var t = document.querySelector('.layerPopup');
+    t.className = 'layerPopup share active';
+    document.body.className = 'scroll-block';
+    document.querySelector('html').setAttribute('class', 'app');
+}
+// closeSNS
+function closeSNS(e) {
+    e.preventDefault();
+    var t = document.querySelector('.layerPopup');
+    t.className = 'layerPopup share';
+    document.body.className = '';
+    document.querySelector('html').removeAttribute('class');
+}
+function closeCardView() {
+    // 카드뷰가 열린 상태에서 리사이징이 일어날때 true
+    if (sessionStorage.getItem('resize') === 'true') {
+        sessionStorage.setItem('cardshow', 'null');
+        article.out();
+        setTimeout(function () {
+            keyword.hideEff();
+            setTimeout(keyword.updateBubble.bind(keyword), 400);
+            sessionStorage.setItem('resize', null);
+        }, 200);
+    }
+    else {
+        article.out();
+    }
+}
+// DEV
+if (true) {
+    g.dd = DATA;
+    g.a = article;
+    g.params = params;
+    g.cc = calendar;
+    g.pp = progress;
+    g.kk = keyword;
 }
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
@@ -2007,6 +2544,21 @@ try {
 // easier to handle this case. if(!global) { ...}
 
 module.exports = g;
+
+
+/***/ }),
+
+/***/ "./tmp/TMP_ARTICLE.js":
+/*!****************************!*\
+  !*** ./tmp/TMP_ARTICLE.js ***!
+  \****************************/
+/*! exports provided: mobile */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mobile", function() { return mobile; });
+var mobile = "\n    <div class=\"todayList\"><button type=\"button\" class=\"btnTodayClose\">close</button>\n        <h3 class=\"todayListTitle\"></h3>\n        <div class=\"todayListItem\">\n            <ul class=\"listItemWrap\">\n            </ul>\n            <div class=\"todayListItemCounts\"></div>\n        </div>\n    </div>\n    <div class=\"todayListEffect\"></div>\n";
 
 
 /***/ }),

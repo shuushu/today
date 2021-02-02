@@ -681,7 +681,7 @@ var KeywordList = /** @class */ (function (_super) {
     };
     KeywordList.prototype._resize = function () {
         var _this_1 = this;
-        if (document.body.clientWidth === ww)
+        if (document.body.clientWidth === ww || !document.getElementById('newsEdgeBubbles'))
             return;
         var wrap = document.getElementById('wrap');
         var mainWrap = document.querySelector('.mainContainer');
@@ -1953,9 +1953,11 @@ var Article = /** @class */ (function (_super) {
             this.cards.activeIndex = history.state.startSlide;
             r = history.state.rank;
         }
-        document.querySelector('html').setAttribute('style', "background-color:" + this.color[r]);
+        if (!('tcall' in g)) {
+            document.querySelector('html').setAttribute('style', "background-color:" + this.color[r]);
+            document.body.style.cssText = "background-color:" + this.color[r];
+        }
         document.body.className = 'body-show-cardview';
-        document.body.style.cssText = "background-color:" + this.color[r];
         document.querySelector('.todayListTitle').innerText = this.model.title.split('?q=').pop();
         document.getElementById('todayListWrap').setAttribute('class', (r < 5) ? 'highScore' : 'lowScore');
         // offset
@@ -2060,33 +2062,49 @@ var Article = /** @class */ (function (_super) {
             // 통계
             if (g.olapclick) {
                 var v = "TOR0" + t.getAttribute('data-idx');
-                if (t.getAttribute('data-idx') === '0') {
-                    v = 'TOM00';
+                if ('tcall' in g) {
+                    // 티전화용 통계
+                    v = "TTC" + (15 + Number(t.getAttribute('data-idx')));
+                    if (t.getAttribute('data-idx') === '0') {
+                        v = 'TTC15';
+                    }
+                }
+                else {
+                    if (t.getAttribute('data-idx') === '0') {
+                        v = 'TOM00';
+                    }
                 }
                 g.olapclick("" + v);
             }
-            if (btimer)
-                clearTimeout(btimer);
-            btimer = setTimeout(function () {
-                g.gsap.set('.todayListEffect', {
-                    x: t.getBoundingClientRect().left,
-                    y: t.getBoundingClientRect().top,
-                    width: t.clientWidth,
-                    height: t.clientHeight,
-                    autoAlpha: 1,
-                    className: 'todayListEffect',
-                    borderRadius: (t.className.indexOf('more') < 0) ? 20 : '100%',
-                });
-            }, 200);
-            // 뒷판
-            var ani = g.gsap.timeline({
-                onComplete: function () {
-                    if (_this.eventListner.has('cardClick')) {
-                        _this.eventListner.get('cardClick')(t);
+            if (!('tcall' in g)) {
+                if (btimer)
+                    clearTimeout(btimer);
+                btimer = setTimeout(function () {
+                    g.gsap.set('.todayListEffect', {
+                        x: t.getBoundingClientRect().left,
+                        y: t.getBoundingClientRect().top,
+                        width: t.clientWidth,
+                        height: t.clientHeight,
+                        autoAlpha: 1,
+                        className: 'todayListEffect',
+                        borderRadius: (t.className.indexOf('more') < 0) ? 20 : '100%',
+                    });
+                }, 200);
+                // 뒷판
+                var ani = g.gsap.timeline({
+                    onComplete: function () {
+                        if (_this.eventListner.has('cardClick')) {
+                            _this.eventListner.get('cardClick')(t);
+                        }
                     }
+                });
+                ani.delay(0.3).set('.todayListEffect', { className: 'todayListEffect active' });
+            }
+            else {
+                if (_this.eventListner.has('cardClick')) {
+                    _this.eventListner.get('cardClick')(t);
                 }
-            });
-            ani.delay(0.3).set('.todayListEffect', { className: 'todayListEffect active' });
+            }
         }
         function onDragStart() {
             cards.initX = this.x;

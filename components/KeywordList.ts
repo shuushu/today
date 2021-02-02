@@ -478,7 +478,7 @@ export default class KeywordList<S> extends ViewModel<S>{
     }
 
     private _resize(): void {
-        if(document.body.clientWidth === ww) return;
+        if(document.body.clientWidth === ww || !document.getElementById('newsEdgeBubbles')) return;
         const wrap = document.getElementById('wrap');
         const mainWrap = document.querySelector('.mainContainer');
         const f = () => {
