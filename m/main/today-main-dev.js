@@ -910,10 +910,10 @@ exports.Model = Model;
 
 /***/ }),
 
-/***/ "./components/Progress.ts":
-/*!********************************!*\
-  !*** ./components/Progress.ts ***!
-  \********************************/
+/***/ "./components/ProgressV2.ts":
+/*!**********************************!*\
+  !*** ./components/ProgressV2.ts ***!
+  \**********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -941,30 +941,24 @@ var g = global, ss = (1000 * 60 * 60 * 24); // 24시간 > ms 변환
 var drag; // gsap dragable plugin
 var resizeTime;
 var flag = false; // 리사이징와 타임라인 관련
-var opt = {
-    width: Math.min(window.innerWidth, 375) * (254 / 375),
-    height: Math.min(window.innerWidth, 375) * (48 / 375),
-    r: (Math.min(window.innerWidth, 375) * (24 / 375)) / 2
+var opt = function () {
+    return {
+        width: Math.min(window.innerWidth - 60, 450),
+        height: 8,
+        r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
+    };
 };
 var ww = 0; // 리사이징 컨텐츠 영역 가로값 저장
+var timeLine;
 var Progress = /** @class */ (function (_super) {
     __extends(Progress, _super);
     function Progress(d) {
         var _this_1 = _super.call(this, d) || this;
         _this_1.axisX = 0;
         _this_1._resize = _this_1._resize.bind(_this_1);
+        _this_1.options = opt();
         return _this_1;
     }
-    Object.defineProperty(Progress.prototype, "options", {
-        get: function () {
-            return opt;
-        },
-        set: function (v) {
-            opt = v;
-        },
-        enumerable: false,
-        configurable: true
-    });
     Object.defineProperty(Progress.prototype, "isOverflow", {
         get: function () {
             return this.model.isOverflow;
@@ -999,8 +993,7 @@ var Progress = /** @class */ (function (_super) {
             currentTarget.classList.toggle(_a);
         }
     };
-    Progress.prototype._update = function () {
-    };
+    Progress.prototype._update = function () { };
     Progress.prototype._init = function () {
         this._drawPath();
         this._updateTooltip();
@@ -1014,97 +1007,91 @@ var Progress = /** @class */ (function (_super) {
             clearTimeout(resizeTime);
         this._removeEvent();
         resizeTime = setTimeout(function () {
-            if (!document.getElementById('newsEdgeProgress'))
-                return;
-            var bw = document.body.clientWidth;
             document.getElementById('newsEdgeProgress').innerHTML = '';
-            _this_1.options = {
-                width: Math.min(bw, 375) * (254 / 375),
-                height: Math.min(bw, 375) * (48 / 375),
-                r: (Math.min(bw, 375) * (24 / 375)) / 2
-            };
+            _this_1.options = opt();
             _this_1._drawPath();
             _this_1._updateTooltip();
             _this_1._addEvent(['.progressWrap']);
             // 드래그 위치 재 설정
             if (flag) {
                 document.querySelector('.timeGroup').setAttribute('transform', "matrix(1,0,0,1," + _this_1.limit + ", " + _this_1.options.height / 2 + ")");
-                document.querySelector('.pathFront').setAttribute('d', "M0 " + _this_1.options.height / 2 + " l " + _this_1.limit + " .001");
+                document.querySelector('.pathFront').setAttribute('width', "" + _this_1.limit);
                 g.TweenMax.set(".timeGroup", { x: _this_1.limit });
             }
+            timeLine.play();
         }, 300);
     };
     // 프로그레스 바 그리기
     Progress.prototype._drawPath = function () {
         var _b = this.options, width = _b.width, height = _b.height, r = _b.r;
         var wrapping = document.querySelector('.progressWrap');
+        wrapping.classList.add('thin');
         wrapping.removeChild(document.getElementById('newsEdgeProgress'));
         var temp = document.createElement('div');
         temp.id = 'newsEdgeProgress';
-        temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS;
+        temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS_THIN;
         document.querySelector('.progressWrap').appendChild(temp);
         var target = g.d3.select('#newsEdgeProgress svg');
-        //target.innerHTML = TMP_PROGRESS_IE11;
-        //초기화
-        //if (target.textContent === ''|| target.innerHTML === '') {
-        //}
         var cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        var now = g.moment(this.model.time.progress_dtm).valueOf();
-        var start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
-        var percent = (now - start) / 86400000;
-        var data = {
-            front: "M0 " + height / 2 + " l " + cx + " .001",
-            back: "M0 " + height / 2 + " l " + this.limit + " .001",
-            backboard: (function () {
-                var time = width / (height * 0.08333333333333333);
-                var pathResult = '';
-                for (var i = 0; i < time; i++) {
-                    pathResult += 'M ' + (height * 0.08333333333333333) * i + ' ' + (height * 0.4166666666666667) + ' H ' + (height * 0.08333333333333333) * i + ' V ' + ((height * 0.4166666666666667) + (height * 0.16666666666666666));
-                }
-                return pathResult;
-            })()
-        };
+        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup', '.timeGroup2'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3], timeGroup2 = _c[4];
+        var timeTooltip = g.d3.select('.timeTooltip');
+        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
+        var HH = isPC ? 58 : 32;
+        var WW = isPC ? 134 : 73;
+        var RR = isPC ? 27 : 15;
+        var tooltipRect = timeTooltip.select('#filter1Rect');
+        var tooltipRect2 = timeTooltip.select('#filter2Rect');
         /* 프로퍼티 설정 */
         target.attr('width', "" + width);
         target.attr('height', "" + height);
-        target.attr('viewBox', "0,0," + width + "," + height);
-        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
-        pathBackboard.attr('d', data.backboard);
-        pathBack.attr('d', data.back);
-        pathFront.attr('d', data.front);
-        pathBack.attr('stroke-width', height * 0.20833333333333334);
-        pathFront.attr('stroke-width', height * 0.2916666666666667);
+        target.attr('viewBox', "0,0," + width + "," + 48);
+        pathBackboard.attr('width', width);
+        pathBack.attr('width', this.limit);
+        pathFront.attr('width', "" + cx);
+        pathBackboard.attr('height', "" + height);
+        pathBack.attr('height', "" + height);
+        pathFront.attr('height', "" + height);
+        if (isPC) {
+            [pathBackboard, pathBack, pathFront].forEach(function (elements) {
+                elements.attr('rx', 5);
+                elements.attr('ry', 5);
+            });
+            timeTooltip.attr('y', 64);
+        }
         timeGroup.attr('transform', "matrix(1,0,0,1, " + cx + ", " + height / 2 + ")");
-        g.d3.select('.timeKnob').attr('r', "" + r);
-        var timeTooltip = g.d3.select('.timeTooltip');
-        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
-        var HH = isPC ? 58 : height * 0.8333333333333334;
-        var WW = isPC ? 134 : width * 0.36;
-        var RR = isPC ? 15 : r;
         timeTooltip.attr('width', "" + WW);
         timeTooltip.attr('height', "" + HH);
         timeTooltip.attr('viebox', "0, 0, " + WW + ", " + HH);
-        var tooltipRect = timeTooltip.select('rect');
         tooltipRect.attr('width', "" + WW);
         tooltipRect.attr('height', "" + HH);
-        //-WW/2 - (84 - percent * 100)
         tooltipRect.attr('x', "" + -WW / 2);
-        tooltipRect.attr('y', "" + -((isPC ? 92 : height + r + 4)));
-        tooltipRect.attr('rx', "" + RR * 2);
-        tooltipRect.attr('ry', "" + RR * 2);
+        tooltipRect.attr('y', "" + -((isPC ? 92 : 30)));
+        tooltipRect.attr('rx', "" + RR);
+        tooltipRect.attr('ry', "" + RR);
+        tooltipRect2.attr('width', "" + WW);
+        tooltipRect2.attr('height', "" + HH);
+        tooltipRect2.attr('x', "" + -WW / 2);
+        tooltipRect2.attr('y', "" + -((isPC ? 92 : 30)));
+        tooltipRect2.attr('rx', "" + RR);
+        tooltipRect2.attr('ry', "" + RR);
         var arrow = timeTooltip.select('#filter2Path');
         if (isPC) {
             arrow.attr('d', 'M -9 0 l 9 18 l 9 -18 h -18z');
-            arrow.attr('transform', 'translate(0 -34)');
+            arrow.attr('transform', utils_1.UA.isIE ? 'translate(8 -50)' : 'translate(4 -50)');
+            g.d3.select('.copy').attr('transform', 'matrix(1,0,0,1, -2, -60)');
+            g.d3.select('.copy .timeText').attr('y', '-52');
         }
         else {
             arrow.attr('transform', "translate(-" + (r + 2) + " -" + r * 2 + ")");
         }
         var timeText = timeTooltip.select('.timeText');
-        //`${(84 < percent * 100) ? (84 - percent * 100) : 0}`
         timeText.attr('x', '0');
-        timeText.attr('y', "" + (isPC ? -54 : -(r * 3 + 2)));
-        timeText.attr('font-size', width * 0.088 + "px");
+        timeText.attr('y', "" + (isPC ? -54 : -10));
+        timeText.attr('font-size', '19px');
+        var timeText2 = timeTooltip.select('.timeText2');
+        timeText2.attr('x', '0');
+        timeText2.attr('y', "" + (isPC ? -54 : -8));
+        timeText2.attr('font-size', '19px');
         ww = document.body.clientWidth;
     };
     /* 이벤트리스너 바인딩 */
@@ -1114,6 +1101,46 @@ var Progress = /** @class */ (function (_super) {
         var end = this.updateProcess.get('dragEnd').bind(this) || function () { };
         //let d = document.querySelector('.pathFront').getAttribute('d').split(' ');
         var body = document.body;
+        var cache = {
+            win: 0,
+            svg: 0,
+            t: null,
+            f: false
+        };
+        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
+        timeLine = g.gsap.timeline({
+            onComplete: function () { return timeLine.pause(); }
+        });
+        if (!utils_1.UA.isIE) {
+            timeLine.set('.copy', { scale: '0', opacity: 0, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' });
+        }
+        // IE11에서 프로퍼티 애니매이션이 상이하게 표현
+        var zoomOut1 = (function () {
+            if (utils_1.UA.isIE) {
+                return {
+                    transform: "matrix(0.4,0,0,1,0,0)",
+                    transformOrigin: '50% 50%',
+                    duration: 0.2,
+                    delay: -0.15
+                };
+            }
+            else {
+                return {
+                    width: (isPC) ? '60px' : '34px',
+                    x: (isPC) ? '30px' : '17px',
+                    duration: 0.3,
+                    delay: -0.15
+                };
+            }
+        })();
+        timeLine.pause();
+        timeLine
+            .to('.origin .timeText', { opacity: 0 })
+            .to('.timeTooltip #filter1Rect', zoomOut1)
+            .to('.timeTooltip .origin', { scale: (isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration: 0.2, delay: (isPC) ? 0 : -0.1 })
+            .to('.timeTooltip .origin .rec', { stroke: '#7c8aff', delay: -0.1 })
+            // 사라지기
+            .to('.copy', { scale: '1', opacity: 1, duration: (isPC) ? 0.8 : 0.6, delay: -0.6, ease: 'power3.inOut' });
         drag = g.Draggable.create('.timeGroup', {
             type: 'x, y',
             bounds: {
@@ -1135,16 +1162,32 @@ var Progress = /** @class */ (function (_super) {
                 if (_this.eventListner.has('dragStart')) {
                     _this.eventListner.get('dragStart').call(this);
                 }
+                // timeLine.pause();
+                // timeLine.reverse();
+                clearTimeout(timeLine.timer);
+                // 캐쉬 기록
+                cache.win = document.body.clientHeight;
+                cache.svg = document.querySelector('.newsEdgeProgress').clientWidth;
+                cache.t = g.d3.select('.timeTooltip');
+                // 시간 툴팁 사라지기 init                
+                if (cache.f === false) {
+                    cache.f = true;
+                    timeLine.play();
+                }
+                else {
+                    if (!utils_1.UA.isIE) {
+                        timeLine.set('.copy', { scale: '1', opacity: 1, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' });
+                    }
+                }
             },
             onDrag: function () {
                 var gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
                 var dt = Math.abs(ss / Number(_this.options.width)); // this.x 이동 값 > 시간(타임스탬프) 변환값
                 var yyymmdd = new Date((_this.model.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
                 _this.axisX = this.x;
-                var value = "M 0 " + _this.options.height / 2 + " l " + this.x + " 0.001";
                 _this.model.updateProgress(g.moment((yyymmdd + dt * this.x) - gmt).format('YYYY-MM-DD HH:mm:ss'));
                 document.querySelector('.newsEdgeProgress').setAttribute('class', 'newsEdgeProgress');
-                document.querySelector('.pathFront').setAttribute('d', value);
+                document.querySelector('.pathFront').setAttribute('width', this.x);
                 _this._updateTooltip();
             },
             onDragEnd: function () {
@@ -1154,6 +1197,10 @@ var Progress = /** @class */ (function (_super) {
                     end();
                 }
                 body.removeAttribute('class');
+                timeLine.timer = setTimeout(function () {
+                    cache.f = false;
+                    timeLine.reverse();
+                }, 2000);
             }
         });
         // 접기
@@ -1177,10 +1224,12 @@ var Progress = /** @class */ (function (_super) {
     /* 툴팁업데이트 */
     Progress.prototype._updateTooltip = function () {
         var progress_dtm = this.model.time.progress_dtm;
-        var _b = ['.hh', '.mm'].map(function (i) { return g.d3.select(".timeText " + i); }), hh = _b[0], mm = _b[1];
+        var _b = ['.hh', '.mm', '.hh2', '.mm2'].map(function (i) { return g.d3.select(".timeText " + i); }), hh = _b[0], mm = _b[1], hh2 = _b[2], mm2 = _b[3];
         // 툴팁 시간 표시
         hh.text(g.moment(progress_dtm).format('HH'));
         mm.text(this._mm(progress_dtm));
+        hh2.text(g.moment(progress_dtm).format('HH'));
+        mm2.text(this._mm(progress_dtm));
     };
     /* n분 단위 표시 */
     Progress.prototype._mm = function (d) {
@@ -1259,6 +1308,72 @@ var ViewModel = /** @class */ (function () {
     return ViewModel;
 }());
 exports.default = ViewModel;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./components/Weather.ts":
+/*!*******************************!*\
+  !*** ./components/Weather.ts ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Weather = void 0;
+var TMP_WEATHER_1 = __webpack_require__(/*! ../tmp/TMP_WEATHER */ "./tmp/TMP_WEATHER.js");
+var g = global;
+var Weather = /** @class */ (function () {
+    function Weather(arr) {
+        this.data = arr;
+    }
+    Object.defineProperty(Weather.prototype, "getClass", {
+        get: function () {
+            return this.data.map(function (v) {
+                // 이미지명에서 className 추출하기
+                return (v.img.split('96x96_').pop()).split('.png').shift();
+            });
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Weather.prototype.draw = function (target) {
+        var _this_1 = this;
+        if (target) {
+            var _a = ['div', 'ul', 'a'].map(function (n) { return document.createElement(n); }), div = _a[0], ul = _a[1], a = _a[2];
+            div.className = 'weather-widget';
+            ul.innerHTML = this.data.reduce(function (p, n, i) { return p += TMP_WEATHER_1.items(_this_1.getClass[i], n.temp, n.name); }, '');
+            a.setAttribute('href', '#');
+            a.innerHTML = '날씨설정';
+            div.appendChild(ul);
+            div.appendChild(a);
+            target.appendChild(div);
+            if (this.data.length > 1)
+                this.play(ul);
+        }
+    };
+    Weather.prototype.remove = function (target) {
+        var weatherWidget = document.querySelector('.weather-widget');
+        if (target && weatherWidget) {
+            target.removeChild(weatherWidget);
+        }
+    };
+    Weather.prototype.play = function (target) {
+        var cnt = 0, _this = this;
+        g.TODAY.weatherTimer = setInterval(function () {
+            target.setAttribute('style', "transform: translateY(-" + cnt * 32 + "px)");
+            cnt++;
+            if (cnt >= _this.data.length) {
+                cnt = 0;
+            }
+        }, 5000);
+    };
+    return Weather;
+}());
+exports.Weather = Weather;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
@@ -1787,8 +1902,9 @@ if (true) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Model_1 = __webpack_require__(/*! ../../../components/Model */ "./components/Model.ts");
 var Calendar_1 = __webpack_require__(/*! ../../../components/Calendar */ "./components/Calendar.ts");
-var Progress_1 = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
+var ProgressV2_1 = __webpack_require__(/*! ../../../components/ProgressV2 */ "./components/ProgressV2.ts");
 var KeywordList_1 = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
+var Weather_1 = __webpack_require__(/*! ../../../components/Weather */ "./components/Weather.ts");
 var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
 var g = global;
 var DATA = new Model_1.Model();
@@ -1825,6 +1941,11 @@ function reset() {
 function _todayInit() {
     // 초기화
     reset();
+    // 날씨 위젯
+    var weather = new Weather_1.Weather(g.TODAY.weather);
+    var newsEdge = document.querySelector('.newsEdge');
+    weather.remove(newsEdge);
+    weather.draw(newsEdge);
     /**
      ** Moment 글로벌 설정
      */
@@ -1871,7 +1992,7 @@ function _todayInit() {
         return new c(DATA);
     }
     var calendar = createInstance(Calendar_1.default);
-    var progress = createInstance(Progress_1.default);
+    var progress = createInstance(ProgressV2_1.default);
     var keyword = createInstance(KeywordList_1.default);
     var triggerBubblClick = function (i) {
         var _a = this.model.items[i], keyword_dtm = _a.keyword_dtm, keyword_sq = _a.keyword_sq;
@@ -1972,6 +2093,7 @@ function _todayInit() {
         g.dd = DATA;
         g.cc = calendar;
         g.pp = progress;
+        g.weather = weather;
     }
     g.bubbles = keyword;
 }
@@ -2015,13 +2137,36 @@ module.exports = g;
 /*!*****************************!*\
   !*** ./tmp/TMP_PROGRESS.js ***!
   \*****************************/
-/*! exports provided: TMP_PROGRESS */
+/*! exports provided: TMP_PROGRESS, TMP_PROGRESS_THIN */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS", function() { return TMP_PROGRESS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS_THIN", function() { return TMP_PROGRESS_THIN; });
 var TMP_PROGRESS = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>\n        <path class=\"pathBackboard\" d=\"M 0 20 H 0 V 28M 4 20 H 4 V 28M 8 20 H 8 V 28M 12 20 H 12 V 28M 16 20 H 16 V 28M 20 20 H 20 V 28M 24 20 H 24 V 28M 28 20 H 28 V 28M 32 20 H 32 V 28M 36 20 H 36 V 28M 40 20 H 40 V 28M 44 20 H 44 V 28M 48 20 H 48 V 28M 52 20 H 52 V 28M 56 20 H 56 V 28M 60 20 H 60 V 28M 64 20 H 64 V 28M 68 20 H 68 V 28M 72 20 H 72 V 28M 76 20 H 76 V 28M 80 20 H 80 V 28M 84 20 H 84 V 28M 88 20 H 88 V 28M 92 20 H 92 V 28M 96 20 H 96 V 28M 100 20 H 100 V 28M 104 20 H 104 V 28M 108 20 H 108 V 28M 112 20 H 112 V 28M 116 20 H 116 V 28M 120 20 H 120 V 28M 124 20 H 124 V 28M 128 20 H 128 V 28M 132 20 H 132 V 28M 136 20 H 136 V 28M 140 20 H 140 V 28M 144 20 H 144 V 28M 148 20 H 148 V 28M 152 20 H 152 V 28M 156 20 H 156 V 28M 160 20 H 160 V 28M 164 20 H 164 V 28M 168 20 H 168 V 28M 172 20 H 172 V 28M 176 20 H 176 V 28M 180 20 H 180 V 28M 184 20 H 184 V 28M 188 20 H 188 V 28M 192 20 H 192 V 28M 196 20 H 196 V 28M 200 20 H 200 V 28M 204 20 H 204 V 28M 208 20 H 208 V 28M 212 20 H 212 V 28M 216 20 H 216 V 28M 220 20 H 220 V 28M 224 20 H 224 V 28M 228 20 H 228 V 28M 232 20 H 232 V 28M 236 20 H 236 V 28M 240 20 H 240 V 28M 244 20 H 244 V 28M 248 20 H 248 V 28M 252 20 H 252 V 28\" stroke-width=\"1\" stroke=\"#c7ccd1\" fill=\"none\" shape-rendering=\"crispEdges\"></path>\n        <path class=\"pathBack\" d=\"M0 24 l 0 0\" stroke-linecap=\"round\" stroke-width=\"10\" stroke=\"#e6e8ea\"></path>\n        <path class=\"pathFront\" stroke=\"url(#pathLinear)\" d=\"M0 24 l 254 0.01\" stroke-width=\"14\" stroke-linecap=\"round\" fill=\"#5b6cff\"></path>\n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <circle class=\"timeKnob\" r=\"12\" stroke=\"#5b6cff\" stroke-width=\"1\" fill=\"#fff\"></circle>\n            <rect class=\"timeKnobEmpty\" x=\"-24\" y=\"-24\" width=\"48\" height=\"48\" fill=\"transparent\"></rect>\n            <svg class=\"timeTooltip\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"91.44\" height=\"40\" viebox=\"0,0,91.44,40\" style=\"overflow: visible\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#000\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-38\" font-size=\"22.352px\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
+var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\" height=\"48\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"20\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <svg class=\"timeTooltip\" height=\"48\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"73\" y=\"25\" viebox=\"0,0,73,32\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                    <rect id=\"filter2Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g class=\"origin\">\n                  <use class=\"shadow\" fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use class=\"rec\" fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"0\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n              <g class=\"copy\" transform=\"matrix(1,0,0,1, -2, -36)\">\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter2Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Rect\"></use>\n                  <use fill=\"#000\" class=\"arr\" transform=\"matrix(1,0,0,1,-5, 14)\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" class=\"arr\" transform=\"matrix(1,0,0,1,-5, 14)\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-8\">\n                      <tspan class=\"hh2\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm2\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n\n\n\n    </g>\n</svg>\n";
+
+
+/***/ }),
+
+/***/ "./tmp/TMP_WEATHER.js":
+/*!****************************!*\
+  !*** ./tmp/TMP_WEATHER.js ***!
+  \****************************/
+/*! exports provided: items, weather */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "items", function() { return items; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "weather", function() { return weather; });
+var weather = "\n        <div class=\"weather-widget\">\n            <ul></ul>\n            <a href=\"#\" class=\"set-weather\">\uB0A0\uC528\uC124\uC815</a>            \n        </div>\n";
+
+var items = function items(className, temperatuer, area) {
+  return "\n        <li class=\"items\">\n            <div class=\"motion weather_".concat(className, "\">\n                <span class=\"m1\"></span>\n                <span class=\"m2\"></span>\n            </div>\n            <div class=\"temperatuer\">").concat(temperatuer, "</div>\n            <div class=\"area\">").concat(area, "</div>\n        </li>\n    ");
+};
+
 
 
 /***/ })

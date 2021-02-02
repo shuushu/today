@@ -1,8 +1,9 @@
 import { Model } from "../../../components/Model";
 import Calendar from "../../../components/Calendar";
 import ViewModel from "../../../components/ViewModel";
-import Progress from "../../../components/Progress";
+import Progress from "../../../components/ProgressV2";
 import KeywordList from "../../../components/KeywordList";
+import { Weather } from "../../../components/Weather";
 import { krStr, CARD_LINK } from "../../../components/utils";
 
 const g:any = global;
@@ -42,7 +43,11 @@ function reset() {
 function _todayInit() {
     // 초기화
     reset();
-
+    // 날씨 위젯
+    const weather = new Weather(g.TODAY.weather);
+    const newsEdge = document.querySelector('.newsEdge');
+    weather.remove(newsEdge);
+    weather.draw(newsEdge);    
     /**
      ** Moment 글로벌 설정
      */
@@ -181,8 +186,7 @@ function _todayInit() {
             if(typeof progress_dtm === 'string' && typeof server_dtm === 'string' && progress_dtm.split(' ')[0] !== server_dtm.split(' ')[0] ) {
                 DATA.time.progress_dtm = (JSON.parse(ss)).progress_dtm;
             }
-        }
-
+        }        
         calendar.init();
         progress.init();
         keyword.init();
@@ -219,6 +223,7 @@ function _todayInit() {
         g.dd = DATA;
         g.cc = calendar;
         g.pp = progress;
+        g.weather = weather;
     }
     g.bubbles = keyword;
 }
