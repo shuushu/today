@@ -10,6 +10,8 @@ interface WEATHER_DATA {
     ndr: string;
     rain: string;
     temp: number;
+    timestr: string;
+    wcode: string;
 }
 const g:any = global;
 class Weather {
@@ -20,8 +22,9 @@ class Weather {
 
     get getClass() {
         return this.data.map(v => {
-            // 이미지명에서 className 추출하기
-            return (v.img.split('96x96_').pop()).split('.png').shift();
+            // 이미지명에서 className 추출하기            
+            return `${v.timestr}_${v.wcode}`
+            //return (v.img.split('96x96_').pop()).split('.png').shift();
         })
     }
 

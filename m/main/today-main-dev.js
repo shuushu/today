@@ -1251,6 +1251,77 @@ exports.default = Progress;
 
 /***/ }),
 
+/***/ "./components/Sns.ts":
+/*!***************************!*\
+  !*** ./components/Sns.ts ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ShareSNS = void 0;
+var TMP_SNS_1 = __webpack_require__(/*! ../tmp/TMP_SNS */ "./tmp/TMP_SNS.js");
+var utils_1 = __webpack_require__(/*! ./utils */ "./components/utils.js");
+var ShareSNS = /** @class */ (function () {
+    function ShareSNS(t) {
+        if (t === void 0) { t = '.layerPopup.share'; }
+        this.name = t;
+    }
+    ShareSNS.prototype.drawLayer = function (t) {
+        var wrap = document.createElement('div');
+        wrap.className = 'layerPopup share';
+        wrap.innerHTML = TMP_SNS_1.SNS;
+        this.target = wrap;
+        t.appendChild(wrap);
+        var btnCopyURL = document.querySelector('.layerPopup .btnCopyURL');
+        btnCopyURL.addEventListener('click', this.urlCopy.bind(this));
+    };
+    ShareSNS.prototype.drawBtn = function (t) {
+        var _this = this;
+        var div = document.createElement('div');
+        var btn = document.createElement('button');
+        if (document.querySelector('.socialShare')) {
+            t.removeChild(document.querySelector('.socialShare'));
+        }
+        div.className = 'socialShare';
+        btn.className = 'btnShare';
+        btn.innerHTML = utils_1.krStr[13];
+        btn.onclick = function (e) { return _this.showLayer(e); };
+        div.appendChild(btn);
+        t.appendChild(div);
+        document.querySelector('.layerPopup .dimm').addEventListener('click', this.hideLayer.bind(this));
+    };
+    ShareSNS.prototype.clear = function (t) {
+        var tt = document.querySelector('.layerPopup.share');
+        if (tt) {
+            t.removeChild(tt);
+        }
+    };
+    ShareSNS.prototype.showLayer = function (e) {
+        e.preventDefault();
+        if (this.target) {
+            this.target.className = 'layerPopup share active';
+        }
+    };
+    ShareSNS.prototype.hideLayer = function (e) {
+        e.preventDefault();
+        if (this.target) {
+            this.target.className = 'layerPopup share';
+        }
+    };
+    ShareSNS.prototype.urlCopy = function (e) {
+        e.preventDefault();
+        utils_1.utils.CopyUrlToClipboard('.shareLinkUrl');
+    };
+    return ShareSNS;
+}());
+exports.ShareSNS = ShareSNS;
+
+
+/***/ }),
+
 /***/ "./components/ViewModel.ts":
 /*!*********************************!*\
   !*** ./components/ViewModel.ts ***!
@@ -1333,8 +1404,9 @@ var Weather = /** @class */ (function () {
     Object.defineProperty(Weather.prototype, "getClass", {
         get: function () {
             return this.data.map(function (v) {
-                // 이미지명에서 className 추출하기
-                return (v.img.split('96x96_').pop()).split('.png').shift();
+                // 이미지명에서 className 추출하기            
+                return v.timestr + "_" + v.wcode;
+                //return (v.img.split('96x96_').pop()).split('.png').shift();
             });
         },
         enumerable: false,
@@ -1722,7 +1794,9 @@ var krStr = {
   // 다시시도
   11: decodeURI('%EB%8B%A4%EC%8B%9C%EC%8B%9C%EB%8F%84'),
   // 시간 전
-  12: decodeURI('1%EC%8B%9C%EA%B0%84')
+  12: decodeURI('1%EC%8B%9C%EA%B0%84'),
+  // 공유하기
+  13: decodeURI('%EA%B3%B5%EC%9C%A0%ED%95%98%EA%B8%B0')
 };
 
 var getURIparams = function getURIparams(v, type) {
@@ -1906,6 +1980,7 @@ var ProgressV2_1 = __webpack_require__(/*! ../../../components/ProgressV2 */ "./
 var KeywordList_1 = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
 var Weather_1 = __webpack_require__(/*! ../../../components/Weather */ "./components/Weather.ts");
 var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
+var Sns_1 = __webpack_require__(/*! ../../../components/Sns */ "./components/Sns.ts");
 var g = global;
 var DATA = new Model_1.Model();
 var KEYWORD_URL = "//m.news.nate.com/api/today/keywordList";
@@ -1946,6 +2021,12 @@ function _todayInit() {
     var newsEdge = document.querySelector('.newsEdge');
     weather.remove(newsEdge);
     weather.draw(newsEdge);
+    // SNS 공유하기
+    var SNS = new Sns_1.ShareSNS();
+    SNS.clear(document.body);
+    SNS.drawLayer(document.body);
+    SNS.drawBtn(document.querySelector('.newsEdge'));
+    document.querySelector('.layerPopup .btnClosePopup').addEventListener('click', SNS.hideLayer.bind(SNS));
     /**
      ** Moment 글로벌 설정
      */
@@ -2146,6 +2227,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TMP_PROGRESS_THIN", function() { return TMP_PROGRESS_THIN; });
 var TMP_PROGRESS = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>\n        <path class=\"pathBackboard\" d=\"M 0 20 H 0 V 28M 4 20 H 4 V 28M 8 20 H 8 V 28M 12 20 H 12 V 28M 16 20 H 16 V 28M 20 20 H 20 V 28M 24 20 H 24 V 28M 28 20 H 28 V 28M 32 20 H 32 V 28M 36 20 H 36 V 28M 40 20 H 40 V 28M 44 20 H 44 V 28M 48 20 H 48 V 28M 52 20 H 52 V 28M 56 20 H 56 V 28M 60 20 H 60 V 28M 64 20 H 64 V 28M 68 20 H 68 V 28M 72 20 H 72 V 28M 76 20 H 76 V 28M 80 20 H 80 V 28M 84 20 H 84 V 28M 88 20 H 88 V 28M 92 20 H 92 V 28M 96 20 H 96 V 28M 100 20 H 100 V 28M 104 20 H 104 V 28M 108 20 H 108 V 28M 112 20 H 112 V 28M 116 20 H 116 V 28M 120 20 H 120 V 28M 124 20 H 124 V 28M 128 20 H 128 V 28M 132 20 H 132 V 28M 136 20 H 136 V 28M 140 20 H 140 V 28M 144 20 H 144 V 28M 148 20 H 148 V 28M 152 20 H 152 V 28M 156 20 H 156 V 28M 160 20 H 160 V 28M 164 20 H 164 V 28M 168 20 H 168 V 28M 172 20 H 172 V 28M 176 20 H 176 V 28M 180 20 H 180 V 28M 184 20 H 184 V 28M 188 20 H 188 V 28M 192 20 H 192 V 28M 196 20 H 196 V 28M 200 20 H 200 V 28M 204 20 H 204 V 28M 208 20 H 208 V 28M 212 20 H 212 V 28M 216 20 H 216 V 28M 220 20 H 220 V 28M 224 20 H 224 V 28M 228 20 H 228 V 28M 232 20 H 232 V 28M 236 20 H 236 V 28M 240 20 H 240 V 28M 244 20 H 244 V 28M 248 20 H 248 V 28M 252 20 H 252 V 28\" stroke-width=\"1\" stroke=\"#c7ccd1\" fill=\"none\" shape-rendering=\"crispEdges\"></path>\n        <path class=\"pathBack\" d=\"M0 24 l 0 0\" stroke-linecap=\"round\" stroke-width=\"10\" stroke=\"#e6e8ea\"></path>\n        <path class=\"pathFront\" stroke=\"url(#pathLinear)\" d=\"M0 24 l 254 0.01\" stroke-width=\"14\" stroke-linecap=\"round\" fill=\"#5b6cff\"></path>\n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <circle class=\"timeKnob\" r=\"12\" stroke=\"#5b6cff\" stroke-width=\"1\" fill=\"#fff\"></circle>\n            <rect class=\"timeKnobEmpty\" x=\"-24\" y=\"-24\" width=\"48\" height=\"48\" fill=\"transparent\"></rect>\n            <svg class=\"timeTooltip\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"91.44\" height=\"40\" viebox=\"0,0,91.44,40\" style=\"overflow: visible\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-64\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g>\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>\n                  <use fill=\"#000\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-38\" font-size=\"22.352px\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n    </g>\n</svg>\n";
 var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress\" height=\"48\">\n    <g class=\"progress\">\n        <defs><linearGradient id=\"pathLinear\"><stop offset=\"0%\" stop-color=\"#639eff\"></stop><stop offset=\"100%\" stop-color=\"rgba(91, 108, 255, .98)\"></stop></linearGradient></defs>        \n        <rect class=\"pathBackboard\" x=\"0\" y=\"20\" width=\"100%\" height=\"8\" fill=\"#f2f2f2\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathBack\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"#c8c8c8\" rx=\"4\" ry=\"4\" />\n        <rect class=\"pathFront\" x=\"0\" y=\"20\" width=\"60%\" height=\"8\" fill=\"url(#pathLinear)\" rx=\"4\" ry=\"4\" />                \n        <g class=\"timeGroup\" transform=\"matrix(1,0,0,1,0,24)\">\n            <svg class=\"timeTooltip\" height=\"48\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"73\" y=\"25\" viebox=\"0,0,73,32\">\n              <defs>\n                <filter id=\"filter1Back\" width=\"128.9%\" height=\"167.4%\" x=\"-14.4%\" y=\"-28.5%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"2\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"4\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0\"></feColorMatrix>\n                    <rect id=\"filter1Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                    <rect id=\"filter2Rect\" width=\"91.44\" height=\"40\" x=\"-45.72\" y=\"-62\"></rect>\n                </filter>\n                <filter id=\"filter2Back\" width=\"356.7%\" height=\"367.1%\" x=\"-128.3%\" y=\"-85%\" filterUnits=\"objectBoundingBox\">\n                    <feOffset result=\"shadowOffsetOuter1\" in=\"SourceAlpha\" dy=\"4\"></feOffset>\n                    <feGaussianBlur result=\"shadowBlurOuter1\" in=\"shadowOffsetOuter1\" stdDeviation=\"3\"></feGaussianBlur>\n                    <feColorMatrix in=\"shadowBlurOuter1\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.0754206731 0\"></feColorMatrix>\n                    <path id=\"filter2Path\" transform=\"translate(-14 -24)\" d=\"M 19.285 0 L 15 8.235 10.714 0 h 8.571z\"></path>\n                </filter>\n              </defs>\n              <g class=\"origin\">\n                  <use class=\"shadow\" fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter1Rect\"></use>\n                  <use class=\"rec\" fill=\"#fff\" xlink:href=\"#filter1Rect\"></use>    \n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"0\">\n                      <tspan class=\"hh\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n              <g class=\"copy\" transform=\"matrix(1,0,0,1, -2, -36)\">\n                  <use fill=\"#000\" filter=\"url(#filter1Back)\" xlink:href=\"#filter2Rect\"></use>\n                  <use fill=\"#fff\" xlink:href=\"#filter2Rect\"></use>\n                  <use fill=\"#000\" class=\"arr\" transform=\"matrix(1,0,0,1,-5, 14)\" filter=\"url(#filter2Back)\" xlink:href=\"#filter2Path\"></use>\n                  <use fill=\"#fff\" class=\"arr\" transform=\"matrix(1,0,0,1,-5, 14)\" xlink:href=\"#filter2Path\"></use>\n                  <text class=\"timeText\" alignment-baseline=\"middle\" text-anchor=\"middle\" x=\"0\" y=\"-8\">\n                      <tspan class=\"hh2\" dx=\"0\" dy=\".1em\" fill=\"#000\">00</tspan><tspan class=\"dtm-div\" dx=\"4\" dy=\"-.1em\" fill=\"#7c8aff\">:</tspan><tspan class=\"mm2\" dx=\"5\" dy=\".1em\" fill=\"#000\">00</tspan>\n                  </text>\n              </g>\n          </svg>\n        </g>\n\n\n\n    </g>\n</svg>\n";
+
+
+/***/ }),
+
+/***/ "./tmp/TMP_SNS.js":
+/*!************************!*\
+  !*** ./tmp/TMP_SNS.js ***!
+  \************************/
+/*! exports provided: SNS */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SNS", function() { return SNS; });
+var SNS = "\n    <div class=\"inner\">\n        <button type=\"button\" class=\"btnClosePopup\">\uB2EB\uAE30</button>\n        <div class=\"content\">\n        <strong class=\"title\">\uACF5\uC720\uD558\uAE30</strong>\n        <ul class=\"shareList\">\n            <li>\n            <a href=\"#\" class=\"shareNateon\" id=\"nateon\">\uB124\uC774\uD2B8\uC628</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareFacebook\" id=\"facebook\">\uD398\uC774\uC2A4\uBD81</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareTwetter\" id=\"twitter\">\uD2B8\uC704\uD130</a>\n            </li>\n        </ul>\n        <div class=\"shareInput\">\n            <input type=\"text\" value=\"https://m.news.nate.com?service_dtm=2021-02-08%2011:00:00\" class=\"shareLinkUrl\" readonly=\"readonly\">\n        </div>\n        </div>\n        <button type=\"button\" class=\"btnCopyURL\" onclick=\"ndrclick('TOS04'); utils.CopyUrlToClipboard('.shareLinkUrl')\">URL \uBCF5\uC0AC</button>\n    </div>\n    <div class=\"dimm\"></div>\n";
 
 
 /***/ }),

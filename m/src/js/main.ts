@@ -5,6 +5,7 @@ import Progress from "../../../components/ProgressV2";
 import KeywordList from "../../../components/KeywordList";
 import { Weather } from "../../../components/Weather";
 import { krStr, CARD_LINK } from "../../../components/utils";
+import { ShareSNS } from '../../../components/Sns';
 
 const g:any = global;
 const DATA = new Model();
@@ -47,7 +48,13 @@ function _todayInit() {
     const weather = new Weather(g.TODAY.weather);
     const newsEdge = document.querySelector('.newsEdge');
     weather.remove(newsEdge);
-    weather.draw(newsEdge);    
+    weather.draw(newsEdge);       
+    // SNS 공유하기
+    const SNS = new ShareSNS();
+    SNS.clear(document.body);
+    SNS.drawLayer(document.body);
+    SNS.drawBtn(document.querySelector('.newsEdge'));
+    document.querySelector('.layerPopup .btnClosePopup').addEventListener('click', SNS.hideLayer.bind(SNS))
     /**
      ** Moment 글로벌 설정
      */

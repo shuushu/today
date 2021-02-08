@@ -318,7 +318,9 @@ const krStr = {
   // 다시시도
   11: decodeURI('%EB%8B%A4%EC%8B%9C%EC%8B%9C%EB%8F%84'),
   // 시간 전
-  12: decodeURI('1%EC%8B%9C%EA%B0%84')
+  12: decodeURI('1%EC%8B%9C%EA%B0%84'),
+  // 공유하기
+  13: decodeURI('%EA%B3%B5%EC%9C%A0%ED%95%98%EA%B8%B0'),
 }
 
 
