@@ -1265,9 +1265,15 @@ exports.ShareSNS = void 0;
 var TMP_SNS_1 = __webpack_require__(/*! ../tmp/TMP_SNS */ "./tmp/TMP_SNS.js");
 var utils_1 = __webpack_require__(/*! ./utils */ "./components/utils.js");
 var ShareSNS = /** @class */ (function () {
-    function ShareSNS(t) {
-        if (t === void 0) { t = '.layerPopup.share'; }
-        this.name = t;
+    function ShareSNS() {
+        this.DATA = {
+            img: 'https://nimg.nate.com/ui/etc/today/m/src/images/og_nate_today.png',
+            title: '한눈에 보는 오늘 - 네이트뉴스',
+            desc: '',
+            href: 'https://m.news.nate.com',
+            time: ''
+        };
+        //?service_dtm=2021-02-09%2018:00:00
     }
     ShareSNS.prototype.drawLayer = function (t) {
         var wrap = document.createElement('div');
@@ -1275,8 +1281,10 @@ var ShareSNS = /** @class */ (function () {
         wrap.innerHTML = TMP_SNS_1.SNS;
         this.target = wrap;
         t.appendChild(wrap);
+        document.querySelector('.shareLinkUrl').setAttribute('value', 'https://m.news.nate.com/');
         var btnCopyURL = document.querySelector('.layerPopup .btnCopyURL');
         btnCopyURL.addEventListener('click', this.urlCopy.bind(this));
+        document.querySelector('.shareList').addEventListener('click', this.providerShare.bind(this));
     };
     ShareSNS.prototype.drawBtn = function (t) {
         var _this = this;
@@ -1314,6 +1322,25 @@ var ShareSNS = /** @class */ (function () {
     ShareSNS.prototype.urlCopy = function (e) {
         e.preventDefault();
         utils_1.utils.CopyUrlToClipboard('.shareLinkUrl');
+    };
+    ShareSNS.prototype.providerShare = function (e) {
+        e.preventDefault();
+        var target = e.target.closest('a');
+        if (target) {
+            var provider = target.getAttribute('id');
+            switch (provider) {
+                case 'twitter':
+                    window.open("https://twitter.com/intent/tweet?via=" + this.DATA.title + "&text=" + encodeURIComponent(this.DATA.desc) + "&url=" + encodeURIComponent(this.DATA.href));
+                    break;
+                case 'facebook':
+                    var link = this.DATA.href + "?service_dtm=" + this.DATA.time;
+                    window.open("https://m.facebook.com/sharer.php?u=" + encodeURIComponent(link));
+                    break;
+                default:
+                    console.log('3');
+                    break;
+            }
+        }
     };
     return ShareSNS;
 }());
@@ -1455,7 +1482,7 @@ exports.Weather = Weather;
 /*!*****************************!*\
   !*** ./components/utils.js ***!
   \*****************************/
-/*! exports provided: boundMethod, boundClass, utils, krStr, autobind, getURIparams, UA, replaceHistory, MAIN_LINK, CARD_LINK */
+/*! exports provided: boundMethod, boundClass, utils, krStr, autobind, getURIparams, UA, replaceHistory, MAIN_LINK, CARD_LINK, refineSnsShareUrl */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1470,6 +1497,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "replaceHistory", function() { return replaceHistory; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MAIN_LINK", function() { return MAIN_LINK; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CARD_LINK", function() { return CARD_LINK; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "refineSnsShareUrl", function() { return refineSnsShareUrl; });
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -1950,7 +1978,20 @@ var replaceHistory = function replaceHistory() {
   }
 
   history.replaceState(history.state, '', hash);
-};
+}; //SNS 공유용 url 을 정제한다. 
+
+
+function refineSnsShareUrl(url) {
+  // 테스트용 url 일 경우, 라이브용 url로 변경 처리
+  // ex) https://test_news.nate.com/ -> https://news.nate.com/
+  url = url.replace(/\/\/[^\.]+_/gi, "//"); // 프로토콜 없이 // 만 있을경우 https: 추가
+
+  if (url.indexOf("//") === 0) {
+    url = location.protocol + url;
+  }
+
+  return url;
+}
 
 var CARD_LINK = '//m.news.nate.com';
 var MAIN_LINK = '//m.nate.com'; // DEV
@@ -2142,6 +2183,18 @@ function _todayInit() {
                 DATA.time.progress_dtm = (JSON.parse(ss)).progress_dtm;
             }
         }
+        // 공유 데이터 셋팅
+        if (Array.isArray(DATA.items) && DATA.items.length > 0) {
+            var keyword_1 = DATA.items.reduce(function (p, n, i) {
+                if (i < 3) {
+                    return p += "\u25CF" + n.keyword_service.split('<br />').join(' ') + " ";
+                }
+                return p;
+            }, '');
+            SNS.DATA.desc = keyword_1;
+            SNS.DATA.time = DATA.time.service_dtm;
+        }
+        ;
         calendar.init();
         progress.init();
         keyword.init();
@@ -2241,7 +2294,7 @@ var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SNS", function() { return SNS; });
-var SNS = "\n    <div class=\"inner\">\n        <button type=\"button\" class=\"btnClosePopup\">\uB2EB\uAE30</button>\n        <div class=\"content\">\n        <strong class=\"title\">\uACF5\uC720\uD558\uAE30</strong>\n        <ul class=\"shareList\">\n            <li>\n            <a href=\"#\" class=\"shareNateon\" id=\"nateon\">\uB124\uC774\uD2B8\uC628</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareFacebook\" id=\"facebook\">\uD398\uC774\uC2A4\uBD81</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareTwetter\" id=\"twitter\">\uD2B8\uC704\uD130</a>\n            </li>\n        </ul>\n        <div class=\"shareInput\">\n            <input type=\"text\" value=\"https://m.news.nate.com?service_dtm=2021-02-08%2011:00:00\" class=\"shareLinkUrl\" readonly=\"readonly\">\n        </div>\n        </div>\n        <button type=\"button\" class=\"btnCopyURL\" onclick=\"ndrclick('TOS04'); utils.CopyUrlToClipboard('.shareLinkUrl')\">URL \uBCF5\uC0AC</button>\n    </div>\n    <div class=\"dimm\"></div>\n";
+var SNS = "\n    <div class=\"inner\">\n        <button type=\"button\" class=\"btnClosePopup\">\uB2EB\uAE30</button>\n        <div class=\"content\">\n        <strong class=\"title\">\uACF5\uC720\uD558\uAE30</strong>\n        <ul class=\"shareList\">\n            <li>\n            <a href=\"#\" class=\"shareNateon\" id=\"nateon\">\uB124\uC774\uD2B8\uC628</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareFacebook\" id=\"facebook\">\uD398\uC774\uC2A4\uBD81</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareTwetter\" id=\"twitter\">\uD2B8\uC704\uD130</a>\n            </li>\n        </ul>\n        <div class=\"shareInput\">\n            <input type=\"text\" class=\"shareLinkUrl\" readonly=\"readonly\">\n        </div>\n        </div>\n        <button type=\"button\" class=\"btnCopyURL\" onclick=\"ndrclick('TOS04'); utils.CopyUrlToClipboard('.shareLinkUrl')\">URL \uBCF5\uC0AC</button>\n    </div>\n    <div class=\"dimm\"></div>\n";
 
 
 /***/ }),

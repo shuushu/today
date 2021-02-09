@@ -1,4 +1,4 @@
-import { Model } from "../../../components/Model";
+import { Model, items } from "../../../components/Model";
 import Calendar from "../../../components/Calendar";
 import ViewModel from "../../../components/ViewModel";
 import Progress from "../../../components/ProgressV2";
@@ -54,7 +54,10 @@ function _todayInit() {
     SNS.clear(document.body);
     SNS.drawLayer(document.body);
     SNS.drawBtn(document.querySelector('.newsEdge'));
-    document.querySelector('.layerPopup .btnClosePopup').addEventListener('click', SNS.hideLayer.bind(SNS))
+    document.querySelector('.layerPopup .btnClosePopup').addEventListener('click', SNS.hideLayer.bind(SNS));
+    
+    
+
     /**
      ** Moment 글로벌 설정
      */
@@ -193,7 +196,20 @@ function _todayInit() {
             if(typeof progress_dtm === 'string' && typeof server_dtm === 'string' && progress_dtm.split(' ')[0] !== server_dtm.split(' ')[0] ) {
                 DATA.time.progress_dtm = (JSON.parse(ss)).progress_dtm;
             }
-        }        
+        }
+        // 공유 데이터 셋팅
+        if (Array.isArray(DATA.items) && DATA.items.length > 0) {
+            const keyword = DATA.items.reduce((p: string, n: items, i: number) => {
+                if (i < 3) {
+                    return p += `●${n.keyword_service.split('<br />').join(' ')} `
+                }
+                return p        
+            },'')
+            SNS.DATA.desc = keyword;
+            SNS.DATA.time = DATA.time.service_dtm;
+        };
+
+        
         calendar.init();
         progress.init();
         keyword.init();

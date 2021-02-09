@@ -15,7 +15,7 @@ const SNS = `
             </li>
         </ul>
         <div class="shareInput">
-            <input type="text" value="https://m.news.nate.com?service_dtm=2021-02-08%2011:00:00" class="shareLinkUrl" readonly="readonly">
+            <input type="text" class="shareLinkUrl" readonly="readonly">
         </div>
         </div>
         <button type="button" class="btnCopyURL" onclick="ndrclick('TOS04'); utils.CopyUrlToClipboard('.shareLinkUrl')">URL 복사</button>

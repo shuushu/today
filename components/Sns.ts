@@ -1,20 +1,39 @@
 import { SNS } from '../tmp/TMP_SNS';
-import { krStr, utils } from "./utils";
+import { krStr, utils, refineSnsShareUrl } from "./utils";
 
+interface shaerData {
+    img: string;
+    title: string;
+    desc: string;
+    href: string;
+    time: string;
+}
 class ShareSNS {
     private target: HTMLElement;
-    public name: string;
-    constructor (t:string = '.layerPopup.share') {
-        this.name = t;
+    public DATA: shaerData;
+    constructor() {
+        this.DATA = {
+            img: 'https://nimg.nate.com/ui/etc/today/m/src/images/og_nate_today.png',
+            title: '한눈에 보는 오늘 - 네이트뉴스',
+            desc: '',
+            href: 'https://m.news.nate.com',
+            time: ''
+        }
+        //?service_dtm=2021-02-09%2018:00:00
     }
+
     drawLayer(t: HTMLElement) {
         const wrap = document.createElement('div');        
         wrap.className = 'layerPopup share'; 
         wrap.innerHTML = SNS;
         this.target = wrap;
         t.appendChild(wrap);
+        document.querySelector('.shareLinkUrl').setAttribute('value', 'https://m.news.nate.com/')
+
         const btnCopyURL = document.querySelector('.layerPopup .btnCopyURL');
         btnCopyURL.addEventListener('click', this.urlCopy.bind(this));
+
+        (<HTMLElement> document.querySelector('.shareList')).addEventListener('click', this.providerShare.bind(this));
     }
     drawBtn(t: HTMLElement) {
         const div = document.createElement('div');
@@ -54,6 +73,25 @@ class ShareSNS {
     urlCopy(e: MouseEvent) {
         e.preventDefault();
         utils.CopyUrlToClipboard('.shareLinkUrl');
+    }
+    providerShare(e: MouseEvent) {
+        e.preventDefault();
+        const target = (<HTMLElement> e.target).closest('a');
+        if (target) {            
+            const provider = target.getAttribute('id');
+            switch (provider) {
+                case 'twitter':
+                    window.open(`https://twitter.com/intent/tweet?via=${this.DATA.title}&text=${encodeURIComponent(this.DATA.desc)}&url=${encodeURIComponent(this.DATA.href)}`);
+                    break;
+                case 'facebook':
+                    const link = `${this.DATA.href}?service_dtm=${this.DATA.time}`;
+		            window.open(`https://m.facebook.com/sharer.php?u=${encodeURIComponent(link)}`);                    
+                    break;
+                default:
+                    console.log('3')
+                    break;
+            }
+        }        
     }
 }
 

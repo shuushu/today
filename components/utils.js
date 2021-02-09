@@ -455,6 +455,55 @@ const replaceHistory = () => {
 }
 
 
+//SNS 공유용 url 을 정제한다. 
+function refineSnsShareUrl (url) {
+	// 테스트용 url 일 경우, 라이브용 url로 변경 처리
+	// ex) https://test_news.nate.com/ -> https://news.nate.com/
+	url = url.replace(/\/\/[^\.]+_/gi, "//");
+		
+	// 프로토콜 없이 // 만 있을경우 https: 추가
+	if ( url.indexOf("//") === 0 ) {
+		url = location.protocol + url;
+	}
+	
+	return url;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 let CARD_LINK = '//m.news.nate.com';
 let MAIN_LINK = '//m.nate.com';
 
@@ -473,5 +522,6 @@ export {
   UA,
   replaceHistory,
   MAIN_LINK,
-  CARD_LINK
+  CARD_LINK,
+  refineSnsShareUrl
 }
