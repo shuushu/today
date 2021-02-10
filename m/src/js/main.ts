@@ -1,7 +1,9 @@
 import { Model, items } from "../../../components/Model";
 import Calendar from "../../../components/Calendar";
 import ViewModel from "../../../components/ViewModel";
-import Progress from "../../../components/ProgressV2";
+/* 리뉴얼 버젼
+import Progress from "../../../components/ProgressV2";*/
+import Progress from "../../../components/Progress";
 import KeywordList from "../../../components/KeywordList";
 import { Weather } from "../../../components/Weather";
 import { krStr, CARD_LINK } from "../../../components/utils";
@@ -44,11 +46,11 @@ function reset() {
 function _todayInit() {
     // 초기화
     reset();
-    // 날씨 위젯
-    const weather = new Weather(g.TODAY.weather);
-    const newsEdge = document.querySelector('.newsEdge');
-    weather.remove(newsEdge);
-    weather.draw(newsEdge);       
+    // [날씨] 위젯
+    // const weather = new Weather(g.TODAY.weather);
+    // const newsEdge = document.querySelector('.newsEdge');
+    // weather.remove(newsEdge);
+    // weather.draw(newsEdge);       
     // SNS 공유하기
     const SNS = new ShareSNS();
     SNS.clear(document.body);
@@ -246,7 +248,7 @@ function _todayInit() {
         g.dd = DATA;
         g.cc = calendar;
         g.pp = progress;
-        g.weather = weather;
+        // [날씨] g.weather = weather;
     }
     g.bubbles = keyword;
 }

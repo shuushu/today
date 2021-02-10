@@ -910,10 +910,10 @@ exports.Model = Model;
 
 /***/ }),
 
-/***/ "./components/ProgressV2.ts":
-/*!**********************************!*\
-  !*** ./components/ProgressV2.ts ***!
-  \**********************************/
+/***/ "./components/Progress.ts":
+/*!********************************!*\
+  !*** ./components/Progress.ts ***!
+  \********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -941,24 +941,30 @@ var g = global, ss = (1000 * 60 * 60 * 24); // 24시간 > ms 변환
 var drag; // gsap dragable plugin
 var resizeTime;
 var flag = false; // 리사이징와 타임라인 관련
-var opt = function () {
-    return {
-        width: Math.min(window.innerWidth - 60, 450),
-        height: 8,
-        r: (Math.min(window.innerWidth, 375) * (15 / 375)) / 2
-    };
+var opt = {
+    width: Math.min(window.innerWidth, 375) * (254 / 375),
+    height: Math.min(window.innerWidth, 375) * (48 / 375),
+    r: (Math.min(window.innerWidth, 375) * (24 / 375)) / 2
 };
 var ww = 0; // 리사이징 컨텐츠 영역 가로값 저장
-var timeLine;
 var Progress = /** @class */ (function (_super) {
     __extends(Progress, _super);
     function Progress(d) {
         var _this_1 = _super.call(this, d) || this;
         _this_1.axisX = 0;
         _this_1._resize = _this_1._resize.bind(_this_1);
-        _this_1.options = opt();
         return _this_1;
     }
+    Object.defineProperty(Progress.prototype, "options", {
+        get: function () {
+            return opt;
+        },
+        set: function (v) {
+            opt = v;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Progress.prototype, "isOverflow", {
         get: function () {
             return this.model.isOverflow;
@@ -993,7 +999,8 @@ var Progress = /** @class */ (function (_super) {
             currentTarget.classList.toggle(_a);
         }
     };
-    Progress.prototype._update = function () { };
+    Progress.prototype._update = function () {
+    };
     Progress.prototype._init = function () {
         this._drawPath();
         this._updateTooltip();
@@ -1007,91 +1014,97 @@ var Progress = /** @class */ (function (_super) {
             clearTimeout(resizeTime);
         this._removeEvent();
         resizeTime = setTimeout(function () {
+            if (!document.getElementById('newsEdgeProgress'))
+                return;
+            var bw = document.body.clientWidth;
             document.getElementById('newsEdgeProgress').innerHTML = '';
-            _this_1.options = opt();
+            _this_1.options = {
+                width: Math.min(bw, 375) * (254 / 375),
+                height: Math.min(bw, 375) * (48 / 375),
+                r: (Math.min(bw, 375) * (24 / 375)) / 2
+            };
             _this_1._drawPath();
             _this_1._updateTooltip();
             _this_1._addEvent(['.progressWrap']);
             // 드래그 위치 재 설정
             if (flag) {
                 document.querySelector('.timeGroup').setAttribute('transform', "matrix(1,0,0,1," + _this_1.limit + ", " + _this_1.options.height / 2 + ")");
-                document.querySelector('.pathFront').setAttribute('width', "" + _this_1.limit);
+                document.querySelector('.pathFront').setAttribute('d', "M0 " + _this_1.options.height / 2 + " l " + _this_1.limit + " .001");
                 g.TweenMax.set(".timeGroup", { x: _this_1.limit });
             }
-            timeLine.play();
         }, 300);
     };
     // 프로그레스 바 그리기
     Progress.prototype._drawPath = function () {
         var _b = this.options, width = _b.width, height = _b.height, r = _b.r;
         var wrapping = document.querySelector('.progressWrap');
-        wrapping.classList.add('thin');
         wrapping.removeChild(document.getElementById('newsEdgeProgress'));
         var temp = document.createElement('div');
         temp.id = 'newsEdgeProgress';
-        temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS_THIN;
+        temp.innerHTML = TMP_PROGRESS_1.TMP_PROGRESS;
         document.querySelector('.progressWrap').appendChild(temp);
         var target = g.d3.select('#newsEdgeProgress svg');
+        //target.innerHTML = TMP_PROGRESS_IE11;
+        //초기화
+        //if (target.textContent === ''|| target.innerHTML === '') {
+        //}
         var cx = this.axisX = this.isToday && this.isOverflow ? this.limit : this.axisX;
-        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup', '.timeGroup2'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3], timeGroup2 = _c[4];
-        var timeTooltip = g.d3.select('.timeTooltip');
-        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
-        var HH = isPC ? 58 : 32;
-        var WW = isPC ? 134 : 73;
-        var RR = isPC ? 27 : 15;
-        var tooltipRect = timeTooltip.select('#filter1Rect');
-        var tooltipRect2 = timeTooltip.select('#filter2Rect');
+        var now = g.moment(this.model.time.progress_dtm).valueOf();
+        var start = g.moment(this.model.time.progress_dtm).startOf('day').valueOf();
+        var percent = (now - start) / 86400000;
+        var data = {
+            front: "M0 " + height / 2 + " l " + cx + " .001",
+            back: "M0 " + height / 2 + " l " + this.limit + " .001",
+            backboard: (function () {
+                var time = width / (height * 0.08333333333333333);
+                var pathResult = '';
+                for (var i = 0; i < time; i++) {
+                    pathResult += 'M ' + (height * 0.08333333333333333) * i + ' ' + (height * 0.4166666666666667) + ' H ' + (height * 0.08333333333333333) * i + ' V ' + ((height * 0.4166666666666667) + (height * 0.16666666666666666));
+                }
+                return pathResult;
+            })()
+        };
         /* 프로퍼티 설정 */
         target.attr('width', "" + width);
         target.attr('height', "" + height);
-        target.attr('viewBox', "0,0," + width + "," + 48);
-        pathBackboard.attr('width', width);
-        pathBack.attr('width', this.limit);
-        pathFront.attr('width', "" + cx);
-        pathBackboard.attr('height', "" + height);
-        pathBack.attr('height', "" + height);
-        pathFront.attr('height', "" + height);
-        if (isPC) {
-            [pathBackboard, pathBack, pathFront].forEach(function (elements) {
-                elements.attr('rx', 5);
-                elements.attr('ry', 5);
-            });
-            timeTooltip.attr('y', 64);
-        }
+        target.attr('viewBox', "0,0," + width + "," + height);
+        var _c = ['.pathBackboard', '.pathBack', '.pathFront', '.timeGroup'].map(function (i) { return g.d3.select(i); }), pathBackboard = _c[0], pathBack = _c[1], pathFront = _c[2], timeGroup = _c[3];
+        pathBackboard.attr('d', data.backboard);
+        pathBack.attr('d', data.back);
+        pathFront.attr('d', data.front);
+        pathBack.attr('stroke-width', height * 0.20833333333333334);
+        pathFront.attr('stroke-width', height * 0.2916666666666667);
         timeGroup.attr('transform', "matrix(1,0,0,1, " + cx + ", " + height / 2 + ")");
+        g.d3.select('.timeKnob').attr('r', "" + r);
+        var timeTooltip = g.d3.select('.timeTooltip');
+        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
+        var HH = isPC ? 58 : height * 0.8333333333333334;
+        var WW = isPC ? 134 : width * 0.36;
+        var RR = isPC ? 15 : r;
         timeTooltip.attr('width', "" + WW);
         timeTooltip.attr('height', "" + HH);
         timeTooltip.attr('viebox', "0, 0, " + WW + ", " + HH);
+        var tooltipRect = timeTooltip.select('rect');
         tooltipRect.attr('width', "" + WW);
         tooltipRect.attr('height', "" + HH);
+        //-WW/2 - (84 - percent * 100)
         tooltipRect.attr('x', "" + -WW / 2);
-        tooltipRect.attr('y', "" + -((isPC ? 92 : 30)));
-        tooltipRect.attr('rx', "" + RR);
-        tooltipRect.attr('ry', "" + RR);
-        tooltipRect2.attr('width', "" + WW);
-        tooltipRect2.attr('height', "" + HH);
-        tooltipRect2.attr('x', "" + -WW / 2);
-        tooltipRect2.attr('y', "" + -((isPC ? 92 : 30)));
-        tooltipRect2.attr('rx', "" + RR);
-        tooltipRect2.attr('ry', "" + RR);
+        tooltipRect.attr('y', "" + -((isPC ? 92 : height + r + 4)));
+        tooltipRect.attr('rx', "" + RR * 2);
+        tooltipRect.attr('ry', "" + RR * 2);
         var arrow = timeTooltip.select('#filter2Path');
         if (isPC) {
             arrow.attr('d', 'M -9 0 l 9 18 l 9 -18 h -18z');
-            arrow.attr('transform', utils_1.UA.isIE ? 'translate(8 -50)' : 'translate(4 -50)');
-            g.d3.select('.copy').attr('transform', 'matrix(1,0,0,1, -2, -60)');
-            g.d3.select('.copy .timeText').attr('y', '-52');
+            arrow.attr('transform', 'translate(0 -34)');
         }
         else {
             arrow.attr('transform', "translate(-" + (r + 2) + " -" + r * 2 + ")");
         }
         var timeText = timeTooltip.select('.timeText');
+        //`${(84 < percent * 100) ? (84 - percent * 100) : 0}`
         timeText.attr('x', '0');
-        timeText.attr('y', "" + (isPC ? -54 : -10));
-        timeText.attr('font-size', '19px');
-        var timeText2 = timeTooltip.select('.timeText2');
-        timeText2.attr('x', '0');
-        timeText2.attr('y', "" + (isPC ? -54 : -8));
-        timeText2.attr('font-size', '19px');
+        timeText.attr('y', "" + (isPC ? -54 : -(r * 3 + 2)));
+        timeText.attr('font-size', width * 0.088 + "px");
         ww = document.body.clientWidth;
     };
     /* 이벤트리스너 바인딩 */
@@ -1101,46 +1114,6 @@ var Progress = /** @class */ (function (_super) {
         var end = this.updateProcess.get('dragEnd').bind(this) || function () { };
         //let d = document.querySelector('.pathFront').getAttribute('d').split(' ');
         var body = document.body;
-        var cache = {
-            win: 0,
-            svg: 0,
-            t: null,
-            f: false
-        };
-        var isPC = utils_1.UA.isPC && document.body.clientHeight > 1200;
-        timeLine = g.gsap.timeline({
-            onComplete: function () { return timeLine.pause(); }
-        });
-        if (!utils_1.UA.isIE) {
-            timeLine.set('.copy', { scale: '0', opacity: 0, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' });
-        }
-        // IE11에서 프로퍼티 애니매이션이 상이하게 표현
-        var zoomOut1 = (function () {
-            if (utils_1.UA.isIE) {
-                return {
-                    transform: "matrix(0.4,0,0,1,0,0)",
-                    transformOrigin: '50% 50%',
-                    duration: 0.2,
-                    delay: -0.15
-                };
-            }
-            else {
-                return {
-                    width: (isPC) ? '60px' : '34px',
-                    x: (isPC) ? '30px' : '17px',
-                    duration: 0.3,
-                    delay: -0.15
-                };
-            }
-        })();
-        timeLine.pause();
-        timeLine
-            .to('.origin .timeText', { opacity: 0 })
-            .to('.timeTooltip #filter1Rect', zoomOut1)
-            .to('.timeTooltip .origin', { scale: (isPC) ? 0.4 : 0.6, transformOrigin: '50% 50%', ease: 'power3.inOut', duration: 0.2, delay: (isPC) ? 0 : -0.1 })
-            .to('.timeTooltip .origin .rec', { stroke: '#7c8aff', delay: -0.1 })
-            // 사라지기
-            .to('.copy', { scale: '1', opacity: 1, duration: (isPC) ? 0.8 : 0.6, delay: -0.6, ease: 'power3.inOut' });
         drag = g.Draggable.create('.timeGroup', {
             type: 'x, y',
             bounds: {
@@ -1162,32 +1135,16 @@ var Progress = /** @class */ (function (_super) {
                 if (_this.eventListner.has('dragStart')) {
                     _this.eventListner.get('dragStart').call(this);
                 }
-                // timeLine.pause();
-                // timeLine.reverse();
-                clearTimeout(timeLine.timer);
-                // 캐쉬 기록
-                cache.win = document.body.clientHeight;
-                cache.svg = document.querySelector('.newsEdgeProgress').clientWidth;
-                cache.t = g.d3.select('.timeTooltip');
-                // 시간 툴팁 사라지기 init                
-                if (cache.f === false) {
-                    cache.f = true;
-                    timeLine.play();
-                }
-                else {
-                    if (!utils_1.UA.isIE) {
-                        timeLine.set('.copy', { scale: '1', opacity: 1, transformOrigin: (isPC) ? '50% 120%' : '50% 150%' });
-                    }
-                }
             },
             onDrag: function () {
                 var gmt = 32340000; // GMT기준 9시간 차 (1000*60*60*h)
                 var dt = Math.abs(ss / Number(_this.options.width)); // this.x 이동 값 > 시간(타임스탬프) 변환값
                 var yyymmdd = new Date((_this.model.time.service_dtm).split(' ')[0]).valueOf(); // YYYY-MM-DD;
                 _this.axisX = this.x;
+                var value = "M 0 " + _this.options.height / 2 + " l " + this.x + " 0.001";
                 _this.model.updateProgress(g.moment((yyymmdd + dt * this.x) - gmt).format('YYYY-MM-DD HH:mm:ss'));
                 document.querySelector('.newsEdgeProgress').setAttribute('class', 'newsEdgeProgress');
-                document.querySelector('.pathFront').setAttribute('width', this.x);
+                document.querySelector('.pathFront').setAttribute('d', value);
                 _this._updateTooltip();
             },
             onDragEnd: function () {
@@ -1197,10 +1154,6 @@ var Progress = /** @class */ (function (_super) {
                     end();
                 }
                 body.removeAttribute('class');
-                timeLine.timer = setTimeout(function () {
-                    cache.f = false;
-                    timeLine.reverse();
-                }, 2000);
             }
         });
         // 접기
@@ -1224,12 +1177,10 @@ var Progress = /** @class */ (function (_super) {
     /* 툴팁업데이트 */
     Progress.prototype._updateTooltip = function () {
         var progress_dtm = this.model.time.progress_dtm;
-        var _b = ['.hh', '.mm', '.hh2', '.mm2'].map(function (i) { return g.d3.select(".timeText " + i); }), hh = _b[0], mm = _b[1], hh2 = _b[2], mm2 = _b[3];
+        var _b = ['.hh', '.mm'].map(function (i) { return g.d3.select(".timeText " + i); }), hh = _b[0], mm = _b[1];
         // 툴팁 시간 표시
         hh.text(g.moment(progress_dtm).format('HH'));
         mm.text(this._mm(progress_dtm));
-        hh2.text(g.moment(progress_dtm).format('HH'));
-        mm2.text(this._mm(progress_dtm));
     };
     /* n분 단위 표시 */
     Progress.prototype._mm = function (d) {
@@ -1409,73 +1360,6 @@ var ViewModel = /** @class */ (function () {
     return ViewModel;
 }());
 exports.default = ViewModel;
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
-
-/***/ }),
-
-/***/ "./components/Weather.ts":
-/*!*******************************!*\
-  !*** ./components/Weather.ts ***!
-  \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Weather = void 0;
-var TMP_WEATHER_1 = __webpack_require__(/*! ../tmp/TMP_WEATHER */ "./tmp/TMP_WEATHER.js");
-var g = global;
-var Weather = /** @class */ (function () {
-    function Weather(arr) {
-        this.data = arr;
-    }
-    Object.defineProperty(Weather.prototype, "getClass", {
-        get: function () {
-            return this.data.map(function (v) {
-                // 이미지명에서 className 추출하기            
-                return v.timestr + "_" + v.wcode;
-                //return (v.img.split('96x96_').pop()).split('.png').shift();
-            });
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Weather.prototype.draw = function (target) {
-        var _this_1 = this;
-        if (target) {
-            var _a = ['div', 'ul', 'a'].map(function (n) { return document.createElement(n); }), div = _a[0], ul = _a[1], a = _a[2];
-            div.className = 'weather-widget';
-            ul.innerHTML = this.data.reduce(function (p, n, i) { return p += TMP_WEATHER_1.items(_this_1.getClass[i], n.temp, n.name); }, '');
-            a.setAttribute('href', '#');
-            a.innerHTML = '날씨설정';
-            div.appendChild(ul);
-            div.appendChild(a);
-            target.appendChild(div);
-            if (this.data.length > 1)
-                this.play(ul);
-        }
-    };
-    Weather.prototype.remove = function (target) {
-        var weatherWidget = document.querySelector('.weather-widget');
-        if (target && weatherWidget) {
-            target.removeChild(weatherWidget);
-        }
-    };
-    Weather.prototype.play = function (target) {
-        var cnt = 0, _this = this;
-        g.TODAY.weatherTimer = setInterval(function () {
-            target.setAttribute('style', "transform: translateY(-" + cnt * 32 + "px)");
-            cnt++;
-            if (cnt >= _this.data.length) {
-                cnt = 0;
-            }
-        }, 5000);
-    };
-    return Weather;
-}());
-exports.Weather = Weather;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
@@ -2210,9 +2094,10 @@ if (true) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Model_1 = __webpack_require__(/*! ../../../components/Model */ "./components/Model.ts");
 var Calendar_1 = __webpack_require__(/*! ../../../components/Calendar */ "./components/Calendar.ts");
-var ProgressV2_1 = __webpack_require__(/*! ../../../components/ProgressV2 */ "./components/ProgressV2.ts");
+/* 리뉴얼 버젼
+import Progress from "../../../components/ProgressV2";*/
+var Progress_1 = __webpack_require__(/*! ../../../components/Progress */ "./components/Progress.ts");
 var KeywordList_1 = __webpack_require__(/*! ../../../components/KeywordList */ "./components/KeywordList.ts");
-var Weather_1 = __webpack_require__(/*! ../../../components/Weather */ "./components/Weather.ts");
 var utils_1 = __webpack_require__(/*! ../../../components/utils */ "./components/utils.js");
 var Sns_1 = __webpack_require__(/*! ../../../components/Sns */ "./components/Sns.ts");
 var g = global;
@@ -2250,11 +2135,11 @@ function reset() {
 function _todayInit() {
     // 초기화
     reset();
-    // 날씨 위젯
-    var weather = new Weather_1.Weather(g.TODAY.weather);
-    var newsEdge = document.querySelector('.newsEdge');
-    weather.remove(newsEdge);
-    weather.draw(newsEdge);
+    // [날씨] 위젯
+    // const weather = new Weather(g.TODAY.weather);
+    // const newsEdge = document.querySelector('.newsEdge');
+    // weather.remove(newsEdge);
+    // weather.draw(newsEdge);       
     // SNS 공유하기
     var SNS = new Sns_1.ShareSNS();
     SNS.clear(document.body);
@@ -2307,7 +2192,7 @@ function _todayInit() {
         return new c(DATA);
     }
     var calendar = createInstance(Calendar_1.default);
-    var progress = createInstance(ProgressV2_1.default);
+    var progress = createInstance(Progress_1.default);
     var keyword = createInstance(KeywordList_1.default);
     var triggerBubblClick = function (i) {
         var _a = this.model.items[i], keyword_dtm = _a.keyword_dtm, keyword_sq = _a.keyword_sq;
@@ -2420,7 +2305,7 @@ function _todayInit() {
         g.dd = DATA;
         g.cc = calendar;
         g.pp = progress;
-        g.weather = weather;
+        // [날씨] g.weather = weather;
     }
     g.bubbles = keyword;
 }
@@ -2488,27 +2373,6 @@ var TMP_PROGRESS_THIN = "\n<svg id=\"newsEdgeProgress\" class=\"newsEdgeProgress
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SNS", function() { return SNS; });
 var SNS = "\n    <div class=\"inner\">\n        <button type=\"button\" class=\"btnClosePopup\">\uB2EB\uAE30</button>\n        <div class=\"content\">\n        <strong class=\"title\">\uACF5\uC720\uD558\uAE30</strong>\n        <ul class=\"shareList\">\n            <li>\n            <a href=\"#\" class=\"shareNateon\" id=\"nateon\">\uB124\uC774\uD2B8\uC628</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareFacebook\" id=\"facebook\">\uD398\uC774\uC2A4\uBD81</a>\n            </li>\n            <li>\n            <a href=\"#\" class=\"shareTwetter\" id=\"twitter\">\uD2B8\uC704\uD130</a>\n            </li>\n        </ul>\n        <div class=\"shareInput\">\n            <input type=\"text\" class=\"shareLinkUrl\" readonly=\"readonly\">\n        </div>\n        </div>\n        <button type=\"button\" class=\"btnCopyURL\" onclick=\"ndrclick('TOS04'); utils.CopyUrlToClipboard('.shareLinkUrl')\">URL \uBCF5\uC0AC</button>\n    </div>\n    <div class=\"dimm\"></div>\n";
-
-
-/***/ }),
-
-/***/ "./tmp/TMP_WEATHER.js":
-/*!****************************!*\
-  !*** ./tmp/TMP_WEATHER.js ***!
-  \****************************/
-/*! exports provided: items, weather */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "items", function() { return items; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "weather", function() { return weather; });
-var weather = "\n        <div class=\"weather-widget\">\n            <ul></ul>\n            <a href=\"#\" class=\"set-weather\">\uB0A0\uC528\uC124\uC815</a>            \n        </div>\n";
-
-var items = function items(className, temperatuer, area) {
-  return "\n        <li class=\"items\">\n            <div class=\"motion weather_".concat(className, "\">\n                <span class=\"m1\"></span>\n                <span class=\"m2\"></span>\n            </div>\n            <div class=\"temperatuer\">").concat(temperatuer, "</div>\n            <div class=\"area\">").concat(area, "</div>\n        </li>\n    ");
-};
-
 
 
 /***/ })
