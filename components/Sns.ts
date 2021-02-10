@@ -1,6 +1,7 @@
 import { SNS } from '../tmp/TMP_SNS';
 import { krStr, utils, refineSnsShareUrl } from "./utils";
 
+const g:any = global;
 interface shaerData {
     img: string;
     title: string;
@@ -18,8 +19,7 @@ class ShareSNS {
             desc: '',
             href: 'https://m.news.nate.com',
             time: ''
-        }
-        //?service_dtm=2021-02-09%2018:00:00
+        }        
     }
 
     drawLayer(t: HTMLElement) {
@@ -77,6 +77,7 @@ class ShareSNS {
     providerShare(e: MouseEvent) {
         e.preventDefault();
         const target = (<HTMLElement> e.target).closest('a');
+
         if (target) {            
             const provider = target.getAttribute('id');
             switch (provider) {
@@ -88,7 +89,9 @@ class ShareSNS {
 		            window.open(`https://m.facebook.com/sharer.php?u=${encodeURIComponent(link)}`);                    
                     break;
                 default:
-                    console.log('3')
+                    const { img, title, desc, href, time } = this.DATA;
+                    const nateon = new g.com.nateon.talk.NateonShare(title, desc, img, href, href, 'memo', 'ver', 'applist', 'appname');
+                    nateon.execute();
                     break;
             }
         }        

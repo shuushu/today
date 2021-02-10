@@ -471,35 +471,227 @@ function refineSnsShareUrl (url) {
 
 
 
+// 네이트온 공유하기
+(function(){
+  function createFrame() {
+    var iframe = document.createElement('iframe');
+    iframe.id = '__nateonshare';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe)
+  }
+  var com = new Object();
+  com.nateon = new Object();
+  com.nateon.talk = new Object();
+  
+  com.nateon = {};
+  com.nateon.talk = {};
+  
+  com.nateon.talk.NateonShare = function (title, desc, thimg, href, srclink, memo, ver, applist, appname, appid, appver) {
+    var t = document.getElementById('__nateonshare');
+    if (!t) {
+      createFrame();
+    }
+  
+    this.title = encodeURIComponent(title); // required
+    this.desc = encodeURIComponent(desc);
+    this.thimg = encodeURIComponent(thimg);
+    this.href = encodeURIComponent(href);
+    this.srclink = encodeURIComponent(srclink); // required
+    this.memo = encodeURIComponent(memo);
+    this.ver = encodeURIComponent(ver);
+    this.appid = encodeURIComponent(appid);
+    this.appver = encodeURIComponent(appver);
+    this.appname = encodeURIComponent(appname);
+    this.applist = encodeURIComponent(JSON.NateOnStringify(applist));
+  
+    //check required params.
+    try {
+      if (isEmptyString(this.title) || isEmptyString(this.srclink)) {
+        throw 'IllegalArgumentException';
+      }
+    } catch (e) {
+      if (e == 'IllegalArgumentException') {
+        //implement.
+      }
+    }
+  };
+  
+  com.nateon.talk.NateonShare.prototype.execute = function (callback) {
+    var userAgent = navigator.userAgent.toLocaleLowerCase();
+  
+    var msgParam = new com.nateon.talk.StringBuilder('link');
+    msgParam
+      .append('?thimg=')
+      .append(this.thimg)
+      .append('&title=')
+      .append(this.title)
+      .append('&desc=')
+      .append(this.desc)
+      .append('&href=')
+      .append(this.href)
+      .append('&srclink=')
+      .append(this.srclink)
+      .append('&memo=')
+      .append(this.memo)
+      .append('&ver=')
+      .append(this.ver)
+      .append('&appver=')
+      .append(this.appver)
+      .append('&appid=')
+      .append(this.appid)
+      .append('&appname=')
+      .append(this.appname);
+  
+    if (userAgent.search('android') > -1) {
+      if (userAgent.search('chrome') > -1) {
+        var callAppURL = 'intent://' + msgParam.toString() + '/#Intent;scheme=nateonuc;package=Uxpp.UC;end;';
+        window.location = callAppURL;
+      } else {
+        var t = document.getElementById('__nateonshare');
+        t.src = 'nateonuc://' + msgParam.toString();
+        t.onload = function() {
+          window.location = '//br.nate.com/index.php?code=A092';
+        }
+      }
+    } else if (userAgent.search('iphone') > -1) {
+      var clickedAt = +new Date();
+      setTimeout(function () {
+        if (+new Date() - clickedAt < 2000) {
+          if (typeof callback == 'function') {
+            callback.call(this);
+          } else if (userAgent.search('iphone') > -1) {
+            var t = document.getElementById('__nateonshare');
+            t.src = '//br.nate.com/index.php?code=A089';
+          }
+        }
+      }, 500);
+      var callAppURL = 'nateonuc://' + msgParam.toString();
+      window.location = callAppURL;
+      //$("#__nateonshare").attr("src", callAppURL);
+    }
+  };
+  
+  com.nateon.talk.NateonShareTiny = function (title, href, srclink, ver, applist, appid, appver, appname) {
+    createFrame();
+  
+    this.title = encodeURIComponent(title); // require
+    this.href = encodeURIComponent(href);
+    this.srclink = encodeURIComponent(srclink); // require
+    this.ver = encodeURIComponent(ver);
+    this.appid = encodeURIComponent(appid);
+    this.appver = encodeURIComponent(appver);
+    this.appname = encodeURIComponent(appname);
+    this.applist = encodeURIComponent(JSON.NateOnStringify(applist));
+  
+    try {
+      // 필수 파라메터 체크
+      if (isEmptyString(this.title) || isEmptyString(this.srclink)) {
+        throw 'IllegalArgumentException';
+      }
+    } catch (e) {
+      if (e == 'IllegalArgumentException') {
+        // implement.
+      }
+    }
+  };
+  
+  com.nateon.talk.NateonShareTiny.prototype.execute = function (callback) {
+    var userAgent = navigator.userAgent.toLocaleLowerCase();
+    var msgParam = new com.nateon.talk.StringBuilder('link');
+    msgParam
+      .append('?title=')
+      .append(this.title)
+      .append('&href=')
+      .append(this.href)
+      .append('&srclink=')
+      .append(this.srclink)
+      .append('&ver=')
+      .append(this.ver)
+      .append('&appid=')
+      .append(this.appid)
+      .append('&appver=')
+      .append(this.appver)
+      .append('&appname=')
+      .append(this.appname);
+  
+    if (userAgent.search('android') > -1) {
+      if (userAgent.search('chrome') > -1) {        
+        var callAppURL = 'intent://' + msgParam.toString() + '/#Intent;scheme=nateonuc;package=Uxpp.UC;end;';
+        window.location = callAppURL;
+      } else {
+        var t = document.getElementById('__nateonshare');
+        t.src = 'nateonuc://' + msgParam.toString();
+        t.onload = function() {
+          window.location = '//br.nate.com/index.php?code=A092';
+        };
+      }
+    } else if (userAgent.search('iphone') > -1) {
+      var clickedAt = +new Date();
+      setTimeout(function () {
+        if (+new Date() - clickedAt < 2000) {
+          if (typeof callback == 'function') {
+            callback.call(this);
+          } else if (userAgent.search('iphone') > -1) {
+            var t = document.getElementById('__nateonshare');
+            t.src = '//br.nate.com/index.php?code=A089';
+          }
+        }
+      }, 500);
+      var callAppURL = 'nateonuc://' + msgParam.toString();
+      window.location = callAppURL;
+    }
+  };
+  
+  /*
+   * utility functions.
+   * */
+  com.nateon.talk.NateonShare.prototype.isEmptyString = function (str) {
+    if (str.replace(/^\s*/, '').replace(/\s*$/, '').length == 0) return true;
+    return false;
+  };
+  
+  com.nateon.talk.StringBuilder = function (value) {
+    this.strings = new Array('');
+    this.append(value);
+  };
+  
+  com.nateon.talk.StringBuilder.prototype.append = function (value) {
+    if (value) {
+      this.strings.push(value);
+    }
+    return this;
+  };
+  
+  com.nateon.talk.StringBuilder.prototype.toString = function () {
+    return this.strings.join('');
+  };
+  
+  JSON.NateOnStringify =
+    JSON.NateOnStringify ||
+    function (obj) {
+      var t = typeof obj;
+      if (t != 'object' || obj === null) {
+        if (t == 'string') obj = '"' + obj + '"';
+        return String(obj);
+      } else {
+        var n,
+          v,
+          json = [],
+          arr = obj && obj.constructor == Array;
+        for (n in obj) {
+          v = obj[n];
+          t = typeof v;
+          if (t == 'string') v = '"' + v + '"';
+          else if (t == 'object' && v !== null) v = JSON.NateOnStringify(v);
+          json.push((arr ? '' : '"' + n + '":') + String(v));
+        }
+        return (arr ? '[' : '{') + String(json) + (arr ? ']' : '}');
+      }
+    };
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  window.com = com;
+}());
 
 
 
